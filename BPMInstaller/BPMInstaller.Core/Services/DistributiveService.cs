@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-
-
 namespace BPMInstaller.Core.Services
 {
     public class DistributiveService
@@ -21,6 +19,10 @@ namespace BPMInstaller.Core.Services
             UpdateDatabaseConfig(installationConfig.DatabaseConfig, rootNode);
             UpdateRedisConfig(installationConfig.RedisConfig, rootNode);
 
+            if (installationConfig.ApplicationConfig.FixAuthorizationCookies)
+            {
+                FixAuthorizationCookies(installationConfig.ApplicationConfig);
+            }
 
             doc.Save(elementPath);
         }
@@ -36,6 +38,18 @@ namespace BPMInstaller.Core.Services
         {
             var dbSetting = rootNode.SelectSingleNode("add[@name='redis']");
             dbSetting.Attributes[1].Value = $"host={redisConfig.Host};db={redisConfig.DbNumber};port={redisConfig.Port}";
+        }
+
+        private void FixAuthorizationCookies(ApplicationConfig appConfig)
+        {
+            XmlDocument doc = new XmlDocument();
+            var elementPath = Path.Combine(appConfig.ApplicationPath, "BPMSoft.WebHost.dll.config");
+            doc.Load(elementPath);
+            var rootNode = doc.SelectSingleNode("configuration/appSettings");
+
+            var dbSetting = rootNode.SelectSingleNode("add[@key='CookiesSameSiteMode']");
+            dbSetting.Attributes[1].Value = $"Lax";
+            doc.Save(elementPath);
         }
     }
 }

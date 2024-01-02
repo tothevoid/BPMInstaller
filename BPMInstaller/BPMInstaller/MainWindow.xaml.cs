@@ -1,4 +1,5 @@
-﻿using BPMInstaller.Core.Services;
+﻿using BPMInstaller.Core.Model.Enums;
+using BPMInstaller.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +18,6 @@ using System.Xml.Linq;
 
 namespace BPMInstaller
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -30,7 +28,8 @@ namespace BPMInstaller
         private void Install(object sender, RoutedEventArgs e)
         {
             var service = new PostgresDatabaseService(new Core.Model.DatabaseConfig { Host = "localhost", UserName = "postgres", Password = "admin", 
-                BackupPath = "" });
+                BackupPath = "", DatabaseMode = DatabaseMode.Docker,
+                DatabaseName = "bpm"});
 
             if (!service.ValidateConnection())
             {

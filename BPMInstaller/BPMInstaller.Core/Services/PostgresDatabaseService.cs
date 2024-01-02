@@ -1,14 +1,6 @@
 ﻿using BPMInstaller.Core.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Npgsql;
 using BPMInstaller.Core.Interfaces;
-using System.Security.AccessControl;
-using System.Xml.Linq;
-using System.Diagnostics;
 
 namespace BPMInstaller.Core.Services
 {
@@ -63,16 +55,23 @@ namespace BPMInstaller.Core.Services
 
         public void RestoreDatabase()
         {
-            var process = new Process();
-            var startInfo = new ProcessStartInfo();
-            startInfo.FileName = Path.Combine("PostgreSQL", "postgresql-restore.bat");
-            startInfo.Arguments = $@"{DatabaseConfig.Host} {DatabaseConfig.Port} {DatabaseConfig.UserName}:{DatabaseConfig.Password} {DatabaseConfig.DatabaseName} ""{DatabaseConfig.BackupPath}""";
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = false;
-            process.StartInfo = startInfo;
-            process.Start();
-            process.WaitForExit();
-            process.Close();
+            if (DatabaseConfig.DatabaseMode == Model.Enums.DatabaseMode.Docker)
+            {
+                RestoreByDocker();
+            }
+        }
+
+        private void RestoreByDocker()
+        {
+            var interactor = new DockerService();
+            var containers = interactor.GetActiveContainers();
+            var postgresContainer = containers.FirstOrDefault(container => container.Value.ToLower().Contains("postgres"));
+            if (!string.IsNullOrEmpty(postgresContainer.Key))
+            {
+                var backupName = DateTime.Now.ToString("dd-MM-HH:mm.backup");
+                interactor.CopyBackup(DatabaseConfig.BackupPath, postgresContainer.Key, backupName);
+                interactor.RestoreBackup(postgresContainer.Key, DatabaseConfig.UserName, DatabaseConfig.DatabaseName, backupName);
+            }
         }
 
         private string GetConnectionString(string database = "postgres") =>

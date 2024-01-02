@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BPMInstaller.Core.Model.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,5 +35,7 @@ namespace BPMInstaller.Core.Model
         /// Название БД
         /// </summary>
         public string DatabaseName { get; set; } = "bpm";
+
+        public DatabaseMode DatabaseMode { get; set; } = DatabaseMode.NonDocker;
     }
 }

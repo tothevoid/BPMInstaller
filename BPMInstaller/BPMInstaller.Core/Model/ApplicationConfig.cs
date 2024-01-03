@@ -16,6 +16,8 @@ namespace BPMInstaller.Core.Model
         /// </summary>
         public string ApplicationPath { get; set; }
 
-        public bool FixAuthorizationCookies { get; set; } 
+        public bool FixAuthorizationCookies { get; set; }
+
+        public int ApplicationPort { get; set; }
     }
 }

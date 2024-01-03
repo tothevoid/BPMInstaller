@@ -1,8 +1,15 @@
 ﻿using BPMInstaller.Core.Model;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
+using System.Net.Http.Json;
+using System.Net.NetworkInformation;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -22,6 +29,11 @@ namespace BPMInstaller.Core.Services
             if (installationConfig.ApplicationConfig.FixAuthorizationCookies)
             {
                 FixAuthorizationCookies(installationConfig.ApplicationConfig);
+            }
+
+            if (installationConfig.ApplicationConfig.ApplicationPort != 0)
+            {
+                UpdateApplicationPort(installationConfig.ApplicationConfig);
             }
 
             doc.Save(elementPath);
@@ -51,5 +63,51 @@ namespace BPMInstaller.Core.Services
             dbSetting.Attributes[1].Value = $"Lax";
             doc.Save(elementPath);
         }
+
+        private void UpdateApplicationPort(ApplicationConfig appConfig)
+        {
+            var appSettingsPath = Path.Combine(appConfig.ApplicationPath, "appsettings.json");
+            var appSettingsJson = File.ReadAllText(appSettingsPath);
+
+            var appSettings = JsonSerializer.Deserialize<AppSettings>(appSettingsJson);
+            if (!string.IsNullOrEmpty(appSettings?.Kestrel?.Endpoints?.Http?.Url))
+            {
+                appSettings.Kestrel.Endpoints.Http.Url = $"http://::{appConfig.ApplicationPort}";
+            }
+            var updatedSettings = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions { WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            }).Replace(@"  ", "\t");
+            File.WriteAllText(appSettingsPath, updatedSettings);
+        }
+    }
+
+    public class AppSettings: PartialJson
+    {
+        [JsonPropertyName("Kestrel")]
+        public KestrelConfig Kestrel { get; set; }
+
+        public class KestrelConfig: PartialJson
+        {
+            [JsonPropertyName("Endpoints")]
+            public EndpointConfig Endpoints { get; set; }
+
+            public class EndpointConfig: PartialJson
+            {
+                [JsonPropertyName("Http")]
+                public HttpConfig Http { get; set; }
+
+                public class HttpConfig: PartialJson
+                {
+                    public string Url { get; set; }
+                }
+            }
+
+        }
+    }
+
+    public class PartialJson
+    {
+        [System.Text.Json.Serialization.JsonExtensionDataAttribute]
+        public IDictionary<string, object> ExtensionData { get; set; }
     }
 }

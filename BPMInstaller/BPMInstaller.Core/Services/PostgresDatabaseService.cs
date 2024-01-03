@@ -61,6 +61,21 @@ namespace BPMInstaller.Core.Services
             }
         }
 
+        public void IncreasePasswordDuration(ApplicationConfig appConfig)
+        {
+            using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
+
+            con.Open();
+
+            using (var cmd = new NpgsqlCommand("UPDATE \"SysAdminUnit\" SET \"ForceChangePassword\" = '0' WHERE \"Name\"='Supervisor'", con))
+            {
+                cmd.ExecuteScalar();
+            }
+
+            con.Close();
+
+        }
+
         private void RestoreByDocker()
         {
             var interactor = new DockerService();

@@ -19,5 +19,9 @@ namespace BPMInstaller.Core.Model
         public bool FixAuthorizationCookies { get; set; }
 
         public int ApplicationPort { get; set; }
+
+        public string AdminUserName { get; set; } = "Supervisor";
+
+        public string AdminUserPassword { get; set; } = "Supervisor";
     }
 }

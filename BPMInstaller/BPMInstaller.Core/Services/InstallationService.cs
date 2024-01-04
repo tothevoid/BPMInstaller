@@ -13,17 +13,17 @@ namespace BPMInstaller.Core.Services
         {
             var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
 
-            if (!databaseService.ValidateConnection())
-            {
-                return;
-            }
+            //if (!databaseService.ValidateConnection())
+            //{
+            //    return;
+            //}
 
-            if (!databaseService.CreateDatabase())
-            {
-                return;
-            }
+            //if (!databaseService.CreateDatabase())
+            //{
+            //    return;
+            //}
 
-            databaseService.RestoreDatabase();
+            //databaseService.RestoreDatabase();
             //TODO: migrate to specific dbService method that operates db model
             databaseService.IncreasePasswordDuration(installationConfig.ApplicationConfig);
 
@@ -31,8 +31,11 @@ namespace BPMInstaller.Core.Services
             distributiveService.ActualizeAppComponentsConfig(installationConfig);
             var appService = new ApplicationService();
 
-            appService.RunApplication(installationConfig.ApplicationConfig);
-            appService.RebuildApplication(installationConfig.ApplicationConfig);
+            appService.RunApplication(installationConfig.ApplicationConfig, () =>
+            {
+                appService.RebuildApplication(installationConfig.ApplicationConfig);
+            });
+           
         }
 
     }

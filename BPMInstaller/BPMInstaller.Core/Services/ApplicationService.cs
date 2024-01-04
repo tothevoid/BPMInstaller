@@ -11,16 +11,31 @@ namespace BPMInstaller.Core.Services
 {
     public class ApplicationService
     {
-        public void RunApplication(ApplicationConfig applicationConfig)
+        public void RunApplication(ApplicationConfig applicationConfig, Action applicationStarted)
         {
             //TODO: handle not installed core 3.1 exception
             Process process = new Process();
             process.StartInfo.WorkingDirectory = applicationConfig.ApplicationPath;
             process.StartInfo.FileName = $"dotnet";
             process.StartInfo.Arguments = "BPMSoft.WebHost.dll";
+            process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.UseShellExecute = false;
+            process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
+            {
+                if (e?.Data == null)
+                {
+                    return;
+                }
+
+                if (e.Data.Contains("started"))
+                {
+                    applicationStarted?.Invoke();
+                }               
+            };
             process.Start();
+            process.BeginOutputReadLine();
         }
+
 
         public void RebuildApplication(ApplicationConfig applicationConfig)
         {

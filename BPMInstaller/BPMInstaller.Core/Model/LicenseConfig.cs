@@ -19,6 +19,6 @@ namespace BPMInstaller.Core.Model
         /// <summary>
         /// CID лицензии
         /// </summary>
-        public string CId { get; set; }
+        public long CId { get; set; }
     }
 }

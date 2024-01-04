@@ -4,6 +4,7 @@ using BPMInstaller.Core.Interfaces;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Xml.Linq;
+using Microsoft.VisualBasic;
 
 namespace BPMInstaller.Core.Services
 {
@@ -43,6 +44,7 @@ namespace BPMInstaller.Core.Services
 
             using (var cmd = new NpgsqlCommand($"DROP DATABASE IF EXISTS {DatabaseConfig.DatabaseName}", con))
             {
+                //TODO: Fix database active connection exception
                 cmd.ExecuteScalar();
             }
 
@@ -81,6 +83,20 @@ namespace BPMInstaller.Core.Services
 
             con.Close();
 
+        }
+
+        public void UpdateCid(LicenseConfig licConfig)
+        {
+            using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
+
+            con.Open();
+
+            using (var cmd = new NpgsqlCommand($"update \"SysSettingsValue\" set \"TextValue\" = '{licConfig.CId}' where \"SysSettingsId\" in (select \"Id\" from \"SysSettings\" where \"SysSettings\".\"Code\" = 'CustomerId')", con))
+            {
+                cmd.ExecuteScalar();
+            }
+
+            con.Close();
         }
 
         private bool RestoreByCli()

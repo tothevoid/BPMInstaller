@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BPMInstaller.Core.Services
@@ -84,6 +86,50 @@ namespace BPMInstaller.Core.Services
             }
 
             return authorizationHeaders;
+        }
+
+        public void UploadLicenses(ApplicationConfig appConfig, LicenseConfig licenseConfig)
+        {
+            if (licenseConfig == null)
+            {
+                return;
+            }
+
+            var authResultHeaders = Auth(appConfig);
+            using var client = new HttpClient();
+            foreach (var header in authResultHeaders)
+            {
+                client.DefaultRequestHeaders.Add(header.Key, header.Value);
+            }
+            var message = new HttpRequestMessage(HttpMethod.Post, 
+                $"{appConfig.ApplicationUrl}/ServiceModel/LicenseManagerProxyService.svc/UploadLicenses");
+
+            var licenseContent = File.ReadAllText(licenseConfig.Path).Replace("\"", "\\\"");
+            var licenseJson = $"{{\"licData\":\"{licenseContent}\"}}";
+            message.Content = new StringContent(licenseJson, Encoding.UTF8, "application/json");
+            var result = client.Send(message);
+            var content = result.Content.ReadAsStringAsync().Result;
+            var licenseResponse = JsonSerializer.Deserialize<LicenseReponse>(content);
+
+            if (!licenseResponse.Success)
+            {
+                throw new Exception("Incorrect license");
+            }
+        }
+
+        public class LicenseReponse
+        {
+            [JsonPropertyName("success")]
+            public bool Success { get; set; }
+
+            [JsonPropertyName("errorInfo")]
+            public ErrorInfo ErrorInfo { get; set; }
+        }
+
+        public class ErrorInfo
+        {
+            [JsonPropertyName("message")]
+            public string Message { get; set; }
         }
     }
 }

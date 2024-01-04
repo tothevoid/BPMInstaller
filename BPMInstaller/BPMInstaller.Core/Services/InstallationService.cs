@@ -24,24 +24,24 @@ namespace BPMInstaller.Core.Services
 
             if (!databaseService.ValidateConnection())
             {
-                return;
+               return;
             }
 
             OnInstallationMessageRecieved.Invoke("Database initialization started");
 
             if (!databaseService.CreateDatabase())
             {
-                return;
+               return;
             }
 
             OnInstallationMessageRecieved.Invoke("Backup restoration started");
 
             databaseService.RestoreDatabase();
             //TODO: migrate to specific dbService method that operates db model
-
             OnInstallationMessageRecieved.Invoke("Password fix started");
-
             databaseService.SuperuserPasswordFix(installationConfig.ApplicationConfig);
+            OnInstallationMessageRecieved.Invoke("Cid update started");
+            databaseService.UpdateCid(installationConfig.LicenseConfig);
 
             var distributiveService = new DistributiveService();
 
@@ -53,11 +53,12 @@ namespace BPMInstaller.Core.Services
             appService.RunApplication(installationConfig.ApplicationConfig, () =>
             {
                 OnInstallationMessageRecieved.Invoke("Application rebuild started");
+
+                appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
+
                 appService.RebuildApplication(installationConfig.ApplicationConfig);
                 OnInstallationMessageRecieved.Invoke("Installation ended");
             });
-
-          
         }
 
     }

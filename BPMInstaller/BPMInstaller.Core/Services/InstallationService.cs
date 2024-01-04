@@ -1,41 +1,63 @@
 ﻿using BPMInstaller.Core.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BPMInstaller.Core.Services
 {
     public class InstallationService
     {
+        private event Action<string> OnInstallationMessageRecieved;
+
+        public InstallationService(Action<string> messageHandler)
+        {
+            if (messageHandler == null)
+            {
+                throw new ArgumentNullException(nameof(messageHandler));
+            }
+
+            OnInstallationMessageRecieved += messageHandler;
+        }
+
         public void StartBasicInstallation(InstallationConfig installationConfig)
         {
             var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
 
-            //if (!databaseService.ValidateConnection())
-            //{
-            //    return;
-            //}
+            OnInstallationMessageRecieved.Invoke("Database server validation started");
 
-            //if (!databaseService.CreateDatabase())
-            //{
-            //    return;
-            //}
+            if (!databaseService.ValidateConnection())
+            {
+                return;
+            }
 
-            //databaseService.RestoreDatabase();
+            OnInstallationMessageRecieved.Invoke("Database initialization started");
+
+            if (!databaseService.CreateDatabase())
+            {
+                return;
+            }
+
+            OnInstallationMessageRecieved.Invoke("Backup restoration started");
+
+            databaseService.RestoreDatabase();
             //TODO: migrate to specific dbService method that operates db model
-            databaseService.IncreasePasswordDuration(installationConfig.ApplicationConfig);
+
+            OnInstallationMessageRecieved.Invoke("Password fix started");
+
+            databaseService.SuperuserPasswordFix(installationConfig.ApplicationConfig);
 
             var distributiveService = new DistributiveService();
+
+            OnInstallationMessageRecieved.Invoke("Appsettings actualization started");
             distributiveService.ActualizeAppComponentsConfig(installationConfig);
             var appService = new ApplicationService();
 
+            OnInstallationMessageRecieved.Invoke("Application started");
             appService.RunApplication(installationConfig.ApplicationConfig, () =>
             {
+                OnInstallationMessageRecieved.Invoke("Application rebuild started");
                 appService.RebuildApplication(installationConfig.ApplicationConfig);
+                OnInstallationMessageRecieved.Invoke("Installation ended");
             });
-           
+
+          
         }
 
     }

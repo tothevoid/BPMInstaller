@@ -68,7 +68,7 @@ namespace BPMInstaller.Core.Services
             }
         }
 
-        public void IncreasePasswordDuration(ApplicationConfig appConfig)
+        public void SuperuserPasswordFix(ApplicationConfig appConfig)
         {
             using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
 

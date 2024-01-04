@@ -7,6 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button Click="Install">Install</Button>
+        <StackPanel>
+            <TextBlock Height="200" x:Name="Output"></TextBlock>
+            <Button Click="Install">Install</Button>
+        </StackPanel>
     </Grid>
 </Window>

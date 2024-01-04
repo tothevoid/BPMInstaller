@@ -22,15 +22,10 @@ namespace BPMInstaller.Core.Services
             process.StartInfo.UseShellExecute = false;
             process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
             {
-                if (e?.Data == null)
-                {
-                    return;
-                }
-
-                if (e.Data.Contains("started"))
+                if (e?.Data != null && e.Data.Contains("started"))
                 {
                     applicationStarted?.Invoke();
-                }               
+                }
             };
             process.Start();
             process.BeginOutputReadLine();

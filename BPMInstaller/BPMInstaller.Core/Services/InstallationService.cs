@@ -11,21 +11,21 @@ namespace BPMInstaller.Core.Services
     {
         public void StartBasicInstallation(InstallationConfig installationConfig)
         {
-            //var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
+            var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
 
-            //if (!databaseService.ValidateConnection())
-            //{
-            //    return;
-            //}
+            if (!databaseService.ValidateConnection())
+            {
+                return;
+            }
 
-            //if (!databaseService.CreateDatabase())
-            //{
-            //    return;
-            //}
+            if (!databaseService.CreateDatabase())
+            {
+                return;
+            }
 
-            //databaseService.RestoreDatabase();
+            databaseService.RestoreDatabase();
             //TODO: migrate to specific dbService method that operates db model
-            //databaseService.IncreasePasswordDuration(installationConfig.ApplicationConfig);
+            databaseService.IncreasePasswordDuration(installationConfig.ApplicationConfig);
 
             var distributiveService = new DistributiveService();
             distributiveService.ActualizeAppComponentsConfig(installationConfig);

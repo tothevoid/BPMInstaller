@@ -1,6 +1,9 @@
 ﻿using BPMInstaller.Core.Model;
 using Npgsql;
 using BPMInstaller.Core.Interfaces;
+using System.Diagnostics;
+using System.ComponentModel;
+using System.Xml.Linq;
 
 namespace BPMInstaller.Core.Services
 {
@@ -58,6 +61,10 @@ namespace BPMInstaller.Core.Services
             if (DatabaseConfig.DatabaseMode == Model.Enums.DatabaseMode.Docker)
             {
                 RestoreByDocker();
+            } 
+            else
+            {
+                RestoreByCli();
             }
         }
 
@@ -76,6 +83,23 @@ namespace BPMInstaller.Core.Services
 
         }
 
+        private bool RestoreByCli()
+        {
+            Process process = new Process();
+            var backupFileName = Path.GetFileName(DatabaseConfig.BackupPath);
+            process.StartInfo.WorkingDirectory = DatabaseConfig.BackupPath.Substring(0, DatabaseConfig.BackupPath.Length - backupFileName.Length - 1);
+            process.StartInfo.FileName = $"{DatabaseConfig.RestorationCliLocation}/pg_restore.exe";
+            process.StartInfo.Arguments = $"--port={DatabaseConfig.Port} --username={DatabaseConfig.UserName} --dbname={DatabaseConfig.DatabaseName} --no-owner --no-privileges ./{backupFileName}";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.EnvironmentVariables["PGPASSWORD"] = DatabaseConfig.Password;
+
+            process.Start();
+            process.WaitForExit();
+            var output = process.StandardError.ReadToEnd();
+            return string.IsNullOrEmpty(output);
+        }
+
         private void RestoreByDocker()
         {
             var interactor = new DockerService();
@@ -90,7 +114,7 @@ namespace BPMInstaller.Core.Services
         }
 
         private string GetConnectionString(string database = "postgres") =>
-            $"Host={DatabaseConfig.Host};Username={DatabaseConfig.UserName};Password={DatabaseConfig.Password};Database={database}";
+            $"Host={DatabaseConfig.Host};Username={DatabaseConfig.UserName};Password={DatabaseConfig.Password};Database={database};Port={DatabaseConfig.Port}";
         
     }
 }

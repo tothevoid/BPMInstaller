@@ -39,9 +39,9 @@ namespace BPMInstaller.Core.Services
             databaseService.RestoreDatabase();
             //TODO: migrate to specific dbService method that operates db model
             OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Password fix started" });
-            databaseService.SuperuserPasswordFix(installationConfig.ApplicationConfig);
+            databaseService.DisableForcePasswordChange(installationConfig.ApplicationConfig.AdminUserName);
             OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Cid update started" });
-            databaseService.UpdateCid(installationConfig.LicenseConfig);
+            databaseService.UpdateCid(installationConfig.LicenseConfig.CId);
 
             var distributiveService = new DistributiveService();
 

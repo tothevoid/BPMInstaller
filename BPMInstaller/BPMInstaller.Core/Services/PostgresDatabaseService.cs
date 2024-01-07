@@ -5,6 +5,9 @@ using System.Diagnostics;
 
 namespace BPMInstaller.Core.Services
 {
+    /// <summary>
+    /// Сервис взаимодействия с бд Postgres
+    /// </summary>
     public class PostgresDatabaseService : IDatabaseService
     {
         private DatabaseConfig DatabaseConfig { get; }
@@ -14,18 +17,16 @@ namespace BPMInstaller.Core.Services
             DatabaseConfig = databaseConfig;
         }
 
+        /// <inheritdoc cref="IDatabaseService.ValidateConnection"/>
         public bool ValidateConnection()
         {
             try
             {
                 using var con = new NpgsqlConnection(GetConnectionString());
                 con.Open();
-
-                var sql = "SELECT version()";
-
-                using var cmd = new NpgsqlCommand(sql, con);
-                var result = cmd.ExecuteScalar()?.ToString();
-                return !string.IsNullOrEmpty(result);
+                using var cmd = new NpgsqlCommand("SELECT version()", con);
+                con.Close();
+                return cmd.ExecuteNonQuery() != 0;
             }
             catch (Exception ex)
             {
@@ -33,12 +34,12 @@ namespace BPMInstaller.Core.Services
             }
         }
 
+        /// <inheritdoc cref="IDatabaseService.CreateDatabase"/>
         public bool CreateDatabase()
         {
             using var con = new NpgsqlConnection(GetConnectionString());
-            
-            con.Open();
 
+            con.Open();
             using (var cmd = new NpgsqlCommand($"DROP DATABASE IF EXISTS {DatabaseConfig.DatabaseName}", con))
             {
                 //TODO: Fix database active connection exception
@@ -49,51 +50,40 @@ namespace BPMInstaller.Core.Services
             {
                 cmd.ExecuteScalar();
             }
-           
             con.Close();
 
             return true;
         }
 
-        public void RestoreDatabase()
-        {
-            if (DatabaseConfig.HostedByDocker)
-            {
-                RestoreByDocker();
-            } 
-            else
-            {
+        /// <inheritdoc cref="IDatabaseService.RestoreDatabase"/>
+        public bool RestoreDatabase() =>
+            DatabaseConfig.HostedByDocker ?
+                RestoreByDocker() :
                 RestoreByCli();
-            }
+
+        /// <inheritdoc cref="IDatabaseService.DisableForcePasswordChange(string)"/>
+        public bool DisableForcePasswordChange(string userName)
+        {
+            using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
+            con.Open();
+            using var cmd = new NpgsqlCommand($"UPDATE \"SysAdminUnit\" SET \"ForceChangePassword\" = '0' WHERE \"Name\"='{userName}'", con);
+            con.Close();
+
+            return cmd.ExecuteNonQuery() != 0;
         }
 
-        public void SuperuserPasswordFix(ApplicationConfig appConfig)
+        /// <inheritdoc cref="IDatabaseService.UpdateCid(long)"/>
+        public bool UpdateCid(long cId)
         {
             using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
 
+            var commandText = $"update \"SysSettingsValue\" set \"TextValue\" = '{cId}' " +
+                $"where \"SysSettingsId\" in (select \"Id\" from \"SysSettings\" where \"SysSettings\".\"Code\" = 'CustomerId')";
             con.Open();
-
-            using (var cmd = new NpgsqlCommand("UPDATE \"SysAdminUnit\" SET \"ForceChangePassword\" = '0' WHERE \"Name\"='Supervisor'", con))
-            {
-                cmd.ExecuteScalar();
-            }
-
+            using var cmd = new NpgsqlCommand(commandText, con);
             con.Close();
 
-        }
-
-        public void UpdateCid(LicenseConfig licConfig)
-        {
-            using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
-
-            con.Open();
-
-            using (var cmd = new NpgsqlCommand($"update \"SysSettingsValue\" set \"TextValue\" = '{licConfig.CId}' where \"SysSettingsId\" in (select \"Id\" from \"SysSettings\" where \"SysSettings\".\"Code\" = 'CustomerId')", con))
-            {
-                cmd.ExecuteScalar();
-            }
-
-            con.Close();
+            return cmd.ExecuteNonQuery() != 0;
         }
 
         private bool RestoreByCli()
@@ -113,17 +103,21 @@ namespace BPMInstaller.Core.Services
             return string.IsNullOrEmpty(output);
         }
 
-        private void RestoreByDocker()
+        private bool RestoreByDocker()
         {
             var interactor = new DockerService();
             var containers = interactor.GetActiveContainers();
             var postgresContainer = containers.FirstOrDefault(container => container.Value.ToLower().Contains("postgres"));
-            if (!string.IsNullOrEmpty(postgresContainer.Key))
+
+            if (string.IsNullOrEmpty(postgresContainer.Key))
             {
-                var backupName = DateTime.Now.ToString("dd-MM-HH:mm.backup");
-                interactor.CopyBackup(DatabaseConfig.BackupPath, postgresContainer.Key, backupName);
-                interactor.RestoreBackup(postgresContainer.Key, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName, backupName);
+                return false;
             }
+            
+            var backupName = DateTime.Now.ToString("dd-MM-HH:mm.backup");
+            interactor.CopyBackup(DatabaseConfig.BackupPath, postgresContainer.Key, backupName);
+            interactor.RestoreBackup(postgresContainer.Key, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName, backupName);
+            return true;
         }
 
         private string GetConnectionString(string database = "postgres") =>

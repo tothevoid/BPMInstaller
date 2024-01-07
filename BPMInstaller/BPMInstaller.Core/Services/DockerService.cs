@@ -8,10 +8,14 @@ namespace BPMInstaller.Core.Services
     {
         public Dictionary<string, string> GetActiveContainers()
         {
-            var output = CallDockerCommand("ps --format json");
+            var output = CallDockerCommand("ps --format \"{{.ID}}\t{{.Image}}\"");
 
             return output.StandardOutput.Split("\n").Where(command => !string.IsNullOrEmpty(command))
-                .Select(part => JsonSerializer.Deserialize<DockerContainer>(part))
+                .Select(part =>
+                {
+                    var subPart = part.Split("\t");
+                    return new DockerContainer { Id = subPart[0], ImageName = subPart[1] };
+                })
                 .ToDictionary(key => key.Id, value => value.ImageName);
         }
 

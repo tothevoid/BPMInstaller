@@ -4,10 +4,8 @@
 
     public class DockerContainer
     {
-        [JsonPropertyName("ID")]
         public string Id { get; set; }
 
-        [JsonPropertyName("Image")]
         public string ImageName { get; set; }
     }
 }

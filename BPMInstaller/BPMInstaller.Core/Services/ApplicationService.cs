@@ -90,7 +90,7 @@ namespace BPMInstaller.Core.Services
 
         public void UploadLicenses(ApplicationConfig appConfig, LicenseConfig licenseConfig)
         {
-            if (licenseConfig == null)
+            if (licenseConfig == null || string.IsNullOrEmpty(licenseConfig.Path) || licenseConfig.CId == default)
             {
                 return;
             }

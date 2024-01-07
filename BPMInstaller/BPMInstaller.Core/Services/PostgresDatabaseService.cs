@@ -2,9 +2,6 @@
 using Npgsql;
 using BPMInstaller.Core.Interfaces;
 using System.Diagnostics;
-using System.ComponentModel;
-using System.Xml.Linq;
-using Microsoft.VisualBasic;
 
 namespace BPMInstaller.Core.Services
 {

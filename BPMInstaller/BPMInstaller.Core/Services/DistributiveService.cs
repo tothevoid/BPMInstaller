@@ -26,10 +26,7 @@ namespace BPMInstaller.Core.Services
             UpdateDatabaseConfig(installationConfig.DatabaseConfig, rootNode);
             UpdateRedisConfig(installationConfig.RedisConfig, rootNode);
 
-            if (installationConfig.ApplicationConfig.FixAuthorizationCookies)
-            {
-                FixAuthorizationCookies(installationConfig.ApplicationConfig);
-            }
+            FixAuthorizationCookies(installationConfig.ApplicationConfig);            
 
             if (installationConfig.ApplicationConfig.ApplicationPort != 0)
             {
@@ -107,7 +104,7 @@ namespace BPMInstaller.Core.Services
 
     public class PartialJson
     {
-        [System.Text.Json.Serialization.JsonExtensionDataAttribute]
-        public IDictionary<string, object> ExtensionData { get; set; }
+        [JsonExtensionData]
+        public IDictionary<string, object> OtherData { get; set; }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using BPMInstaller.UI.Model;
+using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -55,5 +57,41 @@ namespace BPMInstaller
             File.WriteAllText(ConfigPath, json);
         }
 
+        private void SelectDistributivePath(object sender, RoutedEventArgs e)
+        {
+            Config.ApplicationConfig.ApplicationPath = ShowFileSystemDialog(false, Config.ApplicationConfig.ApplicationPath);
+        }
+
+        private void SelectBackupFile(object sender, RoutedEventArgs e)
+        {
+            Config.DatabaseConfig.BackupPath = ShowFileSystemDialog(false, Config.DatabaseConfig.BackupPath);
+        }
+
+        private void SelectCliPath(object sender, RoutedEventArgs e)
+        {
+            Config.DatabaseConfig.RestorationCliLocation = ShowFileSystemDialog(true, Config.DatabaseConfig.RestorationCliLocation);
+        }
+
+        private void SelectLicenseFile(object sender, RoutedEventArgs e)
+        {
+            Config.LicenseConfig.Path = ShowFileSystemDialog(false, Config.LicenseConfig.Path);
+        }
+
+        private string? ShowFileSystemDialog(bool isDirectory, string? previousValue)
+        {
+            var dlg = new CommonOpenFileDialog();
+            dlg.Title = isDirectory ? "Выбор директории": "Выбора файла";
+            dlg.IsFolderPicker = isDirectory;
+
+            dlg.AllowNonFileSystemItems = false;
+            dlg.EnsurePathExists = true;
+            dlg.EnsureReadOnly = false;
+            dlg.EnsureValidNames = true;
+            dlg.Multiselect = false;
+
+            return dlg.ShowDialog() == CommonFileDialogResult.Ok && !string.IsNullOrEmpty(dlg?.FileName) ?
+                 dlg.FileName:
+                 previousValue;
+        }
     }
 }

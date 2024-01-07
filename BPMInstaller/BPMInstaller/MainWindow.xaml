@@ -28,7 +28,14 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
                                 <Label>Путь к дистрибутиву</Label>
-                                <TextBox Text="{Binding ApplicationPath}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="9*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding ApplicationPath}"/>
+                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectDistributivePath"/>
+                                </Grid>
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
                                 <Label>Порт приложения</Label>
@@ -71,11 +78,25 @@
                         <StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
                                 <Label>Путь к бекапу</Label>
-                                <TextBox Text="{Binding BackupPath}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="9*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding BackupPath}"/>
+                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectBackupFile"/>
+                                </Grid>
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
                                 <Label>Путь к CLI восстановления (для восстановления не через докер)</Label>
-                                <TextBox Text="{Binding RestorationCliLocation}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="9*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding RestorationCliLocation}"/>
+                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectCliPath"/>
+                                </Grid>
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
                                 <Label>Восстанавливать через докер</Label>
@@ -122,7 +143,14 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
                                 <Label>Путь к лицензии</Label>
-                                <TextBox Text="{Binding Path}"></TextBox>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="9*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding Path}"/>
+                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectLicenseFile"/>
+                                </Grid>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

@@ -21,9 +21,9 @@ namespace BPMInstaller.Core.Model
 
         public int ApplicationPort { get; set; }
 
-        public string AdminUserName { get; set; } = "Supervisor";
+        public string AdminUserName { get; set; }
 
-        public string AdminUserPassword { get; set; } = "Supervisor";
+        public string AdminUserPassword { get; set; }
 
         public string ApplicationUrl => $"http://localhost:{ApplicationPort}";
     }

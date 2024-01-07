@@ -34,9 +34,9 @@ namespace BPMInstaller.Core.Model
         /// <summary>
         /// Название БД
         /// </summary>
-        public string DatabaseName { get; set; } = "bpm";
+        public string DatabaseName { get; set; }
 
-        public DatabaseMode DatabaseMode { get; set; } = DatabaseMode.NonDocker;
+        public DatabaseMode DatabaseMode { get; set; }
 
         public string? RestorationCliLocation { get; set; }
     }

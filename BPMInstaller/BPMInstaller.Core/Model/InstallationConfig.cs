@@ -12,20 +12,15 @@ namespace BPMInstaller.Core.Model
     public class InstallationConfig
     {
         /// <inheritdoc cref="Model.ApplicationConfig"/>
-        public ApplicationConfig ApplicationConfig { get; set; }
+        public ApplicationConfig ApplicationConfig { get; init; }
 
         /// <inheritdoc cref="Model.DatabaseConfig"/>
-        public DatabaseConfig DatabaseConfig { get; set; }
+        public DatabaseConfig DatabaseConfig { get; init; }
 
         /// <inheritdoc cref="Model.RedisConfig"/>
-        public RedisConfig RedisConfig { get; set; }
-
-        /// <summary>
-        /// Путь до дополнительных пакетов, которые будут поставлены после инициализации
-        /// </summary>
-        public string? AdditionalPackagesPath { get; set; }
+        public RedisConfig RedisConfig { get; init; }
 
         /// <inheritdoc cref="Core.LicenseConfig"/>
-        public LicenseConfig? LicenseConfig { get; set; }
+        public LicenseConfig? LicenseConfig { get; init; }
     }
 }

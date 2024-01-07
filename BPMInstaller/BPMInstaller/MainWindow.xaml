@@ -5,11 +5,56 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BPMInstaller"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="1000" Width="800">
     <Grid>
-        <StackPanel>
-            <TextBlock Height="200" x:Name="Output"></TextBlock>
-            <Button Click="Install">Install</Button>
+        <StackPanel CanHorizontallyScroll="True">
+            <Label HorizontalAlignment="Center">Output:</Label>
+            <TextBlock Width="800" Foreground="White" Background="Gray" TextAlignment="Center" HorizontalAlignment="Center" Height="50" x:Name="Output"></TextBlock>
+            <StackPanel DataContext="{Binding ApplicationConfig}">
+                <Label FontWeight="Bold" >Настройки приложения</Label>
+                <Label>Путь к дистрибутиву</Label>
+                <TextBox Text="{Binding ApplicationPath}"></TextBox>
+                <Label>Порт приложения</Label>
+                <TextBox Text="{Binding ApplicationPort}"></TextBox>
+                <Label>Исправить куки</Label>
+                <CheckBox IsChecked="{Binding FixAuthorizationCookies}"></CheckBox>
+            </StackPanel>
+            <StackPanel DataContext="{Binding DatabaseConfig}">
+                <Label FontWeight="Bold" >Настройки БД</Label>
+                <Label>Хост</Label>
+                <TextBox Text="{Binding Host}"></TextBox>
+                <Label>Имя пользователя</Label>
+                <TextBox Text="{Binding UserName}"></TextBox>
+                <Label>Пароль</Label>
+                <TextBox Text="{Binding Password}"></TextBox>
+                <Label>Путь к бекапу</Label>
+                <TextBox Text="{Binding BackupPath}"></TextBox>
+                <Label>Путь к CLI восстановления (для восстановления не через докер)</Label>
+                <TextBox Text="{Binding RestorationCliLocation}"></TextBox>
+                <Label>Восстанавливать через докер</Label>
+                <CheckBox IsChecked="{Binding IsDocker}"></CheckBox>
+                <Label>Название БД</Label>
+                <TextBox Text="{Binding DatabaseName}"></TextBox>
+                <Label>Порт БД</Label>
+                <TextBox Text="{Binding Port}"></TextBox>
+            </StackPanel>
+            <StackPanel DataContext="{Binding RedisConfig}">
+                <Label FontWeight="Bold">Конфигурация Redis</Label>
+                <Label>Хост</Label>
+                <TextBox Text="{Binding Host}"></TextBox>
+                <Label>Имя пользователя</Label>
+                <TextBox Text="{Binding DbNumber}"></TextBox>
+                <Label>Пароль</Label>
+                <TextBox Text="{Binding Port}"></TextBox>
+            </StackPanel>
+            <StackPanel DataContext="{Binding LicenseConfig}">
+                <Label FontWeight="Bold">Конфигурация лицензии</Label>
+                <Label>Путь к лицензии</Label>
+                <TextBox Text="{Binding Path}"></TextBox>
+                <Label>CId</Label>
+                <TextBox Text="{Binding CId}"></TextBox>
+            </StackPanel>
+            <Button Margin="0 20" Click="Install">Install</Button>
         </StackPanel>
     </Grid>
 </Window>

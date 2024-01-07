@@ -40,7 +40,7 @@ namespace BPMInstaller.Core.Services
         {
             var dbSetting = rootNode.SelectSingleNode("add[@name='db']");
             dbSetting.Attributes[1].Value = $"Pooling=True;Database={databaseConfig.DatabaseName};Host={databaseConfig.Host};" +
-                $"Port={databaseConfig.Port};Username={databaseConfig.UserName};Password={databaseConfig.Password};Timeout=500;Command Timeout=400";
+                $"Port={databaseConfig.Port};Username={databaseConfig.AdminUserName};Password={databaseConfig.AdminPassword};Timeout=500;Command Timeout=400";
         }
 
         private void UpdateRedisConfig(RedisConfig redisConfig, XmlNode rootNode)

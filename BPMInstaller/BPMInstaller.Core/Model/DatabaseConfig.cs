@@ -1,11 +1,4 @@
-﻿using BPMInstaller.Core.Model.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BPMInstaller.Core.Model
+﻿namespace BPMInstaller.Core.Model
 {
     /// <summary>
     /// Конфигурация БД
@@ -22,22 +15,34 @@ namespace BPMInstaller.Core.Model
         /// </summary>
         public int Port { get; set; }
 
-        public string UserName { get; set; }
-
-        public string Password { get; set; }
+        /// <summary>
+        /// Логин админа БД
+        /// </summary>
+        public string AdminUserName { get; set; }
 
         /// <summary>
-        /// Путь к бекапу
+        /// Пароль админа БД
+        /// </summary>
+        public string AdminPassword { get; set; }
+
+        /// <summary>
+        /// Путь к бекапу БД
         /// </summary>
         public string BackupPath { get; set; }
 
         /// <summary>
-        /// Название БД
+        /// Название создаваемой БД
         /// </summary>
         public string DatabaseName { get; set; }
 
-        public DatabaseMode DatabaseMode { get; set; }
+        /// <summary>
+        /// БД развёрнута в Docker-контейнере
+        /// </summary>
+        public bool HostedByDocker { get; set; }
 
+        /// <summary>
+        /// Путь до CLI восстановления бд, если она развёрнута не в контейнере
+        /// </summary>
         public string? RestorationCliLocation { get; set; }
     }
 }

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
-
-namespace BPMInstaller.Core.Model
+﻿namespace BPMInstaller.Core.Model
 {
     /// <summary>
     /// Конфигурация приложения
@@ -17,12 +10,24 @@ namespace BPMInstaller.Core.Model
         /// </summary>
         public string ApplicationPath { get; set; }
 
+        /// <summary>
+        /// Порт локального хоста, на котором будет развернуто приложение
+        /// </summary>
         public int ApplicationPort { get; set; }
 
+        /// <summary>
+        /// Логин администратора приложения
+        /// </summary>
         public string AdminUserName { get; set; }
 
+        /// <summary>
+        /// Пароль администратора приложения
+        /// </summary>
         public string AdminUserPassword { get; set; }
-
+        
+        /// <summary>
+        /// URL приложения
+        /// </summary>
         public string ApplicationUrl => $"http://localhost:{ApplicationPort}";
     }
 }

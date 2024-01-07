@@ -54,7 +54,7 @@ namespace BPMInstaller.UI.Model
         public LicenseConfig LicenseConfig { get; set; }
 
         [JsonIgnore]
-        public InstallationState InstallationState { get; set; } = new InstallationState();
+        public ControlsSessionState ControlsSessionState { get; set; } = new ControlsSessionState();
 
         // TODO: Fix architecture
         public Core.Model.InstallationConfig ConvertToCoreModel()
@@ -69,11 +69,11 @@ namespace BPMInstaller.UI.Model
                 DatabaseConfig = new Core.Model.DatabaseConfig
                 {
                     Host = DatabaseConfig.Host ?? string.Empty,
-                    UserName = DatabaseConfig.UserName ?? string.Empty,
-                    Password = DatabaseConfig.Password ?? string.Empty,
+                    AdminUserName = DatabaseConfig.UserName ?? string.Empty,
+                    AdminPassword = DatabaseConfig.Password ?? string.Empty,
                     BackupPath = DatabaseConfig.BackupPath ?? string.Empty,
                     RestorationCliLocation = DatabaseConfig.RestorationCliLocation ?? string.Empty,
-                    DatabaseMode = DatabaseConfig.IsDocker ? Core.Model.Enums.DatabaseMode.Docker : Core.Model.Enums.DatabaseMode.NonDocker,
+                    HostedByDocker = DatabaseConfig.HostedByDocker,
                     DatabaseName = DatabaseConfig.DatabaseName ?? string.Empty,
                     Port = DatabaseConfig.Port
                 },

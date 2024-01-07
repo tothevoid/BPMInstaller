@@ -57,7 +57,7 @@ namespace BPMInstaller.Core.Services
 
         public void RestoreDatabase()
         {
-            if (DatabaseConfig.DatabaseMode == Model.Enums.DatabaseMode.Docker)
+            if (DatabaseConfig.HostedByDocker)
             {
                 RestoreByDocker();
             } 
@@ -102,10 +102,10 @@ namespace BPMInstaller.Core.Services
             var backupFileName = Path.GetFileName(DatabaseConfig.BackupPath);
             process.StartInfo.WorkingDirectory = DatabaseConfig.BackupPath.Substring(0, DatabaseConfig.BackupPath.Length - backupFileName.Length - 1);
             process.StartInfo.FileName = $"{DatabaseConfig.RestorationCliLocation}/pg_restore.exe";
-            process.StartInfo.Arguments = $"--port={DatabaseConfig.Port} --username={DatabaseConfig.UserName} --dbname={DatabaseConfig.DatabaseName} --no-owner --no-privileges ./{backupFileName}";
+            process.StartInfo.Arguments = $"--port={DatabaseConfig.Port} --username={DatabaseConfig.AdminUserName} --dbname={DatabaseConfig.DatabaseName} --no-owner --no-privileges ./{backupFileName}";
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.EnvironmentVariables["PGPASSWORD"] = DatabaseConfig.Password;
+            process.StartInfo.EnvironmentVariables["PGPASSWORD"] = DatabaseConfig.AdminPassword;
 
             process.Start();
             process.WaitForExit();
@@ -122,12 +122,12 @@ namespace BPMInstaller.Core.Services
             {
                 var backupName = DateTime.Now.ToString("dd-MM-HH:mm.backup");
                 interactor.CopyBackup(DatabaseConfig.BackupPath, postgresContainer.Key, backupName);
-                interactor.RestoreBackup(postgresContainer.Key, DatabaseConfig.UserName, DatabaseConfig.DatabaseName, backupName);
+                interactor.RestoreBackup(postgresContainer.Key, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName, backupName);
             }
         }
 
         private string GetConnectionString(string database = "postgres") =>
-            $"Host={DatabaseConfig.Host};Username={DatabaseConfig.UserName};Password={DatabaseConfig.Password};Database={database};Port={DatabaseConfig.Port}";
+            $"Host={DatabaseConfig.Host};Username={DatabaseConfig.AdminUserName};Password={DatabaseConfig.AdminPassword};Database={database};Port={DatabaseConfig.Port}";
         
     }
 }

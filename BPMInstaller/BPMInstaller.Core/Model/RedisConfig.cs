@@ -21,6 +21,9 @@ namespace BPMInstaller.Core.Model
         /// </summary>
         public int Port { get; set; }
 
+        /// <summary>
+        /// Номер БД
+        /// </summary>
         public int DbNumber { get; set; }
     }
 }

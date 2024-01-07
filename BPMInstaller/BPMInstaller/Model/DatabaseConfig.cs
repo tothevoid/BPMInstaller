@@ -1,6 +1,4 @@
-﻿using BPMInstaller.Core.Model.Enums;
-
-namespace BPMInstaller.UI.Model
+﻿namespace BPMInstaller.UI.Model
 {
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
     public class DatabaseConfig: BaseUIModel
@@ -17,7 +15,7 @@ namespace BPMInstaller.UI.Model
 
         private string? databaseName = "bpm";
 
-        private DatabaseMode databaseMode = DatabaseMode.Docker;
+        private bool hostedByDocker = true;
 
         private string? restorationCliLocation;
 
@@ -33,7 +31,7 @@ namespace BPMInstaller.UI.Model
 
         public string? DatabaseName { get { return databaseName; } set { Set(ref databaseName, value); } }
 
-        public bool IsDocker { get { return databaseMode == DatabaseMode.Docker; } set { var isDocker = databaseMode == DatabaseMode.Docker; Set(ref isDocker, value); } }
+        public bool HostedByDocker { get { return hostedByDocker; } set { Set(ref hostedByDocker, value); } }
 
         public string? RestorationCliLocation { get { return restorationCliLocation; } set { Set(ref restorationCliLocation, value); } }
     }

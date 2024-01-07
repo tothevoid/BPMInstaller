@@ -37,15 +37,21 @@ namespace BPMInstaller
 
         private void Install(object sender, RoutedEventArgs e)
         {
-            Config.InstallationState.StartButtonVisibility = Visibility.Collapsed;
+            Output.Document.Blocks.Clear();
 
-            var handler = (Core.Model.InstallationMessage message) => 
+            Config.ControlsSessionState.StartButtonVisibility = Visibility.Collapsed;
+
+            var handler = (Core.Model.InstallationMessage message) =>
             {
                 if (message.IsTerminal)
                 {
-                    Config.InstallationState.StartButtonVisibility = Visibility.Visible;
+                    Config.ControlsSessionState.StartButtonVisibility = Visibility.Visible;
                 }
-                Dispatcher.Invoke(() => Output.Text += $"{Environment.NewLine} {message.Content}");
+
+                Dispatcher.Invoke(() => {
+                    var date = DateTime.Now.ToString("hh:mm:ss");
+                    Output.AppendText($"{date}:{message.Content} {Environment.NewLine}");
+                });
             };
                
             Task.Run(() => new Core.Services.InstallationService(handler).StartBasicInstallation(Config.ConvertToCoreModel()));

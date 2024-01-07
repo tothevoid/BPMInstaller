@@ -100,7 +100,7 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
                                 <Label>Восстанавливать через докер</Label>
-                                <CheckBox IsChecked="{Binding IsDocker}"/>
+                                <CheckBox IsChecked="{Binding HostedByDocker}"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
                                 <Label>Название БД</Label>
@@ -157,11 +157,9 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="Запуск">
-                <StackPanel DataContext="{Binding InstallationState}" >
-                    <Button Visibility="{Binding StartButtonVisibility}" Margin="0 20" Click="Install">Равернуть дистрибутив</Button>
-                    <ScrollViewer Background="Gray" Height="350">
-                        <TextBlock Width="800" Foreground="White" TextAlignment="Center" HorizontalAlignment="Center" Height="50" x:Name="Output"></TextBlock>
-                    </ScrollViewer>
+                <StackPanel DataContext="{Binding ControlsSessionState}" Margin="0 20">
+                    <Button Visibility="{Binding StartButtonVisibility}" Click="Install">Равернуть дистрибутив</Button>
+                    <RichTextBox Height="600" IsReadOnly="True" Width="800" Foreground="Black" HorizontalAlignment="Center" x:Name="Output"></RichTextBox>
                 </StackPanel>
             </TabItem>
         </TabControl>

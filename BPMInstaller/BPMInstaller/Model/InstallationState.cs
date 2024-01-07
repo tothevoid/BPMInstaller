@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace BPMInstaller.Model
 {
-    public class InstallationState: BaseUIModel
+    public class ControlsSessionState: BaseUIModel
     {
         private Visibility startButtonVisibility = Visibility.Visible;
 

@@ -25,8 +25,9 @@ namespace BPMInstaller.Core.Services
                 using var con = new NpgsqlConnection(GetConnectionString());
                 con.Open();
                 using var cmd = new NpgsqlCommand("SELECT version()", con);
+                var result = cmd.ExecuteNonQuery() != 0;
                 con.Close();
-                return cmd.ExecuteNonQuery() != 0;
+                return result;
             }
             catch (Exception ex)
             {
@@ -67,9 +68,10 @@ namespace BPMInstaller.Core.Services
             using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
             con.Open();
             using var cmd = new NpgsqlCommand($"UPDATE \"SysAdminUnit\" SET \"ForceChangePassword\" = '0' WHERE \"Name\"='{userName}'", con);
+            var result = cmd.ExecuteNonQuery() != 0;
             con.Close();
 
-            return cmd.ExecuteNonQuery() != 0;
+            return result;
         }
 
         /// <inheritdoc cref="IDatabaseService.UpdateCid(long)"/>
@@ -81,9 +83,10 @@ namespace BPMInstaller.Core.Services
                 $"where \"SysSettingsId\" in (select \"Id\" from \"SysSettings\" where \"SysSettings\".\"Code\" = 'CustomerId')";
             con.Open();
             using var cmd = new NpgsqlCommand(commandText, con);
+            var result = cmd.ExecuteNonQuery() != 0;
             con.Close();
 
-            return cmd.ExecuteNonQuery() != 0;
+            return result;
         }
 
         private bool RestoreByCli()

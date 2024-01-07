@@ -7,7 +7,7 @@
 
         private bool fixAuthorizationCookies = true;
 
-        private int applicationPort;
+        private int applicationPort = 5001;
 
         private string adminUserName = "Supervisor";
 

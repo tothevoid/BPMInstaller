@@ -1,6 +1,8 @@
-﻿using System;
+﻿using BPMInstaller.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace BPMInstaller.UI.Model
 {
@@ -51,6 +53,8 @@ namespace BPMInstaller.UI.Model
         /// <inheritdoc cref="Core.LicenseConfig"/>
         public LicenseConfig LicenseConfig { get; set; }
 
+        [JsonIgnore]
+        public InstallationState InstallationState { get; set; } = new InstallationState();
 
         // TODO: Fix architecture
         public Core.Model.InstallationConfig ConvertToCoreModel()
@@ -60,7 +64,6 @@ namespace BPMInstaller.UI.Model
                 ApplicationConfig = new Core.Model.ApplicationConfig()
                 {
                     ApplicationPath = ApplicationConfig.ApplicationPath ?? string.Empty,
-                    FixAuthorizationCookies = ApplicationConfig.FixAuthorizationCookies,
                     ApplicationPort = ApplicationConfig.ApplicationPort
                 },
                 DatabaseConfig = new Core.Model.DatabaseConfig

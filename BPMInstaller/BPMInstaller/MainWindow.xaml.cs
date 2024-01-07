@@ -1,4 +1,5 @@
 ﻿using BPMInstaller.UI.Model;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -34,7 +35,18 @@ namespace BPMInstaller
 
         private void Install(object sender, RoutedEventArgs e)
         {
-            Task.Run(() => new BPMInstaller.Core.Services.InstallationService((string message) => Dispatcher.Invoke(() => Output.Text = message)).StartBasicInstallation(Config.ConvertToCoreModel()));
+            Config.InstallationState.StartButtonVisibility = Visibility.Collapsed;
+
+            var handler = (Core.Model.InstallationMessage message) => 
+            {
+                if (message.IsTerminal)
+                {
+                    Config.InstallationState.StartButtonVisibility = Visibility.Visible;
+                }
+                Dispatcher.Invoke(() => Output.Text += $"{Environment.NewLine} {message.Content}");
+            };
+               
+            Task.Run(() => new Core.Services.InstallationService(handler).StartBasicInstallation(Config.ConvertToCoreModel()));
         }
 
         private void SaveConfig()

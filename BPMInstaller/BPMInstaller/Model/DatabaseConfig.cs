@@ -5,11 +5,11 @@ namespace BPMInstaller.UI.Model
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
     public class DatabaseConfig: BaseUIModel
     {
-        private string? host;
+        private string? host = "localhost";
 
-        private int port;
+        private int port = 5432;
 
-        private string? userName;
+        private string? userName = "postgres";
 
         private string? password;
 

@@ -3,11 +3,11 @@
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
     public class RedisConfig: BaseUIModel
     {
-        private string? host;
+        private string? host = "localhost";
 
-        private int port;
+        private int port = 6379;
 
-        private int dbNumber;
+        private int dbNumber = 1;
 
         public string? Host { get { return host; } set { Set(ref host, value); } }
 

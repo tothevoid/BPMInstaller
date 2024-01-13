@@ -17,7 +17,7 @@ namespace BPMInstaller.Core.Services
 {
     public class DistributiveService
     {
-        public void ActualizeAppComponentsConfig(InstallationConfig installationConfig)
+        public void UpdateConnectionStrings(InstallationConfig installationConfig)
         {
             XmlDocument doc = new XmlDocument();
             var elementPath = Path.Combine(installationConfig.ApplicationConfig.ApplicationPath, "ConnectionStrings.config");
@@ -26,13 +26,36 @@ namespace BPMInstaller.Core.Services
             UpdateDatabaseConfig(installationConfig.DatabaseConfig, rootNode);
             UpdateRedisConfig(installationConfig.RedisConfig, rootNode);
 
-            FixAuthorizationCookies(installationConfig.ApplicationConfig);            
+            doc.Save(elementPath);
+        }
 
-            if (installationConfig.ApplicationConfig.ApplicationPort != 0)
+        public void UpdateApplicationPort(ApplicationConfig appConfig)
+        {
+            var appSettingsPath = Path.Combine(appConfig.ApplicationPath, "appsettings.json");
+            var appSettingsJson = File.ReadAllText(appSettingsPath);
+
+            var appSettings = JsonSerializer.Deserialize<AppSettings>(appSettingsJson);
+            if (!string.IsNullOrEmpty(appSettings?.Kestrel?.Endpoints?.Http?.Url))
             {
-                UpdateApplicationPort(installationConfig.ApplicationConfig);
+                appSettings.Kestrel.Endpoints.Http.Url = $"http://::{appConfig.ApplicationPort}";
             }
+            var updatedSettings = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            }).Replace(@"  ", "\t");
+            File.WriteAllText(appSettingsPath, updatedSettings);
+        }
 
+        public void FixAuthorizationCookies(ApplicationConfig appConfig)
+        {
+            XmlDocument doc = new XmlDocument();
+            var elementPath = Path.Combine(appConfig.ApplicationPath, "BPMSoft.WebHost.dll.config");
+            doc.Load(elementPath);
+            var rootNode = doc.SelectSingleNode("configuration/appSettings");
+
+            var dbSetting = rootNode.SelectSingleNode("add[@key='CookiesSameSiteMode']");
+            dbSetting.Attributes[1].Value = $"Lax";
             doc.Save(elementPath);
         }
 
@@ -47,34 +70,6 @@ namespace BPMInstaller.Core.Services
         {
             var dbSetting = rootNode.SelectSingleNode("add[@name='redis']");
             dbSetting.Attributes[1].Value = $"host={redisConfig.Host};db={redisConfig.DbNumber};port={redisConfig.Port}";
-        }
-
-        private void FixAuthorizationCookies(ApplicationConfig appConfig)
-        {
-            XmlDocument doc = new XmlDocument();
-            var elementPath = Path.Combine(appConfig.ApplicationPath, "BPMSoft.WebHost.dll.config");
-            doc.Load(elementPath);
-            var rootNode = doc.SelectSingleNode("configuration/appSettings");
-
-            var dbSetting = rootNode.SelectSingleNode("add[@key='CookiesSameSiteMode']");
-            dbSetting.Attributes[1].Value = $"Lax";
-            doc.Save(elementPath);
-        }
-
-        private void UpdateApplicationPort(ApplicationConfig appConfig)
-        {
-            var appSettingsPath = Path.Combine(appConfig.ApplicationPath, "appsettings.json");
-            var appSettingsJson = File.ReadAllText(appSettingsPath);
-
-            var appSettings = JsonSerializer.Deserialize<AppSettings>(appSettingsJson);
-            if (!string.IsNullOrEmpty(appSettings?.Kestrel?.Endpoints?.Http?.Url))
-            {
-                appSettings.Kestrel.Endpoints.Http.Url = $"http://::{appConfig.ApplicationPort}";
-            }
-            var updatedSettings = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions { WriteIndented = true,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            }).Replace(@"  ", "\t");
-            File.WriteAllText(appSettingsPath, updatedSettings);
         }
     }
 

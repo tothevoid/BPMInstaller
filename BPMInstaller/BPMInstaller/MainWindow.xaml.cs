@@ -1,4 +1,4 @@
-﻿using BPMInstaller.UI.Model;
+﻿using BPMInstaller.UI.Desktop.Model;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace BPMInstaller
+namespace BPMInstaller.UI.Desktop
 {
     public partial class MainWindow : Window
     {

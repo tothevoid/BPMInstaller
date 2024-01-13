@@ -1,11 +1,9 @@
-﻿using BPMInstaller.Core.Model;
-using BPMInstaller.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
-namespace BPMInstaller.UI.Model
+namespace BPMInstaller.UI.Desktop.Model
 {
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
     public class InstallationConfig
@@ -54,6 +52,7 @@ namespace BPMInstaller.UI.Model
         /// <inheritdoc cref="Core.LicenseConfig"/>
         public LicenseConfig LicenseConfig { get; set; }
 
+        /// <inheritdoc cref="Core.InstallationOptionsConfig"/>
         public InstallationOptionsConfig InstallationOptions { get; set; }
 
         [JsonIgnore]

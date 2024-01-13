@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-namespace BPMInstaller.UI.Model
+
+namespace BPMInstaller.UI.Desktop.Model
 {
     public class BaseUIModel: INotifyPropertyChanged
     {

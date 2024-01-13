@@ -1,38 +1,24 @@
-﻿namespace BPMInstaller.UI.Model
+﻿namespace BPMInstaller.UI.Desktop.Model
 {
-    /// <summary>
-    /// Конфигурация установки
-    /// </summary>
+    /// <inheritdoc cref="Core.Model.InstallationOptionsConfig"/>
     public class InstallationOptionsConfig
     {
-        /// <summary>
-        /// Восстанавилвать бекап БД
-        /// </summary>
+        /// <inheritdoc cref="Core.Model.InstallationOptionsConfig.RestoreBackup"/>
         public bool RestoreBackup { get; init; }
 
-        /// <summary>
-        /// Устанавливать лицензии
-        /// </summary>
+        /// <inheritdoc cref="Core.Model.InstallationOptionsConfig.AddLicense"/>
         public bool AddLicense { get; init; }
 
-        /// <summary>
-        /// Запускать компиляцию
-        /// </summary>
+        /// <inheritdoc cref="Core.Model.InstallationOptionsConfig.StartCompilation"/>
         public bool StartCompilation { get; init; }
 
-        /// <summary>
-        /// Актуаилизировать порт в AppSettings.json
-        /// </summary>
+        /// <inheritdoc cref="Core.Model.InstallationOptionsConfig.ActualizeAppSettings"/>
         public bool ActualizeAppSettings { get; init; }
 
-        /// <summary>
-        /// Запустить компиляцию приложения
-        /// </summary>
+        /// <inheritdoc cref="Core.Model.InstallationOptionsConfig.CompileApplication"/>
         public bool CompileApplication { get; init; }
 
-        /// <summary>
-        /// Отключить принудительную смену пароля
-        /// </summary>
+        /// <inheritdoc cref="Core.Model.InstallationOptionsConfig.DisableForcePasswordChange"/>
         public bool DisableForcePasswordChange { get; init; }
         
     }

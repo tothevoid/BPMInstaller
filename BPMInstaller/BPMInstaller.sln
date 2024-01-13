@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMInstaller", "BPMInstaller\BPMInstaller.csproj", "{9E2A7CC1-9CF5-4558-9739-4A46F80C3BF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMInstaller.UI.Desktop", "BPMInstaller\BPMInstaller.UI.Desktop.csproj", "{9E2A7CC1-9CF5-4558-9739-4A46F80C3BF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMInstaller.Core", "BPMInstaller.Core\BPMInstaller.Core.csproj", "{C8740BC9-C7CA-4EFF-BBD9-ABF77DE53C56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMInstaller.Core", "BPMInstaller.Core\BPMInstaller.Core.csproj", "{C8740BC9-C7CA-4EFF-BBD9-ABF77DE53C56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

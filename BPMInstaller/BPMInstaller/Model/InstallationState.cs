@@ -1,9 +1,8 @@
 ﻿using BPMInstaller.Core.Model;
-using BPMInstaller.UI.Model;
 using System.Collections.ObjectModel;
 using System.Windows;
 
-namespace BPMInstaller.Model
+namespace BPMInstaller.UI.Desktop.Model
 {
     public class ControlsSessionState: BaseUIModel
     {

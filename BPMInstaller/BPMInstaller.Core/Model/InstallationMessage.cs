@@ -4,6 +4,8 @@
     {
         public string Content { get; init; }
 
+        public string Date { get; } = DateTime.Now.ToString("HH:mm:ss");
+
         public bool IsTerminal { get; init; } = false;
     }
 }

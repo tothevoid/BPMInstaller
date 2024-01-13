@@ -1,10 +1,11 @@
-﻿using BPMInstaller.Core.Model;
+﻿using BPMInstaller.Core.Interfaces;
+using BPMInstaller.Core.Model;
 
 namespace BPMInstaller.Core.Services
 {
     public class InstallationService
     {
-        private event Action<InstallationMessage> OnInstallationMessageRecieved;
+        private event Action<InstallationMessage> OnInstallationMessageReceived;
 
         public InstallationService(Action<InstallationMessage> messageHandler)
         {
@@ -13,52 +14,107 @@ namespace BPMInstaller.Core.Services
                 throw new ArgumentNullException(nameof(messageHandler));
             }
 
-            OnInstallationMessageRecieved += messageHandler;
+            OnInstallationMessageReceived += messageHandler;
         }
 
         public void StartBasicInstallation(InstallationConfig installationConfig)
         {
-            var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена установка приложения" });
 
-            OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Database server validation started" });
-
-            if (!databaseService.ValidateConnection())
+            if (installationConfig.OptionsConfig.RestoreBackup)
             {
-                return;
+                if (!InitalizeDatabase(installationConfig.DatabaseConfig))
+                {
+                    return;
+                }
             }
 
-            OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Database initialization started" });
+            SetupDistributive(installationConfig.OptionsConfig, installationConfig);
+
+            var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
+
+            var appService = new ApplicationService();
+
+            if (installationConfig.OptionsConfig.DisableForcePasswordChange)
+            {
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление принудительной смены пароля" });
+                databaseService.DisableForcePasswordChange(installationConfig.ApplicationConfig.AdminUserName);
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Принудительная смена пароля отключена" });
+            }
+                
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запуск приложения" });
+            appService.RunApplication(installationConfig.ApplicationConfig, () =>
+            {
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Приложение запущено" });
+
+                if (installationConfig.OptionsConfig.AddLicense)
+                {
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка лицензий" });
+                    appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии установлены" });
+
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Обновление CId" });
+                    databaseService.UpdateCid(installationConfig.LicenseConfig.CId);
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "CId обновлён" });
+                }
+
+                if (installationConfig.OptionsConfig.CompileApplication)
+                {
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена компиляция приложения" });
+                    appService.RebuildApplication(installationConfig.ApplicationConfig);
+                }
+              
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка приложения завершена", IsTerminal = true });
+            });       
+        }
+
+        public bool InitalizeDatabase(DatabaseConfig dbConfig)
+        {
+            var databaseService = new PostgresDatabaseService(dbConfig);
+
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Создание БД: {dbConfig.DatabaseName}" });
 
             if (!databaseService.CreateDatabase())
             {
-                return;
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Ошибка создания БД", IsTerminal = true });
+                return false;
             }
 
-            OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Backup restoration started" });
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "БД создана" });
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Восстановление БД из бекапа" });
 
-            databaseService.RestoreDatabase();
-            //TODO: migrate to specific dbService method that operates db model
-            OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Password fix started" });
-            databaseService.DisableForcePasswordChange(installationConfig.ApplicationConfig.AdminUserName);
-            OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Cid update started" });
-            databaseService.UpdateCid(installationConfig.LicenseConfig.CId);
+            if (!databaseService.RestoreDatabase())
+            {
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Ошибка восстановления БД", IsTerminal = true });
+                return false;
+            }
 
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "БД восстановлена" });
+           
+            return true;
+        }
+
+        public void SetupDistributive(InstallationOptionsConfig optionsConfig, InstallationConfig installationConfig)
+        {
             var distributiveService = new DistributiveService();
 
-            OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Appsettings actualization started" });
-            distributiveService.ActualizeAppComponentsConfig(installationConfig);
-            var appService = new ApplicationService();
-
-            OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Application started" });
-            appService.RunApplication(installationConfig.ApplicationConfig, () =>
+            if (optionsConfig.RestoreBackup)
             {
-                OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Application rebuild started" });
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация ConnectionStrings" });
+                distributiveService.UpdateConnectionStrings(installationConfig);
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "ConnectionStrings актулизированы" });
+            }
 
-                appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
+            if (installationConfig.ApplicationConfig.ApplicationPort != 0)
+            {
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация порта приложения" });
+                distributiveService.UpdateApplicationPort(installationConfig.ApplicationConfig);
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Порт актуализирован" });
+            }
 
-                appService.RebuildApplication(installationConfig.ApplicationConfig);
-                OnInstallationMessageRecieved.Invoke(new InstallationMessage() { Content = "Installation ended", IsTerminal = true });
-            });
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление авторизации" });
+            distributiveService.FixAuthorizationCookies(installationConfig.ApplicationConfig);
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Авторизация исправлена" });
         }
     }
 }

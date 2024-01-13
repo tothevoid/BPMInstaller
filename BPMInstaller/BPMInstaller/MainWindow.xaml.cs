@@ -37,7 +37,7 @@ namespace BPMInstaller
 
         private void Install(object sender, RoutedEventArgs e)
         {
-            Output.Document.Blocks.Clear();
+            Config.ControlsSessionState.Output.Clear();
 
             Config.ControlsSessionState.StartButtonVisibility = Visibility.Collapsed;
 
@@ -49,8 +49,7 @@ namespace BPMInstaller
                 }
 
                 Dispatcher.Invoke(() => {
-                    var date = DateTime.Now.ToString("hh:mm:ss");
-                    Output.AppendText($"{date}:{message.Content} {Environment.NewLine}");
+                    Config.ControlsSessionState.Output.Add(message);
                 });
             };
                

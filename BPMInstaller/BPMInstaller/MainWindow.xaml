@@ -159,7 +159,14 @@
             <TabItem Header="Запуск">
                 <StackPanel DataContext="{Binding ControlsSessionState}" Margin="0 20">
                     <Button Visibility="{Binding StartButtonVisibility}" Click="Install">Равернуть дистрибутив</Button>
-                    <RichTextBox Height="600" IsReadOnly="True" Width="800" Foreground="Black" HorizontalAlignment="Center" x:Name="Output"></RichTextBox>
+                    <ListView ItemsSource="{Binding Output}" >
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=Date}">Дата</GridViewColumn>
+                                <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=Content}">Сообщение</GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </StackPanel>
             </TabItem>
         </TabControl>

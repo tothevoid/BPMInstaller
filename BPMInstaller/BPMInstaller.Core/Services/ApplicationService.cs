@@ -1,20 +1,23 @@
 ﻿using BPMInstaller.Core.Model;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace BPMInstaller.Core.Services
 {
     public class ApplicationService
     {
+        private static Action? ActiveApplicationCloseProcessAction;
+
         public void RunApplication(ApplicationConfig applicationConfig, Action applicationStarted)
         {
+            if (ActiveApplicationCloseProcessAction != null)
+            {
+                ActiveApplicationCloseProcessAction.Invoke();
+                ActiveApplicationCloseProcessAction = null;
+            }
+
             //TODO: handle not installed core 3.1 exception
             Process process = new Process();
             process.StartInfo.WorkingDirectory = applicationConfig.ApplicationPath;
@@ -31,6 +34,7 @@ namespace BPMInstaller.Core.Services
             };
             process.Start();
             process.BeginOutputReadLine();
+            ActiveApplicationCloseProcessAction = () => process.CloseMainWindow();
         }
 
 

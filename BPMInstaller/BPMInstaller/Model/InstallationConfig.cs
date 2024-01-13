@@ -1,4 +1,5 @@
-﻿using BPMInstaller.Model;
+﻿using BPMInstaller.Core.Model;
+using BPMInstaller.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -53,6 +54,8 @@ namespace BPMInstaller.UI.Model
         /// <inheritdoc cref="Core.LicenseConfig"/>
         public LicenseConfig LicenseConfig { get; set; }
 
+        public InstallationOptionsConfig InstallationOptions { get; set; }
+
         [JsonIgnore]
         public ControlsSessionState ControlsSessionState { get; set; } = new ControlsSessionState();
 
@@ -87,6 +90,15 @@ namespace BPMInstaller.UI.Model
                 {
                     Path = LicenseConfig.Path ?? string.Empty,
                     CId = LicenseConfig.CId
+                },
+                OptionsConfig = new Core.Model.InstallationOptionsConfig()
+                {
+                    ActualizeAppSettings = InstallationOptions.ActualizeAppSettings,
+                    AddLicense = InstallationOptions.AddLicense,
+                    CompileApplication = InstallationOptions.CompileApplication,
+                    DisableForcePasswordChange = InstallationOptions.DisableForcePasswordChange,
+                    RestoreBackup = InstallationOptions.RestoreBackup,
+                    StartCompilation = InstallationOptions.StartCompilation   
                 }
             };
         }

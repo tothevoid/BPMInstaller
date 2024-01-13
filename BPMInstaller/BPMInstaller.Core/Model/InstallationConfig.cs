@@ -14,7 +14,10 @@
         /// <inheritdoc cref="Model.RedisConfig"/>
         public RedisConfig RedisConfig { get; init; }
 
-        /// <inheritdoc cref="Core.LicenseConfig"/>
+        /// <inheritdoc cref="Model.LicenseConfig"/>
         public LicenseConfig? LicenseConfig { get; init; }
+
+        /// <inheritdoc cref="Model.InstallationOptionsConfig"/>
+        public InstallationOptionsConfig? OptionsConfig { get; init; }
     }
 }

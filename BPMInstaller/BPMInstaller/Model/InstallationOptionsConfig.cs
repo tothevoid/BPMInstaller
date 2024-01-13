@@ -1,4 +1,4 @@
-﻿namespace BPMInstaller.Core.Model
+﻿namespace BPMInstaller.UI.Model
 {
     /// <summary>
     /// Конфигурация установки

@@ -3,12 +3,6 @@
     public interface IDatabaseService
     {
         /// <summary>
-        /// Проверка возможности подключения к серверу БД
-        /// </summary>
-        /// <returns>Успешное подключение к БД</returns>
-        public bool ValidateConnection();
-
-        /// <summary>
         /// Создание БД
         /// </summary>
         /// <returns>БД создано успешно</returns>

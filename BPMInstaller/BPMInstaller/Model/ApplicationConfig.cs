@@ -1,4 +1,7 @@
-﻿namespace BPMInstaller.UI.Desktop.Model
+﻿using System.Configuration;
+using System.IO;
+
+namespace BPMInstaller.UI.Desktop.Model
 {
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
     public class ApplicationConfig: BaseUIModel
@@ -7,7 +10,7 @@
 
         private bool fixAuthorizationCookies = true;
 
-        private int applicationPort = 5001;
+        private ushort applicationPort = 5001;
 
         private string adminUserName = "Supervisor";
 
@@ -20,7 +23,7 @@
         public bool FixAuthorizationCookies { get { return fixAuthorizationCookies; } set { Set(ref fixAuthorizationCookies, value); } }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.ApplicationPort"/
-        public int ApplicationPort { get { return applicationPort; } set { Set(ref applicationPort, value); } }
+        public ushort ApplicationPort { get { return applicationPort; } set { Set(ref applicationPort, value); } }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.AdminUserName"/
         public string AdminUserName { get { return adminUserName; } set { Set(ref adminUserName, value); } }
@@ -28,5 +31,31 @@
         /// <inheritdoc cref="Core.Model.ApplicationConfig.AdminUserPassword"/
         public string AdminUserPassword { get { return adminUserPassword; } set { Set(ref adminUserPassword, value); } }
 
+        public string? Validate(string propertyName)
+        {
+            switch (propertyName)
+            {
+                case nameof(AdminUserName):
+                    return string.IsNullOrEmpty(adminUserName) ? "Имя суперпользователя не может быть пустым": null;
+                case nameof(AdminUserPassword):
+                    return string.IsNullOrEmpty(adminUserName) ? "Пароль суперпользователя не может быть пустым" : null;
+                case nameof(ApplicationPath):
+                    if (string.IsNullOrEmpty(applicationPath?.Trim()))
+                    {
+                        return "Путь до дистрибутива не может быть пустым";
+                    }
+                    else if (!Directory.Exists(applicationPath))
+                    {
+                        return "Указанной директории не существует";
+                    }
+                    else if (!File.Exists(Path.Combine(applicationPath, "BPMSoft.WebHost.dll")))
+                    {
+                        return "Указанный путь не является дистрибутивом";
+                    }
+                    return null;
+                default:
+                    return null;
+            }
+        }
     }
 }

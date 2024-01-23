@@ -1,11 +1,13 @@
-﻿namespace BPMInstaller.UI.Desktop.Model
+﻿using System.IO;
+
+namespace BPMInstaller.UI.Desktop.Model
 {
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
     public class DatabaseConfig: BaseUIModel
     {
         private string? host = "localhost";
 
-        private int port = 5432;
+        private ushort port = 5432;
 
         private string? userName = "postgres";
 
@@ -23,7 +25,7 @@
         public string? Host { get { return host; } set { Set(ref host, value); } }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.Port"/>
-        public int Port { get { return port; } set { Set(ref port, value); } }
+        public ushort Port { get { return port; } set { Set(ref port, value); } }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.UserName"/>
         public string? UserName { get { return userName; } set { Set(ref userName, value); } }

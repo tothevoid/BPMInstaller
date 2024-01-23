@@ -15,6 +15,8 @@ namespace BPMInstaller.UI.Desktop
 
         public InstallationConfig Config { get; init; }
 
+        public InstallationWorkflow Workflow { get; init; } = new InstallationWorkflow();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -23,6 +25,11 @@ namespace BPMInstaller.UI.Desktop
             {
                 var json = File.ReadAllText(ConfigPath);
                 var deserialized = JsonSerializer.Deserialize<InstallationConfig>(json);
+                if (deserialized?.ApplicationConfig != null && deserialized.ApplicationConfig.Validate(nameof(ApplicationConfig.ApplicationPath)) != null)
+                {
+                    deserialized.ApplicationConfig.ApplicationPath = string.Empty;
+                }
+
                 deserialized?.ActualizeTriggers();
                 Config = deserialized ?? new InstallationConfig();
             }
@@ -31,7 +38,7 @@ namespace BPMInstaller.UI.Desktop
                 Config = new InstallationConfig();
             }
             Config.OnModelChanged += SaveConfig;
-            DataContext = Config;
+            DataContext = this;
            
         }
 

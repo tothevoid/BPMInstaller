@@ -32,16 +32,18 @@
                         </Grid>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                        <CheckBox Height="15" Width="15" IsChecked="{Binding Workflow.UpdateApplicationPort}"/>
-                        <Label>Обновить порт приложения</Label>
+                        <CheckBox IsChecked="{Binding Workflow.UpdateApplicationPort}">
+                            <TextBlock>Обновить порт приложения</TextBlock>
+                        </CheckBox>
                     </StackPanel>
                     <StackPanel Style="{StaticResource ControlGroup}" Visibility="{Binding Path=Workflow.UpdateApplicationPort, Converter={StaticResource VisibleIfTrueConverter}}">
                         <Label>Порт приложения</Label>
                         <TextBox Text="{Binding Config.ApplicationConfig.ApplicationPort}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                        <CheckBox Height="15" Width="15" IsChecked="{Binding Workflow.UpdateDatabaseConnectionString}"/>
-                        <Label>Обновить строку подключения к БД</Label>
+                        <CheckBox  IsChecked="{Binding Workflow.UpdateDatabaseConnectionString}">
+                            <TextBlock>Обновить строку подключения к БД</TextBlock>
+                        </CheckBox>
                     </StackPanel>
                     <StackPanel Visibility="{Binding Path=Workflow.UpdateDatabaseConnectionString, Converter={StaticResource VisibleIfTrueConverter}}">
                         <StackPanel>
@@ -81,8 +83,9 @@
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                        <CheckBox Height="15" Width="15" IsChecked="{Binding Workflow.RestoreDatabaseBackup}"/>
-                        <Label>Восстановить бекап</Label>
+                        <CheckBox IsChecked="{Binding Workflow.RestoreDatabaseBackup}">
+                            <TextBlock>Восстановить бекап</TextBlock>
+                        </CheckBox>
                     </StackPanel>
                     <StackPanel Visibility="{Binding Path=Workflow.RestoreDatabaseBackup, Converter={StaticResource VisibleIfTrueConverter}}">
                         <StackPanel>
@@ -106,8 +109,9 @@
                                         <ColumnDefinition Width="1*"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Orientation="Horizontal" >
-                                        <CheckBox Height="15" IsChecked="{Binding Config.DatabaseConfig.HostedByDocker}"/>
-                                        <Label>Восстанавливать через докер</Label>
+                                        <CheckBox IsChecked="{Binding Config.DatabaseConfig.HostedByDocker}">
+                                            <TextBlock>Восстанавливать через докер</TextBlock>
+                                        </CheckBox>
                                     </StackPanel>
                                     <TextBox Visibility="{Binding Path=Config.DatabaseConfig.HostedByDocker, Converter={StaticResource VisibleIfTrueConverter}}" Grid.Column="1" Text="{Binding Config.DatabaseConfig.RestorationCliLocation}"/>
                                     <Button Visibility="{Binding Path=Config.DatabaseConfig.HostedByDocker, Converter={StaticResource VisibleIfTrueConverter}}" Grid.Column="2" Content="Выбрать" Click="SelectCliPath"/>
@@ -117,8 +121,9 @@
                     </StackPanel>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                            <CheckBox Height="15" Width="15" IsChecked="{Binding Workflow.UpdateRedisConnectionString}"/>
-                            <Label>Обновить строку подключения к Redis</Label>
+                            <CheckBox IsChecked="{Binding Workflow.UpdateRedisConnectionString}">
+                                <TextBlock>Обновить строку подключения к Redis</TextBlock>
+                            </CheckBox>
                         </StackPanel>
                         <Grid Visibility="{Binding Path=Workflow.UpdateRedisConnectionString, Converter={StaticResource VisibleIfTrueConverter}}">
                             <Grid.ColumnDefinitions>
@@ -142,8 +147,9 @@
                     </StackPanel>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                            <CheckBox Height="15" Width="15" IsChecked="{Binding Workflow.InstallLicense}"/>
-                            <Label>Установить лицензии</Label>
+                            <CheckBox IsChecked="{Binding Workflow.InstallLicense}">
+                                <TextBlock>Установить лицензии</TextBlock>
+                            </CheckBox>
                         </StackPanel>
                         <Grid Visibility="{Binding Path=Workflow.InstallLicense, Converter={StaticResource VisibleIfTrueConverter}}">
                             <Grid.ColumnDefinitions>

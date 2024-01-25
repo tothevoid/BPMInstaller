@@ -11,5 +11,6 @@
         public bool DisableForcePasswordChange { get; set; }
         public bool CompileApplication { get; set; }
         public bool StartApplication { get; set; }
+        public bool FixCookies { get; set; }
     }
 }

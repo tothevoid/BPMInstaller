@@ -101,7 +101,8 @@ namespace BPMInstaller.UI.Desktop.Model
                     UpdateRedisConnectionString = InstallationWorkflow.UpdateRedisConnectionString,
                     DisableForcePasswordChange = InstallationWorkflow.DisableForcePasswordChange,
                     CompileApplication = InstallationWorkflow.CompileApplication,
-                    StartApplication = InstallationWorkflow.StartApplication
+                    StartApplication = InstallationWorkflow.StartApplication,
+                    FixCookies = InstallationWorkflow.FixCookies
                 }
             };
         }

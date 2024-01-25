@@ -20,6 +20,8 @@
 
         private bool startApplication;
 
+        private bool fixCookies;
+
         public bool UpdateApplicationPort { get { return updateApplicationPort; } set { Set(ref updateApplicationPort, value); } }
 
         public bool UpdateDatabaseConnectionString { get { return updateDatabaseConnectionString; } set { Set(ref updateDatabaseConnectionString, value); } }
@@ -37,5 +39,7 @@
         public bool CompileApplication { get { return compileApplication; } set { Set(ref compileApplication, value); if (!StartApplication) StartApplication = true;  } }
 
         public bool StartApplication { get { return startApplication; } set { Set(ref startApplication, value); } }
+
+        public bool FixCookies { get { return fixCookies; } set { Set(ref fixCookies, value); } }
     }
 }

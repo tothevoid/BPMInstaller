@@ -23,7 +23,7 @@ namespace BPMInstaller.UI.Desktop
             {
                 var json = File.ReadAllText(ConfigPath);
                 var deserialized = JsonSerializer.Deserialize<InstallationConfig>(json);
-                if (deserialized?.ApplicationConfig != null && deserialized.ApplicationConfig.Validate(nameof(ApplicationConfig.ApplicationPath)) != null)
+                if (deserialized?.ApplicationConfig != null && deserialized.ApplicationConfig.ValidateApplicationPath() != null)
                 {
                     deserialized.ApplicationConfig.ApplicationPath = string.Empty;
                 }
@@ -68,7 +68,7 @@ namespace BPMInstaller.UI.Desktop
 
         private void SelectDistributivePath(object sender, RoutedEventArgs e)
         {
-            Config.ApplicationConfig.ApplicationPath = ShowFileSystemDialog(false, Config.ApplicationConfig.ApplicationPath);
+            Config.ApplicationConfig.ApplicationPath = ShowFileSystemDialog(true, Config.ApplicationConfig.ApplicationPath);
         }
 
         private void SelectBackupFile(object sender, RoutedEventArgs e)

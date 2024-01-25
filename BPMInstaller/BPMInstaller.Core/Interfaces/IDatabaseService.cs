@@ -5,8 +5,8 @@
         /// <summary>
         /// Создание БД
         /// </summary>
-        /// <returns>БД создано успешно</returns>
-        public bool CreateDatabase();
+        /// <returns>Текст ошибки</returns>
+        public string CreateDatabase();
 
         /// <summary>
         /// Восстановление БД по бекапу

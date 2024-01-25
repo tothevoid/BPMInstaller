@@ -36,24 +36,30 @@ namespace BPMInstaller.Core.Services
         }
 
         /// <inheritdoc cref="IDatabaseService.CreateDatabase"/>
-        public bool CreateDatabase()
+        public string CreateDatabase()
         {
             using var con = new NpgsqlConnection(GetConnectionString());
 
-            con.Open();
-            using (var cmd = new NpgsqlCommand($"DROP DATABASE IF EXISTS {DatabaseConfig.DatabaseName}", con))
+            try
             {
-                //TODO: Fix database active connection exception
-                cmd.ExecuteScalar();
-            }
+                con.Open();
+                using (var cmd = new NpgsqlCommand($"DROP DATABASE IF EXISTS {DatabaseConfig.DatabaseName}", con))
+                {
+                    //TODO: Fix database active connection exception
+                    cmd.ExecuteScalar();
+                }
 
-            using (var cmd = new NpgsqlCommand($"CREATE DATABASE {DatabaseConfig.DatabaseName}", con))
+                using (var cmd = new NpgsqlCommand($"CREATE DATABASE {DatabaseConfig.DatabaseName}", con))
+                {
+                    cmd.ExecuteScalar();
+                }
+                con.Close();
+            }
+            catch (PostgresException ex)
             {
-                cmd.ExecuteScalar();
+                return ex.Message;
             }
-            con.Close();
-
-            return true;
+            return string.Empty;
         }
 
         /// <inheritdoc cref="IDatabaseService.RestoreDatabase"/>

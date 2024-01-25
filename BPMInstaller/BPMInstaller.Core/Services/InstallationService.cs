@@ -43,7 +43,9 @@ namespace BPMInstaller.Core.Services
             if (installationConfig.InstallationWorkflow.DisableForcePasswordChange)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление принудительной смены пароля" });
-                databaseService.DisableForcePasswordChange(installationConfig.ApplicationConfig.AdminUserName);
+                //Make it dynamic
+                string adminUserName = "Supervisor";
+                databaseService.DisableForcePasswordChange(adminUserName);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Принудительная смена пароля отключена" });
             }
             
@@ -85,9 +87,10 @@ namespace BPMInstaller.Core.Services
 
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Создание БД: {dbConfig.DatabaseName}" });
 
-            if (!databaseService.CreateDatabase())
+            var databaseCreationResult = databaseService.CreateDatabase();
+            if (!string.IsNullOrEmpty(databaseCreationResult))
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Ошибка создания БД", IsTerminal = true });
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Ошибка создания БД: {databaseCreationResult}", IsTerminal = true });
                 return false;
             }
 
@@ -123,9 +126,12 @@ namespace BPMInstaller.Core.Services
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Порт актуализирован" });
             }
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление авторизации" });
-            distributiveService.FixAuthorizationCookies(installationConfig.ApplicationConfig);
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Авторизация исправлена" });
+            if (workflow.FixCookies)
+            {
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление авторизации" });
+                distributiveService.FixAuthorizationCookies(installationConfig.ApplicationConfig);
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Авторизация исправлена" });
+            }
         }
     }
 }

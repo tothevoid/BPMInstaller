@@ -14,16 +14,6 @@
         /// Порт локального хоста, на котором будет развернуто приложение
         /// </summary>
         public int ApplicationPort { get; set; }
-
-        /// <summary>
-        /// Логин администратора приложения
-        /// </summary>
-        public string AdminUserName { get; set; }
-
-        /// <summary>
-        /// Пароль администратора приложения
-        /// </summary>
-        public string AdminUserPassword { get; set; }
         
         /// <summary>
         /// URL приложения

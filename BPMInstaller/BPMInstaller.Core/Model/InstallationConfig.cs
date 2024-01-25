@@ -17,7 +17,7 @@
         /// <inheritdoc cref="Model.LicenseConfig"/>
         public LicenseConfig? LicenseConfig { get; init; }
 
-        /// <inheritdoc cref="Model.InstallationOptionsConfig"/>
-        public InstallationOptionsConfig? OptionsConfig { get; init; }
+        /// <inheritdoc cref="Model.InstallationWorkflow"/>
+        public InstallationWorkflow? InstallationWorkflow { get; init;}
     }
 }

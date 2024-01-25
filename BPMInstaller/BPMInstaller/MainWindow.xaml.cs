@@ -15,8 +15,6 @@ namespace BPMInstaller.UI.Desktop
 
         public InstallationConfig Config { get; init; }
 
-        public InstallationWorkflow Workflow { get; init; } = new InstallationWorkflow();
-
         public MainWindow()
         {
             InitializeComponent();
@@ -39,7 +37,6 @@ namespace BPMInstaller.UI.Desktop
             }
             Config.OnModelChanged += SaveConfig;
             DataContext = this;
-           
         }
 
         private void Install(object sender, RoutedEventArgs e)

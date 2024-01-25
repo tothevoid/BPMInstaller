@@ -16,7 +16,7 @@ namespace BPMInstaller.UI.Desktop.Model
             DatabaseConfig = new DatabaseConfig();
             RedisConfig = new RedisConfig();
             LicenseConfig = new LicenseConfig();
-
+            InstallationWorkflow = new InstallationWorkflow();
 
             ActualizeTriggers();
         }
@@ -28,7 +28,8 @@ namespace BPMInstaller.UI.Desktop.Model
                 ApplicationConfig,
                 DatabaseConfig,
                 RedisConfig,
-                LicenseConfig
+                LicenseConfig,
+                InstallationWorkflow
             };
 
             configs.ForEach(config =>
@@ -52,8 +53,8 @@ namespace BPMInstaller.UI.Desktop.Model
         /// <inheritdoc cref="Core.LicenseConfig"/>
         public LicenseConfig LicenseConfig { get; set; }
 
-        /// <inheritdoc cref="Core.InstallationOptionsConfig"/>
-        public InstallationOptionsConfig InstallationOptions { get; set; }
+        /// <inheritdoc cref="Core.InstallationWorkflow"/>
+        public InstallationWorkflow InstallationWorkflow { get; set; }
 
         [JsonIgnore]
         public ControlsSessionState ControlsSessionState { get; set; } = new ControlsSessionState();
@@ -90,14 +91,17 @@ namespace BPMInstaller.UI.Desktop.Model
                     Path = LicenseConfig.Path ?? string.Empty,
                     CId = LicenseConfig.CId
                 },
-                OptionsConfig = new Core.Model.InstallationOptionsConfig()
+                InstallationWorkflow = new Core.Model.InstallationWorkflow()
                 {
-                    ActualizeAppSettings = InstallationOptions.ActualizeAppSettings,
-                    AddLicense = InstallationOptions.AddLicense,
-                    CompileApplication = InstallationOptions.CompileApplication,
-                    DisableForcePasswordChange = InstallationOptions.DisableForcePasswordChange,
-                    RestoreBackup = InstallationOptions.RestoreBackup,
-                    StartCompilation = InstallationOptions.StartCompilation   
+                    InstallLicense = InstallationWorkflow.InstallLicense,
+                    RemoveCertificate = InstallationWorkflow.RemoveCertificate,
+                    RestoreDatabaseBackup = InstallationWorkflow.RestoreDatabaseBackup,
+                    UpdateApplicationPort = InstallationWorkflow.UpdateApplicationPort,
+                    UpdateDatabaseConnectionString = InstallationWorkflow.UpdateDatabaseConnectionString,
+                    UpdateRedisConnectionString = InstallationWorkflow.UpdateRedisConnectionString,
+                    DisableForcePasswordChange = InstallationWorkflow.DisableForcePasswordChange,
+                    CompileApplication = InstallationWorkflow.CompileApplication,
+                    StartApplication = InstallationWorkflow.StartApplication
                 }
             };
         }

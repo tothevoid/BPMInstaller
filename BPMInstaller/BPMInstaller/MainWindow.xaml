@@ -17,165 +17,176 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <TabControl>
+        <TabControl Padding="0,20,0,0">
             <TabItem Header="Конфигурация">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <StackPanel Style="{StaticResource ControlGroup}">
-                        <Label>Путь к дистрибутиву</Label>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="9*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Text="{Binding Config.ApplicationConfig.ApplicationPath}"/>
-                            <Button Grid.Column="1" Content="Выбрать" Click="SelectDistributivePath"/>
-                        </Grid>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                        <CheckBox IsChecked="{Binding Workflow.UpdateApplicationPort}">
-                            <TextBlock>Обновить порт приложения</TextBlock>
-                        </CheckBox>
-                    </StackPanel>
-                    <StackPanel Style="{StaticResource ControlGroup}" Visibility="{Binding Path=Workflow.UpdateApplicationPort, Converter={StaticResource VisibleIfTrueConverter}}">
-                        <Label>Порт приложения</Label>
-                        <TextBox Text="{Binding Config.ApplicationConfig.ApplicationPort}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                        <CheckBox  IsChecked="{Binding Workflow.UpdateDatabaseConnectionString}">
-                            <TextBlock>Обновить строку подключения к БД</TextBlock>
-                        </CheckBox>
-                    </StackPanel>
-                    <StackPanel Visibility="{Binding Path=Workflow.UpdateDatabaseConnectionString, Converter={StaticResource VisibleIfTrueConverter}}">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3*"/>
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                    <Label>Хост</Label>
-                                    <TextBox Text="{Binding Config.DatabaseConfig.Host}"/>
-                                </StackPanel>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                    <Label>Порт</Label>
-                                    <TextBox Text="{Binding Config.DatabaseConfig.Port}"/>
-                                </StackPanel>
-                            </Grid>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1*"/>
-                                    <ColumnDefinition Width="1*"/>
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                    <Label>Имя пользователя</Label>
-                                    <TextBox Text="{Binding Config.DatabaseConfig.UserName}"/>
-                                </StackPanel>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                    <Label>Пароль</Label>
-                                    <TextBox Text="{Binding Config.DatabaseConfig.Password}"/>
-                                </StackPanel>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
-                                    <Label>Название БД</Label>
-                                    <TextBox Text="{Binding Config.DatabaseConfig.DatabaseName}"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                        <CheckBox IsChecked="{Binding Workflow.RestoreDatabaseBackup}">
-                            <TextBlock>Восстановить бекап</TextBlock>
-                        </CheckBox>
-                    </StackPanel>
-                    <StackPanel Visibility="{Binding Path=Workflow.RestoreDatabaseBackup, Converter={StaticResource VisibleIfTrueConverter}}">
                         <StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
-                                <Label>Путь к бекапу</Label>
+                                <Label>Путь к дистрибутиву</Label>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="9*"/>
                                         <ColumnDefinition Width="1*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Text="{Binding Config.DatabaseConfig.BackupPath}"/>
-                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectBackupFile"/>
+                                    <TextBox Grid.Column="0" Text="{Binding Config.ApplicationConfig.ApplicationPath}"/>
+                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectDistributivePath"/>
                                 </Grid>
                             </StackPanel>
-                            <StackPanel  Style="{StaticResource ControlGroup}">
-                                <Label>Путь к CLI восстановления (для восстановления не через докер)</Label>
-                                <Grid>
+                            <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                <CheckBox IsChecked="{Binding Config.InstallationWorkflow.DisableForcePasswordChange}">
+                                    <TextBlock>Отключить принудительную смену пароля (для версии 1.3 и выше)</TextBlock>
+                                </CheckBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                <CheckBox IsChecked="{Binding Config.InstallationWorkflow.UpdateApplicationPort}">
+                                    <TextBlock>Обновить порт приложения</TextBlock>
+                                </CheckBox>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource ControlGroup}" Visibility="{Binding Path=Config.InstallationWorkflow.UpdateApplicationPort, Converter={StaticResource VisibleIfTrueConverter}}">
+                                <Label>Порт приложения</Label>
+                                <TextBox Text="{Binding Config.ApplicationConfig.ApplicationPort}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                <CheckBox  IsChecked="{Binding Config.InstallationWorkflow.UpdateDatabaseConnectionString}">
+                                    <TextBlock>Обновить строку подключения к БД</TextBlock>
+                                </CheckBox>
+                            </StackPanel>
+                            <StackPanel Visibility="{Binding Path=Config.InstallationWorkflow.UpdateDatabaseConnectionString, Converter={StaticResource VisibleIfTrueConverter}}">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                            <Label>Хост</Label>
+                                            <TextBox Text="{Binding Config.DatabaseConfig.Host}"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                            <Label>Порт</Label>
+                                            <TextBox Text="{Binding Config.DatabaseConfig.Port}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                            <Label>Имя пользователя</Label>
+                                            <TextBox Text="{Binding Config.DatabaseConfig.UserName}"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                            <Label>Пароль</Label>
+                                            <TextBox Text="{Binding Config.DatabaseConfig.Password}"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
+                                            <Label>Название БД</Label>
+                                            <TextBox Text="{Binding Config.DatabaseConfig.DatabaseName}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                <CheckBox IsChecked="{Binding Config.InstallationWorkflow.RestoreDatabaseBackup}">
+                                    <TextBlock>Восстановить бекап</TextBlock>
+                                </CheckBox>
+                            </StackPanel>
+                            <StackPanel Visibility="{Binding Path=Config.InstallationWorkflow.RestoreDatabaseBackup, Converter={StaticResource VisibleIfTrueConverter}}">
+                                <StackPanel>
+                                    <StackPanel Style="{StaticResource ControlGroup}">
+                                        <Label>Путь к бекапу</Label>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="9*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Text="{Binding Config.DatabaseConfig.BackupPath}"/>
+                                            <Button Grid.Column="1" Content="Выбрать" Click="SelectBackupFile"/>
+                                        </Grid>
+                                    </StackPanel>
+                                    <StackPanel  Style="{StaticResource ControlGroup}">
+                                        <Label>Путь к CLI восстановления (для восстановления не через докер)</Label>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="4*"/>
+                                                <ColumnDefinition Width="9*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Orientation="Horizontal" >
+                                                <CheckBox IsChecked="{Binding Config.DatabaseConfig.HostedByDocker}">
+                                                    <TextBlock>Восстанавливать через докер</TextBlock>
+                                                </CheckBox>
+                                            </StackPanel>
+                                            <TextBox Visibility="{Binding Path=Config.DatabaseConfig.HostedByDocker, Converter={StaticResource VisibleIfTrueConverter}}" Grid.Column="1" Text="{Binding Config.DatabaseConfig.RestorationCliLocation}"/>
+                                            <Button Visibility="{Binding Path=Config.DatabaseConfig.HostedByDocker, Converter={StaticResource VisibleIfTrueConverter}}" Grid.Column="2" Content="Выбрать" Click="SelectCliPath"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                    <CheckBox IsChecked="{Binding Config.InstallationWorkflow.UpdateRedisConnectionString}">
+                                        <TextBlock>Обновить строку подключения к Redis</TextBlock>
+                                    </CheckBox>
+                                </StackPanel>
+                                <Grid Visibility="{Binding Path=Config.InstallationWorkflow.UpdateRedisConnectionString, Converter={StaticResource VisibleIfTrueConverter}}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="4*"/>
-                                        <ColumnDefinition Width="9*"/>
+                                        <ColumnDefinition Width="1*"/>
                                         <ColumnDefinition Width="1*"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Orientation="Horizontal" >
-                                        <CheckBox IsChecked="{Binding Config.DatabaseConfig.HostedByDocker}">
-                                            <TextBlock>Восстанавливать через докер</TextBlock>
-                                        </CheckBox>
+                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                        <Label>Хост</Label>
+                                        <TextBox Text="{Binding Config.RedisConfig.Host}"></TextBox>
                                     </StackPanel>
-                                    <TextBox Visibility="{Binding Path=Config.DatabaseConfig.HostedByDocker, Converter={StaticResource VisibleIfTrueConverter}}" Grid.Column="1" Text="{Binding Config.DatabaseConfig.RestorationCliLocation}"/>
-                                    <Button Visibility="{Binding Path=Config.DatabaseConfig.HostedByDocker, Converter={StaticResource VisibleIfTrueConverter}}" Grid.Column="2" Content="Выбрать" Click="SelectCliPath"/>
+                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                        <Label>Порт</Label>
+                                        <TextBox Text="{Binding Config.RedisConfig.Port}"></TextBox>
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
+                                        <Label>№ БД</Label>
+                                        <TextBox Text="{Binding Config.RedisConfig.DbNumber}"></TextBox>
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                            <CheckBox IsChecked="{Binding Workflow.UpdateRedisConnectionString}">
-                                <TextBlock>Обновить строку подключения к Redis</TextBlock>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                    <CheckBox IsChecked="{Binding Config.InstallationWorkflow.InstallLicense}">
+                                        <TextBlock>Установить лицензии</TextBlock>
+                                    </CheckBox>
+                                </StackPanel>
+                            <Grid Visibility="{Binding Path=Config.InstallationWorkflow.InstallLicense, Converter={StaticResource VisibleIfTrueConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                    <Label>CId</Label>
+                                    <TextBox Text="{Binding Config.LicenseConfig.CId}"></TextBox>
+                                </StackPanel>
+                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                    <Label>Путь к лицензии</Label>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="9*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0" Text="{Binding Config.LicenseConfig.Path}"/>
+                                        <Button Grid.Column="1" Content="Выбрать" Click="SelectLicenseFile"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.CompileApplication}">
+                                <TextBlock>Скомпилировать приложение</TextBlock>
+                            </CheckBox>
+                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.StartApplication}">
+                                <TextBlock>Запуститить приложение</TextBlock>
                             </CheckBox>
                         </StackPanel>
-                        <Grid Visibility="{Binding Path=Workflow.UpdateRedisConnectionString, Converter={StaticResource VisibleIfTrueConverter}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="4*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                <Label>Хост</Label>
-                                <TextBox Text="{Binding Config.RedisConfig.Host}"></TextBox>
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                <Label>Порт</Label>
-                                <TextBox Text="{Binding Config.RedisConfig.Port}"></TextBox>
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
-                                <Label>№ БД</Label>
-                                <TextBox Text="{Binding Config.RedisConfig.DbNumber}"></TextBox>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                            <CheckBox IsChecked="{Binding Workflow.InstallLicense}">
-                                <TextBlock>Установить лицензии</TextBlock>
-                            </CheckBox>
                         </StackPanel>
-                        <Grid Visibility="{Binding Path=Workflow.InstallLicense, Converter={StaticResource VisibleIfTrueConverter}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="2*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                <Label>CId</Label>
-                                <TextBox Text="{Binding Config.LicenseConfig.CId}"></TextBox>
-                            </StackPanel>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                <Label>Путь к лицензии</Label>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="9*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Text="{Binding Config.LicenseConfig.Path}"/>
-                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectLicenseFile"/>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </StackPanel>
-                </ScrollViewer>
+                    </ScrollViewer>
             </TabItem>
             <TabItem Header="Запуск">
                 <StackPanel DataContext="{Binding Config.ControlsSessionState}" Margin="0 20">

@@ -19,9 +19,14 @@ namespace BPMInstaller.Core.Services
 
         public void StartBasicInstallation(InstallationConfig installationConfig)
         {
+            if (installationConfig == null)
+            {
+                throw new ArgumentException(nameof(installationConfig));
+            }
+
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена установка приложения" });
 
-            if (installationConfig.OptionsConfig.RestoreBackup)
+            if (installationConfig.InstallationWorkflow.RestoreDatabaseBackup)
             {
                 if (!InitalizeDatabase(installationConfig.DatabaseConfig))
                 {
@@ -29,25 +34,31 @@ namespace BPMInstaller.Core.Services
                 }
             }
 
-            SetupDistributive(installationConfig.OptionsConfig, installationConfig);
+            SetupDistributive(installationConfig.InstallationWorkflow, installationConfig);
 
             var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
 
             var appService = new ApplicationService();
 
-            if (installationConfig.OptionsConfig.DisableForcePasswordChange)
+            if (installationConfig.InstallationWorkflow.DisableForcePasswordChange)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление принудительной смены пароля" });
                 databaseService.DisableForcePasswordChange(installationConfig.ApplicationConfig.AdminUserName);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Принудительная смена пароля отключена" });
             }
-                
+            
+            if (!installationConfig.InstallationWorkflow.StartApplication)
+            {
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка приложения завершена", IsTerminal = true });
+                return;
+            }
+
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запуск приложения" });
             appService.RunApplication(installationConfig.ApplicationConfig, () =>
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Приложение запущено" });
 
-                if (installationConfig.OptionsConfig.AddLicense)
+                if (installationConfig.InstallationWorkflow.InstallLicense)
                 {
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка лицензий" });
                     appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
@@ -58,7 +69,7 @@ namespace BPMInstaller.Core.Services
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "CId обновлён" });
                 }
 
-                if (installationConfig.OptionsConfig.CompileApplication)
+                if (installationConfig.InstallationWorkflow.CompileApplication)
                 {
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена компиляция приложения" });
                     appService.RebuildApplication(installationConfig.ApplicationConfig);
@@ -94,18 +105,18 @@ namespace BPMInstaller.Core.Services
             return true;
         }
 
-        public void SetupDistributive(InstallationOptionsConfig optionsConfig, InstallationConfig installationConfig)
+        public void SetupDistributive(InstallationWorkflow workflow, InstallationConfig installationConfig)
         {
             var distributiveService = new DistributiveService();
 
-            if (optionsConfig.RestoreBackup)
+            if (workflow.RestoreDatabaseBackup)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация ConnectionStrings" });
                 distributiveService.UpdateConnectionStrings(installationConfig);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "ConnectionStrings актулизированы" });
             }
 
-            if (installationConfig.ApplicationConfig.ApplicationPort != 0)
+            if (workflow.UpdateApplicationPort)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация порта приложения" });
                 distributiveService.UpdateApplicationPort(installationConfig.ApplicationConfig);

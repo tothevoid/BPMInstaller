@@ -19,6 +19,7 @@
     <Grid>
         <TabControl>
             <TabItem Header="Конфигурация">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <StackPanel Style="{StaticResource ControlGroup}">
                         <Label>Путь к дистрибутиву</Label>
@@ -174,6 +175,7 @@
                         </Grid>
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="Запуск">
                 <StackPanel DataContext="{Binding Config.ControlsSessionState}" Margin="0 20">

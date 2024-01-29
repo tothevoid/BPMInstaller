@@ -13,11 +13,18 @@
         /// <summary>
         /// Порт локального хоста, на котором будет развернуто приложение
         /// </summary>
-        public int ApplicationPort { get; set; }
+        public ushort ApplicationPort { get; set; }
         
         /// <summary>
         /// URL приложения
         /// </summary>
         public string ApplicationUrl => $"http://localhost:{ApplicationPort}";
+
+        /// <summary>
+        /// Путь к dll для запуска приложения
+        /// </summary>
+        public string ExecutableApplicationPath => !string.IsNullOrEmpty(ApplicationPath) ?
+            Path.Combine(ApplicationPath, "BPMSoft.WebHost.dll") :
+            string.Empty;
     }
 }

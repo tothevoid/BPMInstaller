@@ -1,5 +1,7 @@
 ﻿using BPMInstaller.Core.Model;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -40,6 +42,37 @@ namespace BPMInstaller.Core.Services
             ActiveApplicationCloseProcessAction = () => process.CloseMainWindow();
         }
 
+        public bool CloseActiveApplication(ushort applicationPort, string appPath)
+        {
+            if (applicationPort == default)
+            {
+                return false;
+            }
+
+            var connections = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections();
+            var existingAppConnection =
+                IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().FirstOrDefault(tcp =>
+                    tcp.Address.Equals(0) && tcp?.Port == applicationPort);
+
+            var process = Process.GetProcessesByName("dotnet");
+
+            if (process.Length == 0)
+            {
+                return false;
+            }
+
+            bool hasModule = false;
+
+            foreach (var possibleProcess in process)
+            {
+                foreach (ProcessModule module in possibleProcess.Modules)
+                {
+                    hasModule |= module.FileName == appPath;
+                }
+                possibleProcess.CloseMainWindow();
+            }
+            return hasModule;
+        }
 
         public void RebuildApplication(ApplicationConfig applicationConfig)
         {

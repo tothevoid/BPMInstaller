@@ -55,6 +55,14 @@ namespace BPMInstaller.Core.Services
                 return;
             }
 
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Проверка наличия запущенного приложения" });
+            var closed = appService.CloseActiveApplication(installationConfig.ApplicationConfig.ApplicationPort, 
+                installationConfig.ApplicationConfig.ExecutableApplicationPath);
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = closed ? 
+                "Активное прилоение выключено":
+                "Активное приложение не найдено"
+            });
+
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запуск приложения" });
             appService.RunApplication(installationConfig.ApplicationConfig, () =>
             {

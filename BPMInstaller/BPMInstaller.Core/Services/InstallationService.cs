@@ -42,6 +42,7 @@ namespace BPMInstaller.Core.Services
             var databaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
 
             var appService = new ApplicationService();
+            var redisService = new RedisService();
 
             if (installationConfig.InstallationWorkflow.DisableForcePasswordChange)
             {
@@ -83,7 +84,10 @@ namespace BPMInstaller.Core.Services
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Назначение лицензий на {adminUserName}" });
                     databaseService.ApplyAdministratorLicenses(adminUserName);
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии назначены" });
-                    
+
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Запуск очистки Redis" });
+                    redisService.FlushData(installationConfig.RedisConfig);
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Данные приложения в Redis удалены" });
                 }
 
                 if (installationConfig.InstallationWorkflow.CompileApplication)

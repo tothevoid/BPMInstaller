@@ -24,6 +24,9 @@ namespace BPMInstaller.Core.Services
                 throw new ArgumentException(nameof(installationConfig));
             }
 
+            //Make it dynamic
+            const string adminUserName = "Supervisor";
+
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена установка приложения" });
 
             if (installationConfig.InstallationWorkflow.RestoreDatabaseBackup)
@@ -43,8 +46,7 @@ namespace BPMInstaller.Core.Services
             if (installationConfig.InstallationWorkflow.DisableForcePasswordChange)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление принудительной смены пароля" });
-                //Make it dynamic
-                string adminUserName = "Supervisor";
+              
                 databaseService.DisableForcePasswordChange(adminUserName);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Принудительная смена пароля отключена" });
             }
@@ -70,13 +72,18 @@ namespace BPMInstaller.Core.Services
 
                 if (installationConfig.InstallationWorkflow.InstallLicense)
                 {
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Обновление CId" });
+                    databaseService.UpdateCid(installationConfig.LicenseConfig.CId);
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "CId обновлён" });
+
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка лицензий" });
                     appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии установлены" });
 
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Обновление CId" });
-                    databaseService.UpdateCid(installationConfig.LicenseConfig.CId);
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "CId обновлён" });
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Назначение лицензий на {adminUserName}" });
+                    databaseService.ApplyAdministratorLicenses(adminUserName);
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии назначены" });
+                    
                 }
 
                 if (installationConfig.InstallationWorkflow.CompileApplication)
@@ -92,6 +99,19 @@ namespace BPMInstaller.Core.Services
         public bool InitalizeDatabase(DatabaseConfig dbConfig)
         {
             var databaseService = new PostgresDatabaseService(dbConfig);
+
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Проверка подключения к БД" });
+            var exceptionMessage = databaseService.ValidateConnection();
+            if (!string.IsNullOrEmpty(exceptionMessage))
+            {
+                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Ошибка валидации подключения к БД" });
+                return false;
+            }
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Успешное подключение к БД" });
+
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Сброс активных подключений к БД" });
+            databaseService.TerminateAllActiveSessions(dbConfig.DatabaseName);
+            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Подключения к БД сброшены" });
 
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Создание БД: {dbConfig.DatabaseName}" });
 

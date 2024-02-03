@@ -92,6 +92,11 @@ namespace BPMInstaller.UI.Desktop
             dlg.Title = isDirectory ? "Выбор директории": "Выбора файла";
             dlg.IsFolderPicker = isDirectory;
 
+            if (previousValue != null)
+            {
+                dlg.DefaultDirectory = previousValue;
+            }
+
             dlg.AllowNonFileSystemItems = false;
             dlg.EnsurePathExists = true;
             dlg.EnsureReadOnly = false;

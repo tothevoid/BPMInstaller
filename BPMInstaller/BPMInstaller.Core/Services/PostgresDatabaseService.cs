@@ -2,6 +2,7 @@
 using Npgsql;
 using BPMInstaller.Core.Interfaces;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace BPMInstaller.Core.Services
 {
@@ -18,7 +19,7 @@ namespace BPMInstaller.Core.Services
         }
 
         /// <inheritdoc cref="IDatabaseService.ValidateConnection"/>
-        public bool ValidateConnection()
+        public string ValidateConnection()
         {
             try
             {
@@ -27,11 +28,11 @@ namespace BPMInstaller.Core.Services
                 using var cmd = new NpgsqlCommand("SELECT version()", con);
                 var result = cmd.ExecuteNonQuery() != 0;
                 con.Close();
-                return result;
+                return string.Empty;
             }
             catch (Exception ex)
             {
-                return false;
+                return ex.Message;
             }
         }
 
@@ -95,6 +96,59 @@ namespace BPMInstaller.Core.Services
             return result;
         }
 
+        /// <summary>
+        /// Удаление назначенных лицензий и назначение всех на администратора
+        /// </summary>
+        /// <param name="userName">Пользователь администратора</param>
+        public bool ApplyAdministratorLicenses(string userName)
+        {
+            var result = true;
+
+            using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
+
+            con.Open();
+            using (var removeLicensesCommand = new NpgsqlCommand($"TRUNCATE TABLE \"SysLicUser\"", con))
+            {
+                removeLicensesCommand.ExecuteScalar();
+            }
+
+            var licensesInsertQuery = "INSERT INTO \"SysLicUser\" (\"SysLicPackageId\", \"SysUserId\", \"Active\")" +
+                "SELECT \"SysLic\".\"SysLicPackageId\", \"SysAdminUnit\".\"Id\", '1'" +
+                "FROM \"SysLic\"" +
+                $"inner join \"SysAdminUnit\" on \"SysAdminUnit\".\"Name\" = '{userName}'" +
+                "WHERE \"Count\" != 0";
+
+            using (var insertLicensesCommand = new NpgsqlCommand(licensesInsertQuery, con))
+            {
+                result = insertLicensesCommand.ExecuteNonQuery() != 0;
+            }
+
+            con.Close();
+            return result;
+        }
+        
+        /// <summary>
+        /// Остановка всех активных подключений к БД
+        /// </summary>
+        /// <param name="databaseName">Название БД</param>
+        public void TerminateAllActiveSessions(string databaseName)
+        {
+            //try
+            //{
+            //    using var con = new NpgsqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
+            //    var commandText = "select pg_terminate_backend(pid) from pg_stat_activity\n" +
+            //        $"where datname = '{databaseName}' and pid != pg_backend_pid() and leader_pid IS NULL";
+            //    con.Open();
+            //    using var cmd = new NpgsqlCommand(commandText, con);
+            //    cmd.ExecuteNonQuery();
+            //    con.Close();
+            //}
+            //catch (Exception ex)
+            //{
+            //    ;
+            //}
+        }
+
         private bool RestoreByCli()
         {
             Process process = new Process();
@@ -131,6 +185,5 @@ namespace BPMInstaller.Core.Services
 
         private string GetConnectionString(string database = "postgres") =>
             $"Host={DatabaseConfig.Host};Username={DatabaseConfig.AdminUserName};Password={DatabaseConfig.AdminPassword};Database={database};Port={DatabaseConfig.Port}";
-        
     }
 }

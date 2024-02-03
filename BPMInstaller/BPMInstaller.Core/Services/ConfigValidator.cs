@@ -10,7 +10,7 @@ namespace BPMInstaller.Core.Services
 {
     public class ConfigValidator
     {
-        public bool ValidateDatabaseConnection(DatabaseConfig dbConfig) =>
+        public string ValidateDatabaseConnection(DatabaseConfig dbConfig) =>
             new PostgresDatabaseService(dbConfig).ValidateConnection();
     }
 }

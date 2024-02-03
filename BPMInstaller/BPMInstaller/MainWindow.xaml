@@ -43,7 +43,7 @@
                                 <TextBox Text="{Binding Config.ApplicationConfig.ApplicationPort}"/>
                             </StackPanel>
                             <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.FixCookies}">
-                                <TextBlock>Исправить куки (Lax)</TextBlock>
+                            <TextBlock>Исправить авторизацию (CookiesSameSiteMode=Lax)</TextBlock>
                             </CheckBox>
                             <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
                                 <CheckBox  IsChecked="{Binding Config.InstallationWorkflow.UpdateDatabaseConnectionString}">

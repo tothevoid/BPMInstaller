@@ -12,8 +12,8 @@ namespace BPMInstaller.Core.Services
     {
         private static Action? ActiveApplicationCloseProcessAction;
 
-        private const string ADMIN_USER_LOGIN = "SUPEVISOR";
-        private const string ADMIN_USER_PASSWORD = "SUPEVISOR";
+        private const string ADMIN_USER_LOGIN = "Supervisor";
+        private const string ADMIN_USER_PASSWORD = "Supervisor";
 
         public void RunApplication(ApplicationConfig applicationConfig, Action applicationStarted)
         {

@@ -24,9 +24,6 @@ namespace BPMInstaller.Core.Services
                 throw new ArgumentException(nameof(installationConfig));
             }
 
-            //Make it dynamic
-            const string adminUserName = "Supervisor";
-
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена установка приложения" });
 
             if (installationConfig.InstallationWorkflow.RestoreDatabaseBackup)
@@ -48,7 +45,7 @@ namespace BPMInstaller.Core.Services
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление принудительной смены пароля" });
               
-                databaseService.DisableForcePasswordChange(adminUserName);
+                databaseService.DisableForcePasswordChange(Constants.ApplicationAdministrator.UserName);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Принудительная смена пароля отключена" });
             }
             
@@ -81,8 +78,8 @@ namespace BPMInstaller.Core.Services
                     appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии установлены" });
 
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Назначение лицензий на {adminUserName}" });
-                    databaseService.ApplyAdministratorLicenses(adminUserName);
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Назначение лицензий на {Constants.ApplicationAdministrator.UserName}" });
+                    databaseService.ApplyAdministratorLicenses(Constants.ApplicationAdministrator.UserName);
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии назначены" });
 
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Запуск очистки Redis" });

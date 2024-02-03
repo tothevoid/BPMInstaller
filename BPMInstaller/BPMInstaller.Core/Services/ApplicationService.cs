@@ -12,9 +12,6 @@ namespace BPMInstaller.Core.Services
     {
         private static Action? ActiveApplicationCloseProcessAction;
 
-        private const string ADMIN_USER_LOGIN = "Supervisor";
-        private const string ADMIN_USER_PASSWORD = "Supervisor";
-
         public void RunApplication(ApplicationConfig applicationConfig, Action applicationStarted)
         {
             if (ActiveApplicationCloseProcessAction != null)
@@ -93,7 +90,7 @@ namespace BPMInstaller.Core.Services
             using var client = new HttpClient();
 
             var message = new HttpRequestMessage(HttpMethod.Post, $"{applicationConfig.ApplicationUrl}/ServiceModel/AuthService.svc/Login");
-            message.Content = new StringContent($"{{\"UserName\":\"{ADMIN_USER_LOGIN}\", \"UserPassword\":\"{ADMIN_USER_PASSWORD}\"}}", 
+            message.Content = new StringContent($"{{\"UserName\":\"{Constants.ApplicationAdministrator.UserName}\", \"UserPassword\":\"{Constants.ApplicationAdministrator.Password}\"}}", 
                 Encoding.UTF8, "application/json");
 
             var authResult = client.Send(message);

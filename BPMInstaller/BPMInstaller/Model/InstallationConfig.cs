@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Text.Json.Serialization;
 
 namespace BPMInstaller.UI.Desktop.Model
 {
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
-    public class InstallationConfig
+    public class InstallationConfig: BaseUIModel
     {
         public event Action? OnModelChanged;
 
@@ -41,6 +42,11 @@ namespace BPMInstaller.UI.Desktop.Model
             });
         }
 
+        private string? applicationPath;
+
+        /// <inheritdoc cref="Core.Model.ApplicationConfig.ApplicationPath"/
+        public string? ApplicationPath { get { return applicationPath; } set { Set(ref applicationPath, value); } }
+
         /// <inheritdoc cref="Model.ApplicationConfig"/>
         public ApplicationConfig ApplicationConfig { get; set; }
 
@@ -59,15 +65,32 @@ namespace BPMInstaller.UI.Desktop.Model
         [JsonIgnore]
         public ControlsSessionState ControlsSessionState { get; set; } = new ControlsSessionState();
 
+        public string? ValidateApplicationPath()
+        {
+            if (string.IsNullOrEmpty(applicationPath?.Trim()))
+            {
+                return "Путь до дистрибутива не может быть пустым";
+            }
+            else if (!Directory.Exists(applicationPath))
+            {
+                return "Указанной директории не существует";
+            }
+            else if (!File.Exists(Path.Combine(applicationPath, "BPMSoft.WebHost.dll")))
+            {
+                return "Указанный путь не является дистрибутивом";
+            }
+            return null;
+        }
+
         // TODO: Fix architecture
         public Core.Model.InstallationConfig ConvertToCoreModel()
         {
             return new Core.Model.InstallationConfig
             {
+                ApplicationPath = ApplicationPath ?? string.Empty,
                 ApplicationConfig = new Core.Model.ApplicationConfig()
                 {
-                    ApplicationPath = ApplicationConfig.ApplicationPath ?? string.Empty,
-                    ApplicationPort = ApplicationConfig.ApplicationPort
+                    ApplicationPort = ApplicationConfig.Port
                 },
                 DatabaseConfig = new Core.Model.DatabaseConfig
                 {

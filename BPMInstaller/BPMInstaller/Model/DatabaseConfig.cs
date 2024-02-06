@@ -44,5 +44,14 @@ namespace BPMInstaller.UI.Desktop.Model
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.RestorationCliLocation"/>
         public string? RestorationCliLocation { get { return restorationCliLocation; } set { Set(ref restorationCliLocation, value); } }
+
+        public void MergeConfig(Core.Model.DatabaseConfig databaseConfig)
+        {
+            Host = databaseConfig.Host;
+            Port = databaseConfig.Port;
+            UserName = databaseConfig.AdminUserName;
+            Password = databaseConfig.AdminPassword;
+            DatabaseName = databaseConfig.DatabaseName;
+        }
     }
 }

@@ -5,6 +5,17 @@
     /// </summary>
     public class InstallationConfig
     {
+        /// <summary>
+        /// Путь к папке с приложением
+        /// </summary>
+        public string ApplicationPath { get; set; }
+        /// <summary>
+        /// Путь к dll для запуска приложения
+        /// </summary>
+        public string ExecutableApplicationPath => !string.IsNullOrEmpty(ApplicationPath) ?
+            Path.Combine(ApplicationPath, "BPMSoft.WebHost.dll") :
+            string.Empty;
+
         /// <inheritdoc cref="Model.ApplicationConfig"/>
         public ApplicationConfig ApplicationConfig { get; init; }
 

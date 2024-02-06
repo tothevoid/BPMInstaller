@@ -12,7 +12,7 @@ namespace BPMInstaller.Core.Services
     {
         private static Action? ActiveApplicationCloseProcessAction;
 
-        public void RunApplication(ApplicationConfig applicationConfig, Action applicationStarted)
+        public void RunApplication(string applicationPath, Action applicationStarted)
         {
             if (ActiveApplicationCloseProcessAction != null)
             {
@@ -22,7 +22,7 @@ namespace BPMInstaller.Core.Services
 
             //TODO: handle not installed core 3.1 exception
             Process process = new Process();
-            process.StartInfo.WorkingDirectory = applicationConfig.ApplicationPath;
+            process.StartInfo.WorkingDirectory = applicationPath;
             process.StartInfo.FileName = $"dotnet";
             process.StartInfo.Arguments = "BPMSoft.WebHost.dll";
             process.StartInfo.RedirectStandardOutput = true;

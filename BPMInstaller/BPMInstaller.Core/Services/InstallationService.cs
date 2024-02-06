@@ -57,14 +57,14 @@ namespace BPMInstaller.Core.Services
 
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Проверка наличия запущенного приложения" });
             var closed = appService.CloseActiveApplication(installationConfig.ApplicationConfig.ApplicationPort, 
-                installationConfig.ApplicationConfig.ExecutableApplicationPath);
+                installationConfig.ExecutableApplicationPath);
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = closed ? 
                 "Активное прилоение выключено":
                 "Активное приложение не найдено"
             });
 
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запуск приложения" });
-            appService.RunApplication(installationConfig.ApplicationConfig, () =>
+            appService.RunApplication(installationConfig.ApplicationPath, () =>
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Приложение запущено" });
 
@@ -144,21 +144,21 @@ namespace BPMInstaller.Core.Services
             if (workflow.RestoreDatabaseBackup)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация ConnectionStrings" });
-                distributiveService.UpdateConnectionStrings(installationConfig);
+                distributiveService.UpdateConnectionStrings(installationConfig, installationConfig.ApplicationPath);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "ConnectionStrings актулизированы" });
             }
 
             if (workflow.UpdateApplicationPort)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация порта приложения" });
-                distributiveService.UpdateApplicationPort(installationConfig.ApplicationConfig);
+                distributiveService.UpdateApplicationPort(installationConfig.ApplicationConfig, installationConfig.ApplicationPath);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Порт актуализирован" });
             }
 
             if (workflow.FixCookies)
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление авторизации" });
-                distributiveService.FixAuthorizationCookies(installationConfig.ApplicationConfig);
+                distributiveService.FixAuthorizationCookies(installationConfig.ApplicationPath);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Авторизация исправлена" });
             }
         }

@@ -13,7 +13,7 @@
         /// <summary>
         /// Порт
         /// </summary>
-        public int Port { get; set; }
+        public ushort Port { get; set; }
 
         /// <summary>
         /// Логин админа БД

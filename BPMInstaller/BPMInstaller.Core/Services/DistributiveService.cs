@@ -1,40 +1,96 @@
 ﻿using BPMInstaller.Core.Model;
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Net.Http.Json;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Unicode;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace BPMInstaller.Core.Services
 {
     public class DistributiveService
     {
-        public void UpdateConnectionStrings(InstallationConfig installationConfig)
+        public void UpdateConnectionStrings(InstallationConfig installationConfig, string applicationPath)
         {
-            XmlDocument doc = new XmlDocument();
-            var elementPath = Path.Combine(installationConfig.ApplicationConfig.ApplicationPath, "ConnectionStrings.config");
-            doc.Load(elementPath);
-            var rootNode = doc.GetElementsByTagName("connectionStrings")[0];
-            UpdateDatabaseConfig(installationConfig.DatabaseConfig, rootNode);
-            UpdateRedisConfig(installationConfig.RedisConfig, rootNode);
+            var rootNode = GetConnectionString(applicationPath);
 
-            doc.Save(elementPath);
+            UpdateDatabaseConfig(installationConfig.DatabaseConfig, GetDatabaseString(rootNode.Configs));
+            UpdateRedisConfig(installationConfig.RedisConfig, GetRedisString(rootNode.Configs));
+
+            rootNode.Document.Save(applicationPath);
         }
 
-        public void UpdateApplicationPort(ApplicationConfig appConfig)
+        public (DatabaseConfig DatabaseConfig, RedisConfig RedisConfig) GetConnectionStrings(string applicationPath)
         {
-            var appSettingsPath = Path.Combine(appConfig.ApplicationPath, "appsettings.json");
-            var appSettingsJson = File.ReadAllText(appSettingsPath);
+            var rootNode = GetConnectionString(applicationPath);
 
-            var appSettings = JsonSerializer.Deserialize<AppSettings>(appSettingsJson);
+            return (
+                //TODO: Handle case-insensetive namings
+                ParseDatabaseConnectionString(GetDatabaseString(rootNode.Configs)?.Value ?? string.Empty),
+                ParseRedisConnectionString(GetRedisString(rootNode.Configs)?.Value ?? string.Empty)
+            );
+        }
+
+        public AppSettings GetAppSettings(string applicationPath)
+        {
+            var appSettingsPath = Path.Combine(applicationPath, "appsettings.json");
+            var appSettingsJson = File.ReadAllText(appSettingsPath);
+            return JsonSerializer.Deserialize<AppSettings>(appSettingsJson) ?? new AppSettings();
+        }
+
+        private DatabaseConfig ParseDatabaseConnectionString(string connectionString)
+        {
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                return new DatabaseConfig();
+            }
+
+            var keyValues = ParseKeyValuesString(connectionString);
+
+            return new DatabaseConfig
+            {
+                Host = keyValues.ContainsKey(nameof(DatabaseConfig.Host)) ? keyValues[nameof(DatabaseConfig.Host)] : string.Empty,
+                Port = keyValues.ContainsKey(nameof(DatabaseConfig.Port)) ? ushort.Parse(keyValues[nameof(DatabaseConfig.Port)]): default,
+                AdminUserName = keyValues.ContainsKey("Username") ? keyValues["Username"] : string.Empty,
+                AdminPassword = keyValues.ContainsKey("Password") ? keyValues["Password"] : string.Empty,
+                DatabaseName = keyValues.ContainsKey("Database") ? keyValues["Database"] : string.Empty
+            };
+        }
+
+        private RedisConfig ParseRedisConnectionString(string connectionString)
+        {
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                return new RedisConfig();
+            }
+
+            var keyValues = ParseKeyValuesString(connectionString);
+            return new RedisConfig
+            {
+                Host = keyValues.ContainsKey("host") ? keyValues["host"] : string.Empty,
+                Port = keyValues.ContainsKey("port") ? int.Parse(keyValues["port"]) : 0,
+                DbNumber = keyValues.ContainsKey("db") ? int.Parse(keyValues["db"]) : 0
+            };
+        }
+
+        private Dictionary<string, string> ParseKeyValuesString(string value)
+        {
+            return value.Split(";")
+               .Select(keyValue => keyValue.Trim())
+               .Where(keyValue => !string.IsNullOrEmpty(keyValue))
+               .Select(keyValue => keyValue.Split("="))
+               .ToDictionary(keyValue => keyValue[0].Trim(), keyValue => keyValue[1].Trim());
+        }
+
+        private (XmlDocument Document, XmlNode Configs) GetConnectionString(string applicationPath)
+        {
+            XmlDocument doc = new XmlDocument();
+            var elementPath = Path.Combine(applicationPath, "ConnectionStrings.config");
+            doc.Load(elementPath);
+            return (doc, doc.GetElementsByTagName("connectionStrings")[0]);
+        }
+
+        public void UpdateApplicationPort(ApplicationConfig appConfig, string applicationPath)
+        {
+            var appSettings = GetAppSettings(applicationPath);
             if (!string.IsNullOrEmpty(appSettings?.Kestrel?.Endpoints?.Http?.Url))
             {
                 appSettings.Kestrel.Endpoints.Http.Url = $"http://::{appConfig.ApplicationPort}";
@@ -44,13 +100,13 @@ namespace BPMInstaller.Core.Services
                 WriteIndented = true,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             }).Replace(@"  ", "\t");
-            File.WriteAllText(appSettingsPath, updatedSettings);
+            File.WriteAllText(applicationPath, updatedSettings);
         }
 
-        public void FixAuthorizationCookies(ApplicationConfig appConfig)
+        public void FixAuthorizationCookies(string applicationPath)
         {
             XmlDocument doc = new XmlDocument();
-            var elementPath = Path.Combine(appConfig.ApplicationPath, "BPMSoft.WebHost.dll.config");
+            var elementPath = Path.Combine(applicationPath, "BPMSoft.WebHost.dll.config");
             doc.Load(elementPath);
             var rootNode = doc.SelectSingleNode("configuration/appSettings");
 
@@ -59,17 +115,27 @@ namespace BPMInstaller.Core.Services
             doc.Save(elementPath);
         }
 
-        private void UpdateDatabaseConfig(DatabaseConfig databaseConfig, XmlNode rootNode)
+        private XmlAttribute GetDatabaseString(XmlNode rootNode)
         {
             var dbSetting = rootNode.SelectSingleNode("add[@name='db']");
-            dbSetting.Attributes[1].Value = $"Pooling=True;Database={databaseConfig.DatabaseName};Host={databaseConfig.Host};" +
+            return dbSetting.Attributes[1];
+        }
+
+        private XmlAttribute GetRedisString(XmlNode rootNode)
+        {
+            var dbSetting = rootNode.SelectSingleNode("add[@name='redis']");
+            return dbSetting.Attributes[1];
+        }
+
+        private void UpdateDatabaseConfig(DatabaseConfig databaseConfig, XmlAttribute attribute)
+        {
+            attribute.Value = $"Pooling=True;Database={databaseConfig.DatabaseName};Host={databaseConfig.Host};" +
                 $"Port={databaseConfig.Port};Username={databaseConfig.AdminUserName};Password={databaseConfig.AdminPassword};Timeout=500;Command Timeout=400";
         }
 
-        private void UpdateRedisConfig(RedisConfig redisConfig, XmlNode rootNode)
+        private void UpdateRedisConfig(RedisConfig redisConfig, XmlNode attribute)
         {
-            var dbSetting = rootNode.SelectSingleNode("add[@name='redis']");
-            dbSetting.Attributes[1].Value = $"host={redisConfig.Host};db={redisConfig.DbNumber};port={redisConfig.Port}";
+            attribute.Value = $"host={redisConfig.Host};db={redisConfig.DbNumber};port={redisConfig.Port}";
         }
     }
 

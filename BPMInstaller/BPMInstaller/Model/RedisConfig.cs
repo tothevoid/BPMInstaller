@@ -17,5 +17,12 @@
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.DbNumber"/>
         public int DbNumber { get { return dbNumber; } set { Set(ref dbNumber, value); } }
+       
+        public void MergeConfig(Core.Model.RedisConfig redisConfig)
+        {
+            Host = redisConfig.Host;
+            Port = redisConfig.Port;
+            DbNumber = redisConfig.DbNumber;
+        }
     }
 }

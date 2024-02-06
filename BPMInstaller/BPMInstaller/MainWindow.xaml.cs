@@ -1,4 +1,5 @@
-﻿using BPMInstaller.UI.Desktop.Model;
+﻿using BPMInstaller.Core.Services;
+using BPMInstaller.UI.Desktop.Model;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -23,9 +24,9 @@ namespace BPMInstaller.UI.Desktop
             {
                 var json = File.ReadAllText(ConfigPath);
                 var deserialized = JsonSerializer.Deserialize<InstallationConfig>(json);
-                if (deserialized?.ApplicationConfig != null && deserialized.ApplicationConfig.ValidateApplicationPath() != null)
+                if (!string.IsNullOrEmpty(deserialized?.ApplicationPath) && deserialized.ValidateApplicationPath() != null)
                 {
-                    deserialized.ApplicationConfig.ApplicationPath = string.Empty;
+                    deserialized.ApplicationPath = string.Empty;
                 }
 
                 deserialized?.ActualizeTriggers();
@@ -65,10 +66,23 @@ namespace BPMInstaller.UI.Desktop
             var json = JsonSerializer.Serialize(Config);
             File.WriteAllText(ConfigPath, json);
         }
+        private void LoadCurrentConfig(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(Config?.ApplicationPath))
+            {
+                return;
+            }
 
+            var stateLoader = new AppConfigurationStateLoaded();
+            var state = stateLoader.GetConfig(Config.ApplicationPath);
+            Config.ApplicationConfig.MergeConfig(state.ApplicationConfig);
+            Config.DatabaseConfig.MergeConfig(state.DatabaseConfig);
+            Config.RedisConfig.MergeConfig(state.RedisConfig);
+        }
+        
         private void SelectDistributivePath(object sender, RoutedEventArgs e)
         {
-            Config.ApplicationConfig.ApplicationPath = ShowFileSystemDialog(true, Config.ApplicationConfig.ApplicationPath);
+            Config.ApplicationPath = ShowFileSystemDialog(true, Config.ApplicationPath);
         }
 
         private void SelectBackupFile(object sender, RoutedEventArgs e)

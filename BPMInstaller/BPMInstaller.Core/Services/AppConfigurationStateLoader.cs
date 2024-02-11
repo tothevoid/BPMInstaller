@@ -8,7 +8,7 @@ namespace BPMInstaller.Core.Services
         {
             var distributiveService = new DistributiveService();
             var connectionString = distributiveService.GetConnectionStrings(applicationPath);
-            var url = distributiveService.GetAppSettings(applicationPath)?.Kestrel?.Endpoints?.Http?.Url ?? string.Empty;
+            var url = distributiveService.GetAppSettings(applicationPath).Settings?.Kestrel?.Endpoints?.Http?.Url ?? string.Empty;
             var portParts = url.Reverse().TakeWhile(symbol => char.IsDigit(symbol)).Reverse();
             var port = ushort.Parse(string.Join("", portParts));
 

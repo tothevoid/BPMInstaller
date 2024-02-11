@@ -29,11 +29,11 @@ namespace BPMInstaller.Core.Services
             );
         }
 
-        public AppSettings GetAppSettings(string applicationPath)
+        public (string SettingsPath, AppSettings Settings) GetAppSettings(string applicationPath)
         {
             var appSettingsPath = Path.Combine(applicationPath, "appsettings.json");
             var appSettingsJson = File.ReadAllText(appSettingsPath);
-            return JsonSerializer.Deserialize<AppSettings>(appSettingsJson) ?? new AppSettings();
+            return (appSettingsPath, JsonSerializer.Deserialize<AppSettings>(appSettingsJson) ?? new AppSettings());
         }
 
         private DatabaseConfig ParseDatabaseConnectionString(string connectionString)
@@ -91,16 +91,17 @@ namespace BPMInstaller.Core.Services
         public void UpdateApplicationPort(ApplicationConfig appConfig, string applicationPath)
         {
             var appSettings = GetAppSettings(applicationPath);
-            if (!string.IsNullOrEmpty(appSettings?.Kestrel?.Endpoints?.Http?.Url))
+            var settings = appSettings.Settings;
+            if (!string.IsNullOrEmpty(settings?.Kestrel?.Endpoints?.Http?.Url))
             {
-                appSettings.Kestrel.Endpoints.Http.Url = $"http://::{appConfig.ApplicationPort}";
+                appSettings.Settings.Kestrel.Endpoints.Http.Url = $"http://::{appConfig.ApplicationPort}";
             }
-            var updatedSettings = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions
+            var updatedSettings = JsonSerializer.Serialize(settings, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             }).Replace(@"  ", "\t");
-            File.WriteAllText(applicationPath, updatedSettings);
+            File.WriteAllText(appSettings.SettingsPath, updatedSettings);
         }
 
         public void FixAuthorizationCookies(string applicationPath)

@@ -17,113 +17,130 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <TabControl Padding="0,20,0,0">
+        <TabControl Name="ApplicationTabs" Padding="0,20,0,0">
             <TabItem Header="Конфигурация">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="45px"/>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                        <StackPanel Style="{StaticResource ControlGroup}">
-                            <Label>Путь к дистрибутиву</Label>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="9*"/>
-                                    <ColumnDefinition Width="2*"/>
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Text="{Binding Config.ApplicationPath}"/>
-                                <Button Grid.Column="1" Content="Проставить конфиги" Click="LoadCurrentConfig"/>
-                                <Button Grid.Column="2" Content="Выбрать" Click="SelectDistributivePath"/>
-                            </Grid>
-                        </StackPanel>
-                        <StackPanel Style="{StaticResource ControlGroup}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3*"/>
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                    <Label>Хост приложения</Label>
-                                    <TextBox IsEnabled="false" Text="{Binding Config.ApplicationConfig.Host}"/>
-                                </StackPanel>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                    <Label>Порт</Label>
-                                    <TextBox Text="{Binding Config.ApplicationConfig.Port}"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                        <StackPanel Style="{StaticResource ControlGroup}">
-                            <StackPanel>
+                            <StackPanel Style="{StaticResource ControlGroup}">
+                                <Label>Путь к дистрибутиву</Label>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="3*"/>
-                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="9*"/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                        <Label>Хост БД</Label>
-                                        <TextBox Text="{Binding Config.DatabaseConfig.Host}"/>
-                                    </StackPanel>
-                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                        <Label>Порт</Label>
-                                        <TextBox Text="{Binding Config.DatabaseConfig.Port}"/>
-                                    </StackPanel>
-                                </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                        <Label>Имя пользователя</Label>
-                                        <TextBox Text="{Binding Config.DatabaseConfig.UserName}"/>
-                                    </StackPanel>
-                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                        <Label>Пароль</Label>
-                                        <TextBox Text="{Binding Config.DatabaseConfig.Password}"/>
-                                    </StackPanel>
-                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
-                                        <Label>Название БД</Label>
-                                        <TextBox Text="{Binding Config.DatabaseConfig.DatabaseName}"/>
-                                    </StackPanel>
+                                    <TextBox Grid.Column="0" Text="{Binding Config.ApplicationPath}"/>
+                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectDistributivePath"/>
                                 </Grid>
                             </StackPanel>
-                        </StackPanel>
-                        <Grid Style="{StaticResource ControlGroup}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="4*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                <Label>Хост Redis</Label>
-                                <TextBox Text="{Binding Config.RedisConfig.Host}"></TextBox>
+                            <StackPanel Style="{StaticResource ControlGroup}">
+                                <GroupBox Header="Приложение">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                            <Label>Хост</Label>
+                                            <TextBox IsEnabled="false" Text="{Binding Config.ApplicationConfig.Host}"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                            <Label>Порт</Label>
+                                            <TextBox Text="{Binding Config.ApplicationConfig.Port}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </GroupBox>
                             </StackPanel>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                <Label>Порт</Label>
-                                <TextBox Text="{Binding Config.RedisConfig.Port}"></TextBox>
+                            <StackPanel Style="{StaticResource ControlGroup}">
+                                <StackPanel>
+                                    <GroupBox Header="Подключение к базе данных">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1*"/>
+                                                <RowDefinition Height="1*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="3*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="3*"/>
+                                            </Grid.ColumnDefinitions>
+                                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                                    <Label>Хост БД</Label>
+                                                    <TextBox Text="{Binding Config.DatabaseConfig.Host}"/>
+                                                </StackPanel>
+                                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                                    <Label>Порт</Label>
+                                                    <TextBox Text="{Binding Config.DatabaseConfig.Port}"/>
+                                                </StackPanel>
+                                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
+                                                    <Label>Название БД</Label>
+                                                    <TextBox Text="{Binding Config.DatabaseConfig.DatabaseName}"/>
+                                                </StackPanel>
+                                                <GroupBox Grid.Row="1" Grid.ColumnSpan="3" Header="Авторизация">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1*"/>
+                                                            <ColumnDefinition Width="1*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                                            <Label>Имя пользователя</Label>
+                                                            <TextBox Text="{Binding Config.DatabaseConfig.UserName}"/>
+                                                        </StackPanel>
+                                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                                            <Label>Пароль</Label>
+                                                            <TextBox Text="{Binding Config.DatabaseConfig.Password}"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </GroupBox>
+                                        </Grid>
+                                    </GroupBox>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
-                                <Label>№ БД</Label>
-                                <TextBox Text="{Binding Config.RedisConfig.DbNumber}"></TextBox>
+                            <StackPanel Style="{StaticResource ControlGroup}">
+                                <GroupBox Header="Подключение к Redis">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="4*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                            <Label>Хост</Label>
+                                            <TextBox Text="{Binding Config.RedisConfig.Host}"></TextBox>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                            <Label>Порт</Label>
+                                            <TextBox Text="{Binding Config.RedisConfig.Port}"></TextBox>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
+                                            <Label>№ БД</Label>
+                                            <TextBox Text="{Binding Config.RedisConfig.DbNumber}"></TextBox>
+                                        </StackPanel>
+                                    </Grid>
+                                </GroupBox>
                             </StackPanel>
-                        </Grid>
-                        <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                            <CheckBox  IsChecked="{Binding Config.InstallationWorkflow.UpdateDatabaseConnectionString}">
-                                <TextBlock>Обновить строку подключения к БД</TextBlock>
-                            </CheckBox>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                            <CheckBox IsChecked="{Binding Config.InstallationWorkflow.UpdateRedisConnectionString}">
-                                <TextBlock>Обновить строку подключения к Redis</TextBlock>
-                            </CheckBox>
-                        </StackPanel>
-                        <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.DisableForcePasswordChange}">
-                                <TextBlock>Отключить принудительную смену пароля (для версии 1.3 и выше)</TextBlock>
-                            </CheckBox>
+                            <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                <CheckBox  IsChecked="{Binding Config.InstallationWorkflow.UpdateDatabaseConnectionString}">
+                                    <TextBlock>Обновить строку подключения к БД</TextBlock>
+                                </CheckBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
+                                <CheckBox IsChecked="{Binding Config.InstallationWorkflow.UpdateRedisConnectionString}">
+                                    <TextBlock>Обновить строку подключения к Redis</TextBlock>
+                                </CheckBox>
+                            </StackPanel>
                             <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.UpdateApplicationPort}">
                                 <TextBlock>Обновить порт приложения</TextBlock>
                             </CheckBox>
+                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.DisableForcePasswordChange}">
+                                <TextBlock>Отключить принудительную смену пароля (для версии 1.3 и выше)</TextBlock>
+                            </CheckBox>
                             <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.FixCookies}">
-                            <TextBlock>Исправить авторизацию (CookiesSameSiteMode=Lax)</TextBlock>
+                                <TextBlock>Исправить авторизацию (CookiesSameSiteMode=Lax)</TextBlock>
                             </CheckBox>
                             <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
                                 <CheckBox IsChecked="{Binding Config.InstallationWorkflow.RestoreDatabaseBackup}">
@@ -162,48 +179,49 @@
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
-                        <StackPanel>
-                        </StackPanel>
+                            <StackPanel>
+                            </StackPanel>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
                                     <CheckBox IsChecked="{Binding Config.InstallationWorkflow.InstallLicense}">
                                         <TextBlock>Установить лицензии</TextBlock>
                                     </CheckBox>
                                 </StackPanel>
-                            <Grid Visibility="{Binding Path=Config.InstallationWorkflow.InstallLicense, Converter={StaticResource VisibleIfTrueConverter}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1*"/>
-                                    <ColumnDefinition Width="2*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                    <Label>CId</Label>
-                                    <TextBox Text="{Binding Config.LicenseConfig.CId}"></TextBox>
-                                </StackPanel>
-                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                    <Label>Путь к лицензии</Label>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="9*"/>
-                                            <ColumnDefinition Width="1*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Grid.Column="0" Text="{Binding Config.LicenseConfig.Path}"/>
-                                        <Button Grid.Column="1" Content="Выбрать" Click="SelectLicenseFile"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.CompileApplication}">
-                                <TextBlock>Скомпилировать приложение</TextBlock>
-                            </CheckBox>
-                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.StartApplication}">
-                                <TextBlock>Запуститить приложение</TextBlock>
-                            </CheckBox>
-                        </StackPanel>
+                                <Grid Visibility="{Binding Path=Config.InstallationWorkflow.InstallLicense, Converter={StaticResource VisibleIfTrueConverter}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                        <Label>CId</Label>
+                                        <TextBox Text="{Binding Config.LicenseConfig.CId}"></TextBox>
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                        <Label>Путь к лицензии</Label>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="9*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Text="{Binding Config.LicenseConfig.Path}"/>
+                                            <Button Grid.Column="1" Content="Выбрать" Click="SelectLicenseFile"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                                <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.CompileApplication}">
+                                    <TextBlock>Скомпилировать приложение</TextBlock>
+                                </CheckBox>
+                                <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.StartApplication}">
+                                    <TextBlock>Запуститить приложение</TextBlock>
+                                </CheckBox>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
+                    <Button Background="White" Grid.Row="1" Click="Install">Запустить установку</Button>
+                </Grid>
             </TabItem>
             <TabItem Header="Запуск">
                 <StackPanel DataContext="{Binding Config.ControlsSessionState}" Margin="0 20">
-                    <Button Visibility="{Binding StartButtonVisibility}" Click="Install">Равернуть дистрибутив</Button>
                     <ListView ItemsSource="{Binding Output}" >
                         <ListView.View>
                             <GridView>

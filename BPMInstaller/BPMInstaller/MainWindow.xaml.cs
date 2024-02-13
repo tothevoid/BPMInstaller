@@ -1,14 +1,14 @@
 ﻿using BPMInstaller.Core.Services;
 using BPMInstaller.UI.Desktop.Model;
 using BPMInstaller.UI.Desktop.Utilities;
-using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
-using System.Configuration;
+using System.Drawing;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace BPMInstaller.UI.Desktop
 {
@@ -17,6 +17,8 @@ namespace BPMInstaller.UI.Desktop
         private readonly string ConfigPath = "Config.json";
 
         public InstallationConfig Config { get; init; }
+
+        private ConfigValidator Validator { get; } = new ConfigValidator();
 
         public MainWindow()
         {
@@ -101,6 +103,7 @@ namespace BPMInstaller.UI.Desktop
             Config.RedisConfig.MergeConfig(state.RedisConfig);
         }
 
+        #region File system selection handlers
         private void SelectBackupFile(object sender, RoutedEventArgs e)
         {
             Config.DatabaseConfig.BackupPath = InteractionUtilities
@@ -118,5 +121,51 @@ namespace BPMInstaller.UI.Desktop
             Config.LicenseConfig.Path = InteractionUtilities
                 .ShowFileSystemDialog(false, Config.LicenseConfig.Path);
         }
+        #endregion
+
+        #region Validation handlers
+        //TODO: Remove duplication
+        private void ValidateRedis(object sender, RoutedEventArgs e)
+        {
+            if (ValidateRedisState.Fill == null || Config?.RedisConfig?.IsChanged == true)
+            {
+                ValidateConfig(() => Validator.ValidateRedisConnection(Config.RedisConfig.ToCoreModel()),
+                   ValidateRedisState, Config.RedisConfig);
+            }
+        }
+
+        private void ValidateDatabase(object sender, RoutedEventArgs e)
+        {
+            if (ValidateDatabaseState.Fill == null || Config?.DatabaseConfig?.IsChanged == true)
+            {
+                ValidateConfig(() => Validator.ValidateDatabaseConnection(Config.DatabaseConfig.ToCoreModel()),
+                   ValidateDatabaseState, Config.DatabaseConfig);
+            }
+        }
+        private void ValidateApplication(object sender, RoutedEventArgs e)
+        {
+            if (ValidateApplicationState.Fill == null || Config?.ApplicationConfig?.IsChanged == true)
+            {
+                ValidateConfig(() => Validator.ValidateAppConfig(Config.ApplicationConfig.ToCoreModel()), 
+                    ValidateApplicationState, Config.ApplicationConfig);
+            }
+        }
+
+        private void ValidateConfig(Func<string> validationHandler, System.Windows.Shapes.Rectangle stateElement, BaseUIModel model)
+        {
+            stateElement.Fill = new SolidColorBrush(Colors.Yellow);
+            Task.Run(() =>
+            {
+                var validationResult = validationHandler();
+                Dispatcher.Invoke(() =>
+                {
+                    stateElement.ToolTip = validationResult;
+                    stateElement.Fill = new SolidColorBrush(string.IsNullOrEmpty(validationResult) ? Colors.Green : Colors.Red);
+                });
+                model.CommitChanges();
+            });
+        }
+        #endregion
+
     }
 }

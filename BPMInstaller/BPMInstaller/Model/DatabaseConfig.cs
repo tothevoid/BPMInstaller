@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using BPMInstaller.Core.Model;
+using System.IO;
 
 namespace BPMInstaller.UI.Desktop.Model
 {
@@ -52,6 +53,22 @@ namespace BPMInstaller.UI.Desktop.Model
             UserName = databaseConfig.AdminUserName;
             Password = databaseConfig.AdminPassword;
             DatabaseName = databaseConfig.DatabaseName;
+        }
+
+        public Core.Model.DatabaseConfig ToCoreModel()
+        {
+            return new Core.Model.DatabaseConfig
+            {
+                Host = this.Host,
+                Port = this.Port,
+                AdminUserName = this.UserName,
+                AdminPassword = this.Password,
+                DatabaseName = this.DatabaseName,
+                BackupPath = this.BackupPath,
+                RestorationCliLocation = this.RestorationCliLocation,
+                HostedByDocker = this.HostedByDocker
+
+            };      
         }
     }
 }

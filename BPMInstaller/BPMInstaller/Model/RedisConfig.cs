@@ -1,6 +1,8 @@
-﻿namespace BPMInstaller.UI.Desktop.Model
+﻿using BPMInstaller.Core.Model;
+
+namespace BPMInstaller.UI.Desktop.Model
 {
-    /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
+    /// <inheritdoc cref="Core.Model.RedisConfig"/>
     public class RedisConfig: BaseUIModel
     {
         private string? host = "localhost";
@@ -23,6 +25,16 @@
             Host = redisConfig.Host;
             Port = redisConfig.Port;
             DbNumber = redisConfig.DbNumber;
+        }
+
+        public Core.Model.RedisConfig ToCoreModel()
+        {
+            return new Core.Model.RedisConfig
+            {
+                Host = this.Host,
+                Port = this.Port,
+                DbNumber = this.DbNumber
+            };
         }
     }
 }

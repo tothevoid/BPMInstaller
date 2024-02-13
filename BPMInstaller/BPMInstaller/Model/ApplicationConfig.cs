@@ -16,5 +16,13 @@
         {
             Port = applicationConfig.ApplicationPort;
         }
+
+        public Core.Model.ApplicationConfig ToCoreModel()
+        {
+            return new Core.Model.ApplicationConfig
+            {
+                ApplicationPort = this.Port
+            };
+        }
     }
 }

@@ -88,21 +88,8 @@ namespace BPMInstaller.UI.Desktop.Model
             return new Core.Model.InstallationConfig
             {
                 ApplicationPath = ApplicationPath ?? string.Empty,
-                ApplicationConfig = new Core.Model.ApplicationConfig()
-                {
-                    ApplicationPort = ApplicationConfig.Port
-                },
-                DatabaseConfig = new Core.Model.DatabaseConfig
-                {
-                    Host = DatabaseConfig.Host ?? string.Empty,
-                    AdminUserName = DatabaseConfig.UserName ?? string.Empty,
-                    AdminPassword = DatabaseConfig.Password ?? string.Empty,
-                    BackupPath = DatabaseConfig.BackupPath ?? string.Empty,
-                    RestorationCliLocation = DatabaseConfig.RestorationCliLocation ?? string.Empty,
-                    HostedByDocker = DatabaseConfig.HostedByDocker,
-                    DatabaseName = DatabaseConfig.DatabaseName ?? string.Empty,
-                    Port = DatabaseConfig.Port
-                },
+                ApplicationConfig = ApplicationConfig.ToCoreModel(),
+                DatabaseConfig = DatabaseConfig.ToCoreModel(),
                 RedisConfig = new Core.Model.RedisConfig()
                 {
                     Host = RedisConfig.Host ?? string.Empty,

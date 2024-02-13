@@ -41,7 +41,14 @@
                                 </Grid>
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
-                                <GroupBox Header="Приложение">
+                                <GroupBox>
+                                    <GroupBox.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock VerticalAlignment="Center">Приложение</TextBlock>
+                                            <Button Style="{StaticResource ValidationButton}" Margin="5 0" Click="ValidateApplication"/>
+                                            <Rectangle x:Name="ValidateApplicationState" Height="15" Width="15" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GroupBox.Header>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="3*"/>
@@ -60,7 +67,14 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
                                 <StackPanel>
-                                    <GroupBox Header="Подключение к базе данных">
+                                    <GroupBox>
+                                        <GroupBox.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock VerticalAlignment="Center">Подключение к базе данных</TextBlock>
+                                                <Button x:Name="ValidateDatabaseButton" Style="{StaticResource ValidationButton}" Margin="5 0" Click="ValidateDatabase"/>
+                                                <Rectangle x:Name="ValidateDatabaseState" Height="15" Width="15" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </GroupBox.Header>
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="1*"/>
@@ -104,7 +118,14 @@
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
-                                <GroupBox Header="Подключение к Redis">
+                                <GroupBox>
+                                    <GroupBox.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock VerticalAlignment="Center">Подключение к Redis</TextBlock>
+                                            <Button x:Name="ValidateRedisButton" Style="{StaticResource ValidationButton}" Click="ValidateRedis" Margin="5 0"/>
+                                            <Rectangle x:Name="ValidateRedisState" Height="15" Width="15" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GroupBox.Header>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="4*"/>
@@ -126,7 +147,7 @@
                                     </Grid>
                                 </GroupBox>
                             </StackPanel>
-                            <GroupBox Header="Порядок установок"  Style="{StaticResource ControlGroup}">
+                            <GroupBox Header="Элементы установки" Style="{StaticResource ControlGroup}">
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
                                         <CheckBox  IsChecked="{Binding Config.InstallationWorkflow.UpdateDatabaseConnectionString}">

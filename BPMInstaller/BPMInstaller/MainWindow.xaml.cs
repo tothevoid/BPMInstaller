@@ -2,11 +2,16 @@
 using BPMInstaller.UI.Desktop.Model;
 using BPMInstaller.UI.Desktop.Utilities;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -14,11 +19,15 @@ namespace BPMInstaller.UI.Desktop
 {
     public partial class MainWindow : Window
     {
-        private readonly string ConfigPath = "Config.json";
+        private readonly string ConfigPath = "configurations.json";
 
-        public InstallationConfig Config { get; init; }
+        public ObservableCollection<string> Configurations { get; } = new ObservableCollection<string>();
+
+        public InstallationConfig Config { get; set; }
 
         private ConfigValidator Validator { get; } = new ConfigValidator();
+
+        public ControlsSessionState ControlsSessionState { get; set; } = new ControlsSessionState();
 
         public MainWindow()
         {
@@ -27,40 +36,35 @@ namespace BPMInstaller.UI.Desktop
             if (File.Exists(ConfigPath))
             {
                 var json = File.ReadAllText(ConfigPath);
-                var deserialized = JsonSerializer.Deserialize<InstallationConfig>(json);
-                if (!string.IsNullOrEmpty(deserialized?.ApplicationPath) && deserialized.ValidateApplicationPath() != null)
-                {
-                    deserialized.ApplicationPath = string.Empty;
-                }
+                var configurations = JsonSerializer.Deserialize<IEnumerable<string>>(json) ?? Enumerable.Empty<string>();
+                Configurations = new ObservableCollection<string>(configurations);
 
-                deserialized?.ActualizeTriggers();
-                Config = deserialized ?? new InstallationConfig();
+                if (Configurations.Any())
+                {
+                    var lastConfiguration = Configurations.LastOrDefault(config => !string.IsNullOrEmpty(config));
+                    Config = new InstallationConfig { ApplicationPath = lastConfiguration };
+                    LoadCurrentConfig();
+                }
             }
-            else
-            {
-                Config = new InstallationConfig();
-            }
-            Config.OnModelChanged += SaveConfig;
+            Config ??= new InstallationConfig();
             DataContext = this;
         }
 
         private void Install(object sender, RoutedEventArgs e)
         {
-            ApplicationTabs.TabIndex = 1;
+            ControlsSessionState.Output.Clear();
 
-            Config.ControlsSessionState.Output.Clear();
-
-            Config.ControlsSessionState.StartButtonVisibility = Visibility.Collapsed;
+            ControlsSessionState.StartButtonVisibility = Visibility.Collapsed;
 
             var handler = (Core.Model.InstallationMessage message) =>
             {
                 if (message.IsTerminal)
                 {
-                    Config.ControlsSessionState.StartButtonVisibility = Visibility.Visible;
+                    ControlsSessionState.StartButtonVisibility = Visibility.Visible;
                 }
 
                 Dispatcher.Invoke(() => {
-                    Config.ControlsSessionState.Output.Add(message);
+                    ControlsSessionState.Output.Add(message);
                 });
             };
                
@@ -69,25 +73,32 @@ namespace BPMInstaller.UI.Desktop
 
         private void SaveConfig()
         {
-            var json = JsonSerializer.Serialize(Config);
+            var json = JsonSerializer.Serialize(Configurations);
             File.WriteAllText(ConfigPath, json);
         }
         
         private void SelectDistributivePath(object sender, RoutedEventArgs e)
         {
             var newPath = InteractionUtilities.ShowFileSystemDialog(true, Config.ApplicationPath);
-            var initConnectionStrings = newPath == Config.ApplicationPath || 
+            var pathChanged = newPath != Config.ApplicationPath;
+            Config.ApplicationPath = newPath;
+            
+            if (pathChanged && !string.IsNullOrEmpty(Config.ApplicationPath) && !Configurations.Contains(Config.ApplicationPath))
+            {
+                Configurations.Add(Config.ApplicationPath);
+                SaveConfig();
+            }
+
+            var initConnectionStrings = pathChanged || 
                 InteractionUtilities.ShowConfirmationButton("Выбран идентичный дистрибутив",
                    "Проставить значения строк подключения из конфигурационных файлов?");
 
+            
             if (initConnectionStrings)
             {
                 LoadCurrentConfig();
             }
-
-            Config.ApplicationPath = newPath;
         }
-
 
         private void LoadCurrentConfig()
         {
@@ -167,5 +178,15 @@ namespace BPMInstaller.UI.Desktop
         }
         #endregion
 
+        private void OpenConfig(object sender, RoutedEventArgs e)
+        {
+            var pressedButton = sender as Button;
+            if (pressedButton?.Tag is string processedButtonTag)
+            {
+                Config = new InstallationConfig { ApplicationPath = processedButtonTag };
+                Config.ActualizeTriggers();
+                LoadCurrentConfig();
+            }
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace BPMInstaller.Core.Model
+﻿using BPMInstaller.Core.Enums;
+
+namespace BPMInstaller.Core.Model
 {
     /// <summary>
     /// Конфигурация БД
@@ -36,9 +38,9 @@
         public string DatabaseName { get; set; }
 
         /// <summary>
-        /// БД развёрнута в Docker-контейнере
+        /// Способ восстановления БД
         /// </summary>
-        public bool HostedByDocker { get; set; }
+        public RestorationOption RestorationKind { get; set; }
 
         /// <summary>
         /// Путь до CLI восстановления бд, если она развёрнута не в контейнере

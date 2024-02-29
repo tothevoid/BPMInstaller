@@ -62,9 +62,6 @@ namespace BPMInstaller.UI.Desktop.Model
         /// <inheritdoc cref="Core.InstallationWorkflow"/>
         public InstallationWorkflow InstallationWorkflow { get; set; }
 
-        [JsonIgnore]
-        public ControlsSessionState ControlsSessionState { get; set; } = new ControlsSessionState();
-
         public string? ValidateApplicationPath()
         {
             if (string.IsNullOrEmpty(applicationPath?.Trim()))

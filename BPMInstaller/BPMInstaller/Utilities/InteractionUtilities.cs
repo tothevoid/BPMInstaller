@@ -29,7 +29,7 @@ namespace BPMInstaller.UI.Desktop.Utilities
 
         public static bool ShowConfirmationButton(string header, string mesage)
         {
-            return MessageBox.Show(header, mesage, MessageBoxButton.YesNo) == MessageBoxResult.Yes;
+            return MessageBox.Show(mesage, header, MessageBoxButton.YesNo) == MessageBoxResult.Yes;
         }
     }
 }

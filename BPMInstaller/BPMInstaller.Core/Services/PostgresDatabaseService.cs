@@ -3,6 +3,7 @@ using Npgsql;
 using BPMInstaller.Core.Interfaces;
 using System.Diagnostics;
 using System.Collections.Generic;
+using BPMInstaller.Core.Enums;
 
 namespace BPMInstaller.Core.Services
 {
@@ -71,9 +72,11 @@ namespace BPMInstaller.Core.Services
 
         /// <inheritdoc cref="IDatabaseService.RestoreDatabase"/>
         public bool RestoreDatabase() =>
-            DatabaseConfig.HostedByDocker ?
-                RestoreByDocker() :
-                RestoreByCli();
+            DatabaseConfig.RestorationKind switch
+            {
+                RestorationOption.CLI => RestoreByCli(),
+                RestorationOption.Docker => RestoreByDocker()
+            };
 
         /// <inheritdoc cref="IDatabaseService.DisableForcePasswordChange(string)"/>
         public bool DisableForcePasswordChange(string userName)

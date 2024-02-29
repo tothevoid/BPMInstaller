@@ -25,7 +25,7 @@ namespace BPMInstaller.UI.Desktop.Model
         private string? restorationCliLocation;
 
         private string? selectedRestorationOption = RestorationMapping
-            .FirstOrDefault(mapping => mapping.Value == RestorationOption.Docker).Key ?? string.Empty;
+            .FirstOrDefault(mapping => mapping.Value == DatabaseDeploymentType.Docker).Key ?? string.Empty;
 
         private string? selectedContainer;
 
@@ -83,7 +83,7 @@ namespace BPMInstaller.UI.Desktop.Model
             { 
                 Set(ref selectedRestorationOption, value);
                 ModifyVisibility();
-                if (RestorationKind == RestorationOption.Docker)
+                if (RestorationKind == DatabaseDeploymentType.Docker)
                 {
                     GetActiveContainers();
                 }
@@ -92,14 +92,14 @@ namespace BPMInstaller.UI.Desktop.Model
 
         public ObservableCollection<string> ActiveContainers  { get { return activeContainers; } set { Set(ref activeContainers, value); } }
 
-        public RestorationOption RestorationKind { get { return RestorationMapping[SelectedRestorationOption]; } } 
+        public DatabaseDeploymentType RestorationKind { get { return RestorationMapping[SelectedRestorationOption]; } } 
 
         public IEnumerable<string> RestorationOptions { get; } = RestorationMapping.Keys;
 
-        private static Dictionary<string, RestorationOption> RestorationMapping { get; } = new Dictionary<string, RestorationOption>
+        private static Dictionary<string, DatabaseDeploymentType> RestorationMapping { get; } = new Dictionary<string, DatabaseDeploymentType>
         {
-            { "Docker", RestorationOption.Docker },
-            { "PG_restore", RestorationOption.CLI },
+            { "Docker", DatabaseDeploymentType.Docker },
+            { "PG_restore", DatabaseDeploymentType.Cli },
         };
 
         public void MergeConfig(Core.Model.DatabaseConfig databaseConfig)
@@ -119,10 +119,7 @@ namespace BPMInstaller.UI.Desktop.Model
                 Port = this.Port,
                 AdminUserName = this.UserName,
                 AdminPassword = this.Password,
-                DatabaseName = this.DatabaseName,
-                BackupPath = this.BackupPath,
-                RestorationCliLocation = this.RestorationCliLocation,
-                RestorationKind = this.RestorationKind
+                DatabaseName = this.DatabaseName
             };      
         }
 
@@ -138,8 +135,8 @@ namespace BPMInstaller.UI.Desktop.Model
 
         public void ModifyVisibility()
         {
-            IsDocker = RestorationKind == RestorationOption.Docker;
-            IsCli = RestorationKind == RestorationOption.CLI;
+            IsDocker = RestorationKind == DatabaseDeploymentType.Docker;
+            IsCli = RestorationKind == DatabaseDeploymentType.Cli;
         }
     }
 }

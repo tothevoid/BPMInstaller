@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using BPMInstaller.Core.Enums;
 
-namespace BPMInstaller.Core.Services
+namespace BPMInstaller.Core.Services.Database.Postgres
 {
     /// <summary>
     /// Сервис взаимодействия с бд Postgres
@@ -70,14 +70,6 @@ namespace BPMInstaller.Core.Services
             return string.Empty;
         }
 
-        /// <inheritdoc cref="IDatabaseService.RestoreDatabase"/>
-        public bool RestoreDatabase() =>
-            DatabaseConfig.RestorationKind switch
-            {
-                DatabaseDeploymentType.Cli => RestoreByCli(),
-                DatabaseDeploymentType.Docker => RestoreByDocker()
-            };
-
         /// <inheritdoc cref="IDatabaseService.DisableForcePasswordChange(string)"/>
         public bool DisableForcePasswordChange(string userName)
         {
@@ -135,7 +127,7 @@ namespace BPMInstaller.Core.Services
             con.Close();
             return result;
         }
-        
+
         /// <summary>
         /// Остановка всех активных подключений к БД
         /// </summary>
@@ -156,40 +148,6 @@ namespace BPMInstaller.Core.Services
             //{
             //    ;
             //}
-        }
-
-        private bool RestoreByCli()
-        {
-            Process process = new Process();
-            var backupFileName = Path.GetFileName(DatabaseConfig.BackupPath);
-            process.StartInfo.WorkingDirectory = DatabaseConfig.BackupPath.Substring(0, DatabaseConfig.BackupPath.Length - backupFileName.Length - 1);
-            process.StartInfo.FileName = $"{DatabaseConfig.RestorationCliLocation}/pg_restore.exe";
-            process.StartInfo.Arguments = $"--port={DatabaseConfig.Port} --username={DatabaseConfig.AdminUserName} --dbname={DatabaseConfig.DatabaseName} --no-owner --no-privileges ./{backupFileName}";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.EnvironmentVariables["PGPASSWORD"] = DatabaseConfig.AdminPassword;
-
-            process.Start();
-            process.WaitForExit();
-            var output = process.StandardError.ReadToEnd();
-            return string.IsNullOrEmpty(output);
-        }
-
-        private bool RestoreByDocker()
-        {
-            var interactor = new DockerService();
-            var containers = interactor.GetActiveContainers();
-            var postgresContainer = containers.FirstOrDefault(container => container.Value.ToLower().Contains("postgres"));
-
-            if (string.IsNullOrEmpty(postgresContainer.Key))
-            {
-                return false;
-            }
-            
-            var backupName = DateTime.Now.ToString("dd-MM-HH:mm.backup");
-            interactor.CopyBackup(DatabaseConfig.BackupPath, postgresContainer.Key, backupName);
-            interactor.RestoreBackup(postgresContainer.Key, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName, backupName);
-            return true;
         }
 
         private string GetConnectionString(string database = "postgres") =>

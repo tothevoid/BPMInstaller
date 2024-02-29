@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using BPMInstaller.Core.Constants;
 
 namespace BPMInstaller.Core.Services
 {
@@ -90,7 +91,7 @@ namespace BPMInstaller.Core.Services
             using var client = new HttpClient();
 
             var message = new HttpRequestMessage(HttpMethod.Post, $"{applicationConfig.ApplicationUrl}/ServiceModel/AuthService.svc/Login");
-            message.Content = new StringContent($"{{\"UserName\":\"{Constants.ApplicationAdministrator.UserName}\", \"UserPassword\":\"{Constants.ApplicationAdministrator.Password}\"}}", 
+            message.Content = new StringContent($"{{\"UserName\":\"{ApplicationAdministrator.UserName}\", \"UserPassword\":\"{ApplicationAdministrator.Password}\"}}", 
                 Encoding.UTF8, "application/json");
 
             var authResult = client.Send(message);

@@ -1,6 +1,8 @@
-﻿using BPMInstaller.Core.Interfaces;
+﻿using BPMInstaller.Core.Constants;
+using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
 using BPMInstaller.Core.Model.Runtime;
+using BPMInstaller.Core.Services.Database.Postgres;
 
 namespace BPMInstaller.Core.Services
 {
@@ -29,7 +31,7 @@ namespace BPMInstaller.Core.Services
 
             if (installationConfig.InstallationWorkflow.RestoreDatabaseBackup)
             {
-                if (!InitalizeDatabase(installationConfig.DatabaseConfig))
+                if (!InitializeDatabase(installationConfig.DatabaseConfig))
                 {
                     return;
                 }
@@ -46,7 +48,7 @@ namespace BPMInstaller.Core.Services
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление принудительной смены пароля" });
               
-                databaseService.DisableForcePasswordChange(Constants.ApplicationAdministrator.UserName);
+                databaseService.DisableForcePasswordChange(ApplicationAdministrator.UserName);
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Принудительная смена пароля отключена" });
             }
             
@@ -79,8 +81,8 @@ namespace BPMInstaller.Core.Services
                     appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии установлены" });
 
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Назначение лицензий на {Constants.ApplicationAdministrator.UserName}" });
-                    databaseService.ApplyAdministratorLicenses(Constants.ApplicationAdministrator.UserName);
+                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Назначение лицензий на {ApplicationAdministrator.UserName}" });
+                    databaseService.ApplyAdministratorLicenses(ApplicationAdministrator.UserName);
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии назначены" });
 
                     OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Запуск очистки Redis" });
@@ -98,7 +100,7 @@ namespace BPMInstaller.Core.Services
             });       
         }
 
-        public bool InitalizeDatabase(DatabaseConfig dbConfig)
+        public bool InitializeDatabase(DatabaseConfig dbConfig)
         {
             var databaseService = new PostgresDatabaseService(dbConfig);
 
@@ -125,16 +127,23 @@ namespace BPMInstaller.Core.Services
             }
 
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "БД создана" });
+            
+           
+            return true;
+        }
+
+        public bool RestoreDatabase(DatabaseConfig dbConfig, BackupRestorationConfig restorationConfig)
+        {
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Восстановление БД из бекапа" });
 
-            if (!databaseService.RestoreDatabase())
+            IDatabaseRestorationService databaseRestorationService = new PostgresRestorationService(restorationConfig, dbConfig);
+            if (!databaseRestorationService.Restore())
             {
                 OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Ошибка восстановления БД", IsTerminal = true });
                 return false;
             }
 
             OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "БД восстановлена" });
-           
             return true;
         }
 

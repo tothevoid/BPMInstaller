@@ -8,10 +8,6 @@
         Title="Установщик BPM" MinHeight="750" Height="975" Width="800">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
-        <Style x:Key="ConfigSectionHeader">
-            <Setter Property="Control.Margin" Value="10 0 0 0" />
-            <Setter Property="Control.FontWeight" Value="Bold" />
-        </Style>
         <Style x:Key="ControlGroup">
             <Setter Property="Control.Margin" Value="10" />
         </Style>
@@ -85,34 +81,34 @@
                                                 <ColumnDefinition Width="1*"/>
                                                 <ColumnDefinition Width="3*"/>
                                             </Grid.ColumnDefinitions>
-                                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                                    <Label>Хост БД</Label>
-                                                    <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.Host}"/>
-                                                </StackPanel>
-                                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                                    <Label>Порт</Label>
-                                                    <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.Port}"/>
-                                                </StackPanel>
-                                                <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="2">
-                                                    <Label>Название БД</Label>
-                                                    <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.DatabaseName}"/>
-                                                </StackPanel>
-                                                <GroupBox Grid.Row="1" Grid.ColumnSpan="3" Header="Авторизация">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="1*"/>
-                                                            <ColumnDefinition Width="1*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
-                                                            <Label>Имя пользователя</Label>
-                                                            <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.UserName}"/>
-                                                        </StackPanel>
-                                                        <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
-                                                            <Label>Пароль</Label>
-                                                            <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.Password}"/>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </GroupBox>
+                                            <StackPanel Grid.Row="0" Grid.Column="0" Style="{StaticResource ControlGroup}">
+                                                <Label>Хост БД</Label>
+                                                <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.Host}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="0" Grid.Column="1" Style="{StaticResource ControlGroup}">
+                                                <Label>Порт</Label>
+                                                <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.Port}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="0" Grid.Column="2" Style="{StaticResource ControlGroup}">
+                                                <Label>Название БД</Label>
+                                                <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.DatabaseName}"/>
+                                            </StackPanel>
+                                            <GroupBox Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Header="Авторизация">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="1*"/>
+                                                        <ColumnDefinition Width="1*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
+                                                        <Label>Имя пользователя</Label>
+                                                        <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.UserName}"/>
+                                                    </StackPanel>
+                                                    <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
+                                                        <Label>Пароль</Label>
+                                                        <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.Password}"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </GroupBox>
                                         </Grid>
                                     </GroupBox>
                                 </StackPanel>
@@ -203,7 +199,7 @@
                                                         </ComboBox>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1" Visibility="{Binding Path=Config.DatabaseConfig.IsCli, Converter={StaticResource VisibleIfTrueConverter}}">
-                                                        <Label Height="25px">Путь к CLI восстановления (для восстановления не через докер)</Label>
+                                                        <Label Height="25px">Путь к pg_restore</Label>
                                                         <Grid Height="25px">
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="*"/>
@@ -242,25 +238,25 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
                                                 <Label>CId</Label>
-                                                <TextBox Text="{Binding Config.LicenseConfig.CId}"></TextBox>
+                                                <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.LicenseConfig.CId}"></TextBox>
                                             </StackPanel>
                                             <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
                                                 <Label>Путь к лицензии</Label>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="9*"/>
-                                                        <ColumnDefinition Width="1*"/>
+                                                        <ColumnDefinition Width="2*"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBox Grid.Column="0" Text="{Binding Config.LicenseConfig.Path}"/>
+                                                    <TextBox Style="{StaticResource BaseField}" Grid.Column="0" Text="{Binding Config.LicenseConfig.Path}"/>
                                                     <Button Grid.Column="1" Content="Выбрать" Click="SelectLicenseFile"/>
                                                 </Grid>
                                             </StackPanel>
                                         </Grid>
                                         <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.CompileApplication}">
-                                            <TextBlock>Скомпилировать приложение</TextBlock>
+                                            <TextBlock>Полная компиляция</TextBlock>
                                         </CheckBox>
                                         <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.StartApplication}">
-                                            <TextBlock>Запуститить приложение</TextBlock>
+                                            <TextBlock>Запустить приложение</TextBlock>
                                         </CheckBox>
                                     </StackPanel>
                                 </StackPanel>

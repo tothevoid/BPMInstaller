@@ -18,6 +18,11 @@ namespace BPMInstaller.Core.Model
         public ushort Port { get; set; }
 
         /// <summary>
+        /// Название создаваемой БД
+        /// </summary>
+        public string DatabaseName { get; set; }
+
+        /// <summary>
         /// Логин админа БД
         /// </summary>
         public string AdminUserName { get; set; }
@@ -26,25 +31,5 @@ namespace BPMInstaller.Core.Model
         /// Пароль админа БД
         /// </summary>
         public string AdminPassword { get; set; }
-
-        /// <summary>
-        /// Путь к бекапу БД
-        /// </summary>
-        public string BackupPath { get; set; }
-
-        /// <summary>
-        /// Название создаваемой БД
-        /// </summary>
-        public string DatabaseName { get; set; }
-
-        /// <summary>
-        /// Способ восстановления БД
-        /// </summary>
-        public RestorationOption RestorationKind { get; set; }
-
-        /// <summary>
-        /// Путь до CLI восстановления бд, если она развёрнута не в контейнере
-        /// </summary>
-        public string? RestorationCliLocation { get; set; }
     }
 }

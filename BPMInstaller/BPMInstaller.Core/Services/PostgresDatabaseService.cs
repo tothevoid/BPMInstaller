@@ -74,8 +74,8 @@ namespace BPMInstaller.Core.Services
         public bool RestoreDatabase() =>
             DatabaseConfig.RestorationKind switch
             {
-                RestorationOption.CLI => RestoreByCli(),
-                RestorationOption.Docker => RestoreByDocker()
+                DatabaseDeploymentType.Cli => RestoreByCli(),
+                DatabaseDeploymentType.Docker => RestoreByDocker()
             };
 
         /// <inheritdoc cref="IDatabaseService.DisableForcePasswordChange(string)"/>

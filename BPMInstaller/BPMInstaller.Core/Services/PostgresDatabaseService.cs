@@ -21,6 +21,12 @@ namespace BPMInstaller.Core.Services
         /// <inheritdoc cref="IDatabaseService.ValidateConnection"/>
         public string ValidateConnection()
         {
+            /*
+             TODO: handle possible cases
+             * Not enough permissions
+             * Has active connections 
+             * Database already exists (also add a checkbox that ignores that)
+            */
             try
             {
                 using var con = new NpgsqlConnection(GetConnectionString());

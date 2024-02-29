@@ -9,6 +9,10 @@ namespace BPMInstaller.Core.Services
         {
             try
             {
+                /*
+                  TODO: handle possible cases
+                  * User is not admin
+                */
                 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect($"{redisConfig.Host}:{redisConfig.Port},allowAdmin=true");
                 return String.Empty;
             }

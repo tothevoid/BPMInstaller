@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace BPMInstaller.Core.Resources
+﻿namespace BPMInstaller.Core.Resources
 {
     public static class InstallationResources
     {

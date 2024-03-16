@@ -9,16 +9,11 @@ namespace BPMInstaller.Core.Services
 {
     public class InstallationService
     {
-        private event Action<InstallationMessage> OnInstallationMessageReceived;
+        private IInstallationLogger InstallationLogger { get; }
 
-        public InstallationService(Action<InstallationMessage> messageHandler)
+        public InstallationService(IInstallationLogger logger)
         {
-            if (messageHandler == null)
-            {
-                throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            OnInstallationMessageReceived += messageHandler;
+            InstallationLogger = logger;
         }
 
         public void StartBasicInstallation(InstallationConfig installationConfig)
@@ -28,7 +23,7 @@ namespace BPMInstaller.Core.Services
                 throw new ArgumentException(nameof(installationConfig));
             }
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.MainWorkflow.Started));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Started));
 
             if (installationConfig.InstallationWorkflow.RestoreDatabaseBackup)
             {
@@ -47,58 +42,58 @@ namespace BPMInstaller.Core.Services
 
             if (installationConfig.InstallationWorkflow.DisableForcePasswordChange)
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixing));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixing));
               
                 databaseService.DisableForcePasswordChange(ApplicationAdministrator.UserName);
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixed));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixed));
             }
             
             if (!installationConfig.InstallationWorkflow.StartApplication)
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
                 return;
             }
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Application.Instance.Validation));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Instance.Validation));
             var closed = appService.CloseActiveApplication(installationConfig.ApplicationConfig.ApplicationPort, 
                 installationConfig.ExecutableApplicationPath);
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(closed ?
+            InstallationLogger.Log(InstallationMessage.Info(closed ?
                 InstallationResources.Application.Instance.Terminated:
                 InstallationResources.Application.Instance.ThereIsNoActiveInstance
             ));
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Application.Starting));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Starting));
             appService.RunApplication(installationConfig.ApplicationPath, () =>
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Application.Started));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Started));
 
                 if (installationConfig.InstallationWorkflow.InstallLicense)
                 {
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Licensing.CidActualization));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.CidActualization));
                     databaseService.UpdateCid(installationConfig.LicenseConfig.CId);
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Licensing.CidActualized));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.CidActualized));
 
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Licensing.Applying));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Applying));
                     appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Licensing.Applied));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Applied));
 
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(string.Format(InstallationResources.Licensing.AssingingTo,
+                    InstallationLogger.Log(InstallationMessage.Info(string.Format(InstallationResources.Licensing.AssingingTo,
                        ApplicationAdministrator.UserName)));
                     databaseService.ApplyAdministratorLicenses(ApplicationAdministrator.UserName);
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Licensing.Applied));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Applied));
 
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Redis.Flushing));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Redis.Flushing));
                     redisService.FlushData(installationConfig.RedisConfig);
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Redis.Flushed));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Redis.Flushed));
                 }
 
                 if (installationConfig.InstallationWorkflow.CompileApplication)
                 {
-                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Application.Compiling));
+                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Compiling));
                     appService.RebuildApplication(installationConfig.ApplicationConfig);
                 }
               
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
             });       
         }
 
@@ -106,45 +101,45 @@ namespace BPMInstaller.Core.Services
         {
             var databaseService = new PostgresDatabaseService(dbConfig);
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.Connection.Validating));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Connection.Validating));
             var exceptionMessage = databaseService.ValidateConnection();
             if (!string.IsNullOrEmpty(exceptionMessage))
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Error(InstallationResources.Database.Connection.Failed));
+                InstallationLogger.Log(InstallationMessage.Error(InstallationResources.Database.Connection.Failed));
                 return false;
             }
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.Connection.Success));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Connection.Success));
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.OtherConnections.Disconnecting));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.OtherConnections.Disconnecting));
             databaseService.TerminateAllActiveSessions(dbConfig.DatabaseName);
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.OtherConnections.Disconnected));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.OtherConnections.Disconnected));
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.Creation.Started));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Creation.Started));
 
             var databaseCreationResult = databaseService.CreateDatabase();
             if (!string.IsNullOrEmpty(databaseCreationResult))
             {
                 var errorMessage = string.Format(InstallationResources.Database.Creation.Failed, databaseCreationResult);
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(errorMessage, true));
+                InstallationLogger.Log(InstallationMessage.Info(errorMessage, true));
                 return false;
             }
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.Creation.Done));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Creation.Done));
             return true;
         }
 
         public bool RestoreDatabase(DatabaseConfig dbConfig, BackupRestorationConfig restorationConfig)
         {
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.Restoration.Started));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Restoration.Started));
 
             IDatabaseRestorationService databaseRestorationService = new PostgresRestorationService(restorationConfig, dbConfig);
             if (!databaseRestorationService.Restore())
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Error(InstallationResources.Database.Restoration.Failed));
+                InstallationLogger.Log(InstallationMessage.Error(InstallationResources.Database.Restoration.Failed));
                 return false;
             }
 
-            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Database.Restoration.Ended));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Restoration.Ended));
             return true;
         }
 
@@ -154,23 +149,23 @@ namespace BPMInstaller.Core.Services
 
             if (workflow.RestoreDatabaseBackup)
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.ConnectionStrings.Actualization));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ConnectionStrings.Actualization));
                 distributiveService.UpdateConnectionStrings(installationConfig, installationConfig.ApplicationPath);
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.ConnectionStrings.Actualized));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ConnectionStrings.Actualized));
             }
 
             if (workflow.UpdateApplicationPort)
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Distributive.PortActualization));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.PortActualization));
                 distributiveService.UpdateApplicationPort(installationConfig.ApplicationConfig, installationConfig.ApplicationPath);
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Distributive.PortActualized));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.PortActualized));
             }
 
             if (workflow.FixCookies)
             {
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Distributive.FixingCookies));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.FixingCookies));
                 distributiveService.FixAuthorizationCookies(installationConfig.ApplicationPath);
-                OnInstallationMessageReceived.Invoke(InstallationMessage.Info(InstallationResources.Distributive.CookiedFixed));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.CookiedFixed));
             }
         }
     }

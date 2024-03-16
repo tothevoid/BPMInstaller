@@ -3,10 +3,8 @@ using BPMInstaller.Core.Services;
 using BPMInstaller.UI.Desktop.Model;
 using BPMInstaller.UI.Desktop.Utilities;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -68,8 +66,11 @@ namespace BPMInstaller.UI.Desktop
                     ControlsSessionState.Output.Add(message);
                 });
             };
-               
-            Task.Run(() => new Core.Services.InstallationService(handler).StartBasicInstallation(Config.ConvertToCoreModel()));
+            Task.Run(() =>
+            {
+                var logger = new InstallationLogger(handler);
+                new InstallationService(logger).StartBasicInstallation(Config.ConvertToCoreModel());
+            });
         }
 
         private void SaveConfig()

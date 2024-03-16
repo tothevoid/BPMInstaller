@@ -272,7 +272,7 @@
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=Date}">Дата</GridViewColumn>
-                                <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=Content}">Сообщение</GridViewColumn>
+                                <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=Text}">Сообщение</GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>

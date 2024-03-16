@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace BPMInstaller.Core.Model.Runtime
+﻿namespace BPMInstaller.Core.Model.Runtime
 {
     /// <summary>
     /// Сообщение о ходе установки
@@ -10,12 +8,12 @@ namespace BPMInstaller.Core.Model.Runtime
         /// <summary>
         /// Текст сообщения
         /// </summary>
-        public string Content { get; init; }
+        public string Text { get; init; }
 
         /// <summary>
         /// Дата сообщения
         /// </summary>
-        public string Date { get; } = DateTime.Now.ToString("HH:mm:ss");
+        public DateTime Date { get; init; }
 
         /// <summary>
         /// Ошибка
@@ -26,5 +24,24 @@ namespace BPMInstaller.Core.Model.Runtime
         /// Сообщение, завершающее установку
         /// </summary>
         public bool IsTerminal { get; init; } = false;
+
+        private InstallationMessage() { }
+
+        public static InstallationMessage Error(string message) =>
+            new InstallationMessage
+            {
+                Text = message,
+                IsError = true,
+                IsTerminal = true,
+                Date = DateTime.Now
+            };
+
+        public static InstallationMessage Info(string message, bool isTerminal = false) =>
+            new InstallationMessage
+            {
+                Text = message,
+                IsTerminal = isTerminal,
+                Date = DateTime.Now
+            };
     }
 }

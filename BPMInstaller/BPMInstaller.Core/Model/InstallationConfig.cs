@@ -9,6 +9,7 @@
         /// Путь к папке с приложением
         /// </summary>
         public string ApplicationPath { get; set; }
+
         /// <summary>
         /// Путь к dll для запуска приложения
         /// </summary>

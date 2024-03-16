@@ -1,4 +1,5 @@
-﻿using BPMInstaller.Core.Services;
+﻿using BPMInstaller.Core.Model.Runtime;
+using BPMInstaller.Core.Services;
 using BPMInstaller.UI.Desktop.Model;
 using BPMInstaller.UI.Desktop.Utilities;
 using System;
@@ -56,7 +57,7 @@ namespace BPMInstaller.UI.Desktop
 
             ControlsSessionState.StartButtonVisibility = Visibility.Collapsed;
 
-            var handler = (Core.Model.InstallationMessage message) =>
+            var handler = (InstallationMessage message) =>
             {
                 if (message.IsTerminal)
                 {

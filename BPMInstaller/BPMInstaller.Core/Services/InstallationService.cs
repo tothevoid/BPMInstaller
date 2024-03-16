@@ -27,7 +27,7 @@ namespace BPMInstaller.Core.Services
                 throw new ArgumentException(nameof(installationConfig));
             }
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена установка приложения" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Запущена установка приложения"));
 
             if (installationConfig.InstallationWorkflow.RestoreDatabaseBackup)
             {
@@ -46,57 +46,57 @@ namespace BPMInstaller.Core.Services
 
             if (installationConfig.InstallationWorkflow.DisableForcePasswordChange)
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление принудительной смены пароля" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Исправление принудительной смены пароля"));
               
                 databaseService.DisableForcePasswordChange(ApplicationAdministrator.UserName);
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Принудительная смена пароля отключена" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Принудительная смена пароля отключена"));
             }
             
             if (!installationConfig.InstallationWorkflow.StartApplication)
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка приложения завершена", IsTerminal = true });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Установка приложения завершена", true));
                 return;
             }
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Проверка наличия запущенного приложения" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Проверка наличия запущенного приложения"));
             var closed = appService.CloseActiveApplication(installationConfig.ApplicationConfig.ApplicationPort, 
                 installationConfig.ExecutableApplicationPath);
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = closed ? 
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info(closed ? 
                 "Активное прилоение выключено":
                 "Активное приложение не найдено"
-            });
+            ));
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запуск приложения" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Запуск приложения"));
             appService.RunApplication(installationConfig.ApplicationPath, () =>
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Приложение запущено" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Приложение запущено"));
 
                 if (installationConfig.InstallationWorkflow.InstallLicense)
                 {
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Обновление CId" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Обновление CId"));
                     databaseService.UpdateCid(installationConfig.LicenseConfig.CId);
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "CId обновлён" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info("CId обновлён"));
 
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка лицензий" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Установка лицензий"));
                     appService.UploadLicenses(installationConfig.ApplicationConfig, installationConfig.LicenseConfig);
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии установлены" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Лицензии установлены"));
 
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Назначение лицензий на {ApplicationAdministrator.UserName}" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Назначение лицензий на {ApplicationAdministrator.UserName}"));
                     databaseService.ApplyAdministratorLicenses(ApplicationAdministrator.UserName);
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Лицензии назначены" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Лицензии назначены"));
 
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Запуск очистки Redis" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Запуск очистки Redis"));
                     redisService.FlushData(installationConfig.RedisConfig);
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Данные приложения в Redis удалены" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Данные приложения в Redis удалены"));
                 }
 
                 if (installationConfig.InstallationWorkflow.CompileApplication)
                 {
-                    OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Запущена компиляция приложения" });
+                    OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Запущена компиляция приложения"));
                     appService.RebuildApplication(installationConfig.ApplicationConfig);
                 }
               
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Установка приложения завершена", IsTerminal = true });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Установка приложения завершена", true));
             });       
         }
 
@@ -104,29 +104,29 @@ namespace BPMInstaller.Core.Services
         {
             var databaseService = new PostgresDatabaseService(dbConfig);
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Проверка подключения к БД" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Проверка подключения к БД"));
             var exceptionMessage = databaseService.ValidateConnection();
             if (!string.IsNullOrEmpty(exceptionMessage))
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Ошибка валидации подключения к БД" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Ошибка валидации подключения к БД"));
                 return false;
             }
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Успешное подключение к БД" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Успешное подключение к БД"));
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Сброс активных подключений к БД" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Сброс активных подключений к БД"));
             databaseService.TerminateAllActiveSessions(dbConfig.DatabaseName);
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Подключения к БД сброшены" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Подключения к БД сброшены"));
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Создание БД: {dbConfig.DatabaseName}" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Создание БД: {dbConfig.DatabaseName}"));
 
             var databaseCreationResult = databaseService.CreateDatabase();
             if (!string.IsNullOrEmpty(databaseCreationResult))
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = $"Ошибка создания БД: {databaseCreationResult}", IsTerminal = true });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info($"Ошибка создания БД: {databaseCreationResult}", true));
                 return false;
             }
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "БД создана" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info("БД создана"));
             
            
             return true;
@@ -134,16 +134,16 @@ namespace BPMInstaller.Core.Services
 
         public bool RestoreDatabase(DatabaseConfig dbConfig, BackupRestorationConfig restorationConfig)
         {
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Восстановление БД из бекапа" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Восстановление БД из бекапа"));
 
             IDatabaseRestorationService databaseRestorationService = new PostgresRestorationService(restorationConfig, dbConfig);
             if (!databaseRestorationService.Restore())
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Ошибка восстановления БД", IsTerminal = true });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Ошибка восстановления БД", true) );
                 return false;
             }
 
-            OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "БД восстановлена" });
+            OnInstallationMessageReceived.Invoke(InstallationMessage.Info("БД восстановлена"));
             return true;
         }
 
@@ -153,23 +153,23 @@ namespace BPMInstaller.Core.Services
 
             if (workflow.RestoreDatabaseBackup)
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация ConnectionStrings" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Актуализация ConnectionStrings"));
                 distributiveService.UpdateConnectionStrings(installationConfig, installationConfig.ApplicationPath);
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "ConnectionStrings актулизированы" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("ConnectionStrings актулизированы"));
             }
 
             if (workflow.UpdateApplicationPort)
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Актуализация порта приложения" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Актуализация порта приложения"));
                 distributiveService.UpdateApplicationPort(installationConfig.ApplicationConfig, installationConfig.ApplicationPath);
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Порт актуализирован" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Порт актуализирован"));
             }
 
             if (workflow.FixCookies)
             {
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Исправление авторизации" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Исправление авторизации"));
                 distributiveService.FixAuthorizationCookies(installationConfig.ApplicationPath);
-                OnInstallationMessageReceived.Invoke(new InstallationMessage() { Content = "Авторизация исправлена" });
+                OnInstallationMessageReceived.Invoke(InstallationMessage.Info("Авторизация исправлена"));
             }
         }
     }

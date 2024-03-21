@@ -1,9 +1,6 @@
 ﻿using BPMInstaller.Core.Model;
 using Npgsql;
 using BPMInstaller.Core.Interfaces;
-using System.Diagnostics;
-using System.Collections.Generic;
-using BPMInstaller.Core.Enums;
 
 namespace BPMInstaller.Core.Services.Database.Postgres
 {

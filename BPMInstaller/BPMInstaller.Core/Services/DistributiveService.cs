@@ -8,12 +8,13 @@ namespace BPMInstaller.Core.Services
 {
     public class DistributiveService
     {
-        public void UpdateConnectionStrings(InstallationConfig installationConfig, string applicationPath)
+        public void UpdateConnectionStrings(string applicationPath, DatabaseConfig databaseConfig = null, 
+            RedisConfig redisConfig = null)
         {
             var rootNode = GetConnectionString(applicationPath);
 
-            UpdateDatabaseConfig(installationConfig.DatabaseConfig, GetDatabaseString(rootNode.Configs));
-            UpdateRedisConfig(installationConfig.RedisConfig, GetRedisString(rootNode.Configs));
+            UpdateDatabaseConfig(databaseConfig, GetDatabaseString(rootNode.Configs));
+            UpdateRedisConfig(redisConfig, GetRedisString(rootNode.Configs));
 
             rootNode.Document.Save(applicationPath);
         }

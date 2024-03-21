@@ -18,13 +18,13 @@ namespace BPMInstaller.UI.Desktop
 {
     public partial class MainWindow : Window
     {
-        private readonly string ConfigPath = "configurations.json";
-
         public ObservableCollection<string> Configurations { get; } = new ObservableCollection<string>();
 
         public InstallationConfig Config { get; set; }
 
         private ConfigValidator Validator { get; } = new ConfigValidator();
+
+        private ConfigurationSerializer ConfigSerializer { get; set; } = new ConfigurationSerializer();
 
         public ControlsSessionState ControlsSessionState { get; set; } = new ControlsSessionState();
 
@@ -32,19 +32,15 @@ namespace BPMInstaller.UI.Desktop
         {
             InitializeComponent();
 
-            if (File.Exists(ConfigPath))
+            var distributiveLocations = ConfigSerializer.LoadLocations().ToList();
+            if (distributiveLocations.Any())
             {
-                var json = File.ReadAllText(ConfigPath);
-                var configurations = JsonSerializer.Deserialize<IEnumerable<string>>(json) ?? Enumerable.Empty<string>();
-                Configurations = new ObservableCollection<string>(configurations);
-
-                if (Configurations.Any())
-                {
-                    var lastConfiguration = Configurations.LastOrDefault(config => !string.IsNullOrEmpty(config));
-                    Config = new InstallationConfig { ApplicationPath = lastConfiguration };
-                    LoadCurrentConfig();
-                }
+                Configurations = new ObservableCollection<string>(distributiveLocations);
+                var lastConfiguration = Configurations.LastOrDefault(config => !string.IsNullOrEmpty(config));
+                Config = new InstallationConfig { ApplicationPath = lastConfiguration };
+                LoadCurrentConfig();
             }
+
             Config ??= new InstallationConfig();
             DataContext = this;
         }
@@ -52,33 +48,27 @@ namespace BPMInstaller.UI.Desktop
         private void Install(object sender, RoutedEventArgs e)
         {
             ControlsSessionState.Output.Clear();
-
             ControlsSessionState.StartButtonVisibility = Visibility.Collapsed;
 
-            var handler = (InstallationMessage message) =>
-            {
-                if (message.IsTerminal)
-                {
-                    ControlsSessionState.StartButtonVisibility = Visibility.Visible;
-                }
-
-                Dispatcher.Invoke(() => {
-                    ControlsSessionState.Output.Add(message);
-                });
-            };
             Task.Run(() =>
             {
-                var logger = new InstallationLogger(handler);
+                var logger = new InstallationLogger(AddLoggerMessage);
                 new InstallationService(logger).StartBasicInstallation(Config.ConvertToCoreModel());
             });
         }
 
-        private void SaveConfig()
+        private void AddLoggerMessage(InstallationMessage message)
         {
-            var json = JsonSerializer.Serialize(Configurations);
-            File.WriteAllText(ConfigPath, json);
+            if (message.IsTerminal)
+            {
+                ControlsSessionState.StartButtonVisibility = Visibility.Visible;
+            }
+
+            Dispatcher.Invoke(() => {
+                ControlsSessionState.Output.Add(message);
+            });
         }
-        
+
         private void SelectDistributivePath(object sender, RoutedEventArgs e)
         {
             var newPath = InteractionUtilities.ShowFileSystemDialog(true, Config.ApplicationPath);
@@ -88,7 +78,7 @@ namespace BPMInstaller.UI.Desktop
             if (pathChanged && !string.IsNullOrEmpty(Config.ApplicationPath) && !Configurations.Contains(Config.ApplicationPath))
             {
                 Configurations.Add(Config.ApplicationPath);
-                SaveConfig();
+                ConfigSerializer.SaveLocations(Configurations);
             }
 
             var initConnectionStrings = pathChanged || 

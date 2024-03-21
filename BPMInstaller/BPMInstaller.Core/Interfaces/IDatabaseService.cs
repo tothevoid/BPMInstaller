@@ -24,5 +24,10 @@
         /// <param name="cId">Идентификатор организации</param>
         /// <returns>Customer id обновлён</returns>
         public bool UpdateCid(long cId);
+
+
+        public void ApplyAdministratorLicenses(string userName);
+        public string? ValidateConnection();
+        void TerminateAllActiveSessions(string databaseConfigDatabaseName);
     }
 }

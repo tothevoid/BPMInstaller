@@ -1,11 +1,5 @@
-﻿using BPMInstaller.Core.Interfaces;
-using BPMInstaller.Core.Model;
+﻿using BPMInstaller.Core.Model;
 using BPMInstaller.Core.Services.Database.Postgres;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BPMInstaller.Core.Services
 {

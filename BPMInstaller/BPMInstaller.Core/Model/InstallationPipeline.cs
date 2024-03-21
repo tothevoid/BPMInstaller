@@ -3,7 +3,7 @@
     /// <summary>
     /// Конфигурация процесса установки приложения
     /// </summary>
-    public class InstallationWorkflow
+    public class InstallationPipeline
     {
         #region Строки подключения к отдельным сервисам
         /// <summary>

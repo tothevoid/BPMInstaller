@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Windows.Media.Animation;
 
 namespace BPMInstaller.UI.Desktop.Model
 {
@@ -18,6 +19,7 @@ namespace BPMInstaller.UI.Desktop.Model
             RedisConfig = new RedisConfig();
             LicenseConfig = new LicenseConfig();
             InstallationWorkflow = new InstallationWorkflow();
+            BackupRestorationConfig = new BackupRestorationConfig();
 
             ActualizeTriggers();
         }
@@ -62,6 +64,10 @@ namespace BPMInstaller.UI.Desktop.Model
         /// <inheritdoc cref="Core.InstallationWorkflow"/>
         public InstallationWorkflow InstallationWorkflow { get; set; }
 
+        /// <inheritdoc cref="Core.BackupRestorationConfig"/>
+        public BackupRestorationConfig BackupRestorationConfig { get; set; }
+
+
         public string? ValidateApplicationPath()
         {
             if (string.IsNullOrEmpty(applicationPath?.Trim()))
@@ -82,35 +88,39 @@ namespace BPMInstaller.UI.Desktop.Model
         // TODO: Fix architecture
         public Core.Model.InstallationConfig ConvertToCoreModel()
         {
-            return new Core.Model.InstallationConfig
+            var redisConfig = new Core.Model.RedisConfig()
             {
-                ApplicationPath = ApplicationPath ?? string.Empty,
-                ApplicationConfig = ApplicationConfig.ToCoreModel(),
-                DatabaseConfig = DatabaseConfig.ToCoreModel(),
-                RedisConfig = new Core.Model.RedisConfig()
-                {
-                    Host = RedisConfig.Host ?? string.Empty,
-                    DbNumber = RedisConfig.DbNumber,
-                    Port = RedisConfig.Port
-                },
+                Host = RedisConfig.Host ?? string.Empty,
+                DbNumber = RedisConfig.DbNumber,
+                Port = RedisConfig.Port
+            };
+
+            var pipeline = new Core.Model.InstallationPipeline()
+            {
+                InstallLicense = InstallationWorkflow.InstallLicense,
+                RemoveCertificate = InstallationWorkflow.RemoveCertificate,
+                RestoreDatabaseBackup = InstallationWorkflow.RestoreDatabaseBackup,
+                UpdateApplicationPort = InstallationWorkflow.UpdateApplicationPort,
+                UpdateDatabaseConnectionString = InstallationWorkflow.UpdateDatabaseConnectionString,
+                UpdateRedisConnectionString = InstallationWorkflow.UpdateRedisConnectionString,
+                DisableForcePasswordChange = InstallationWorkflow.DisableForcePasswordChange,
+                CompileApplication = InstallationWorkflow.CompileApplication,
+                StartApplication = InstallationWorkflow.StartApplication,
+                FixCookies = InstallationWorkflow.FixCookies
+            };
+
+            return new Core.Model.InstallationConfig(ApplicationPath ?? string.Empty,
+                ApplicationConfig.ToCoreModel(),
+                DatabaseConfig.ToCoreModel(),
+                redisConfig,
+                pipeline)
+            {
                 LicenseConfig = new Core.Model.LicenseConfig()
                 {
                     Path = LicenseConfig.Path ?? string.Empty,
                     CId = LicenseConfig.CId
                 },
-                InstallationWorkflow = new Core.Model.InstallationWorkflow()
-                {
-                    InstallLicense = InstallationWorkflow.InstallLicense,
-                    RemoveCertificate = InstallationWorkflow.RemoveCertificate,
-                    RestoreDatabaseBackup = InstallationWorkflow.RestoreDatabaseBackup,
-                    UpdateApplicationPort = InstallationWorkflow.UpdateApplicationPort,
-                    UpdateDatabaseConnectionString = InstallationWorkflow.UpdateDatabaseConnectionString,
-                    UpdateRedisConnectionString = InstallationWorkflow.UpdateRedisConnectionString,
-                    DisableForcePasswordChange = InstallationWorkflow.DisableForcePasswordChange,
-                    CompileApplication = InstallationWorkflow.CompileApplication,
-                    StartApplication = InstallationWorkflow.StartApplication,
-                    FixCookies = InstallationWorkflow.FixCookies
-                }
+                BackupRestorationConfig = BackupRestorationConfig.ToCoreModel()
             };
         }
     }

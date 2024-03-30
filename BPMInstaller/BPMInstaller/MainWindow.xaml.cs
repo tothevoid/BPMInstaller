@@ -12,6 +12,7 @@ using System.Windows.Media;
 
 namespace BPMInstaller.UI.Desktop
 {
+    // ReSharper disable once UnusedMember.Global
     public partial class MainWindow : Window
     {
         public ObservableCollection<string> Configurations { get; } = new ObservableCollection<string>();
@@ -67,9 +68,14 @@ namespace BPMInstaller.UI.Desktop
 
         private void SelectDistributivePath(object sender, RoutedEventArgs e)
         {
-            var newPath = InteractionUtilities.ShowFileSystemDialog(true, Config.ApplicationPath);
-            var pathChanged = newPath != Config.ApplicationPath;
-            Config.ApplicationPath = newPath;
+            var selectionResult = InteractionUtilities.ShowFileSystemDialog(true, Config.ApplicationPath);
+            if (!selectionResult.IsSelected)
+            {
+                return;
+            }
+
+            var pathChanged = selectionResult.Path != Config.ApplicationPath;
+            Config.ApplicationPath = selectionResult.Path;
             
             if (pathChanged && !string.IsNullOrEmpty(Config.ApplicationPath) && !Configurations.Contains(Config.ApplicationPath))
             {
@@ -106,19 +112,19 @@ namespace BPMInstaller.UI.Desktop
         private void SelectBackupFile(object sender, RoutedEventArgs e)
         {
             Config.DatabaseConfig.BackupPath = InteractionUtilities
-                .ShowFileSystemDialog(false, Config.DatabaseConfig.BackupPath);
+                .ShowFileSystemDialog(false, Config.DatabaseConfig.BackupPath).Path;
         }
 
         private void SelectCliPath(object sender, RoutedEventArgs e)
         {
             Config.DatabaseConfig.RestorationCliLocation = InteractionUtilities
-                .ShowFileSystemDialog(true, Config.DatabaseConfig.RestorationCliLocation);
+                .ShowFileSystemDialog(true, Config.DatabaseConfig.RestorationCliLocation).Path;
         }
 
         private void SelectLicenseFile(object sender, RoutedEventArgs e)
         {
             Config.LicenseConfig.Path = InteractionUtilities
-                .ShowFileSystemDialog(false, Config.LicenseConfig.Path);
+                .ShowFileSystemDialog(false, Config.LicenseConfig.Path).Path;
         }
         #endregion
 

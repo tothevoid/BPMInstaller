@@ -5,7 +5,7 @@ namespace BPMInstaller.UI.Desktop.Utilities
 {
     public static class InteractionUtilities
     {
-        public static string? ShowFileSystemDialog(bool isDirectory, string? previousValue)
+        public static (bool IsSelected, string Path) ShowFileSystemDialog(bool isDirectory, string? previousValue)
         {
             var dlg = new CommonOpenFileDialog();
             dlg.Title = isDirectory ? "Выбор директории" : "Выбора файла";
@@ -22,9 +22,13 @@ namespace BPMInstaller.UI.Desktop.Utilities
             dlg.EnsureValidNames = true;
             dlg.Multiselect = false;
 
-            return dlg.ShowDialog() == CommonFileDialogResult.Ok && !string.IsNullOrEmpty(dlg?.FileName) ?
+            var isValueSelected = dlg.ShowDialog() == CommonFileDialogResult.Ok;
+
+            var path = isValueSelected && !string.IsNullOrEmpty(dlg?.FileName) ?
                  dlg.FileName :
                  previousValue;
+
+            return (isValueSelected, path);
         }
 
         public static bool ShowConfirmationButton(string header, string mesage)

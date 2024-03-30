@@ -11,7 +11,6 @@ namespace BPMInstaller.UI.Desktop.Model
 
         public Visibility StartButtonVisibility { get { return startButtonVisibility; } set { Set(ref startButtonVisibility, value); } }
 
-
         public ObservableCollection<InstallationMessage> Output { get; set; } = new ObservableCollection<InstallationMessage>();
     }
 }

@@ -3,16 +3,12 @@ using BPMInstaller.Core.Services;
 using BPMInstaller.UI.Desktop.Model;
 using BPMInstaller.UI.Desktop.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace BPMInstaller.UI.Desktop
 {
@@ -53,7 +49,7 @@ namespace BPMInstaller.UI.Desktop
             Task.Run(() =>
             {
                 var logger = new InstallationLogger(AddLoggerMessage);
-                new InstallationService(logger).StartBasicInstallation(Config.ConvertToCoreModel());
+                new InstallationService(logger, Config.ConvertToCoreModel()).Install();
             });
         }
 

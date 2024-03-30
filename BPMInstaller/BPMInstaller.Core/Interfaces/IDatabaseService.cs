@@ -25,9 +25,14 @@
         /// <returns>Customer id обновлён</returns>
         public bool UpdateCid(long cId);
 
+        /// <summary>
+        /// Удаление назначенных лицензий и назначение всех на администратора
+        /// </summary>
+        /// <param name="userName">Пользователь администратора</param>
+        public bool ApplyAdministratorLicenses(string userName);
 
-        public void ApplyAdministratorLicenses(string userName);
         public string? ValidateConnection();
+
         void TerminateAllActiveSessions(string databaseConfigDatabaseName);
     }
 }

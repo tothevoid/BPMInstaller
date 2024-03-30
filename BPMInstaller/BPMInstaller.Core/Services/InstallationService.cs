@@ -3,6 +3,7 @@ using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
 using BPMInstaller.Core.Model.Runtime;
 using BPMInstaller.Core.Resources;
+using BPMInstaller.Core.Services.Application;
 using BPMInstaller.Core.Services.Database.Postgres;
 
 namespace BPMInstaller.Core.Services
@@ -13,8 +14,6 @@ namespace BPMInstaller.Core.Services
 
         private IDatabaseService DatabaseService { get; }
 
-        private ApplicationService ApplicationService { get; }
-
         private RedisService RedisService { get; }
 
         private InstallationConfig InstallationConfig { get; }
@@ -24,19 +23,25 @@ namespace BPMInstaller.Core.Services
             InstallationLogger = logger;
             InstallationConfig = installationConfig ?? throw new ArgumentException(nameof(installationConfig));
             DatabaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
-            ApplicationService = new ApplicationService();
             RedisService = new RedisService();
         }
 
         public void Install()
         {
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Started));
+            try
+            {
+                StartBasicInstallation();
+            }
+            catch (Exception ex)
+            {
+                InstallationLogger.Log(InstallationMessage.Error(ex.Message));
+            }
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
         }
 
-        public void StartBasicInstallation()
+        private void StartBasicInstallation()
         {
-            
-
             ActualizeConfigs();
 
             if (!InitializeDatabase())
@@ -63,35 +68,28 @@ namespace BPMInstaller.Core.Services
                 return;
             }
 
-            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Instance.Validation));
-            var closed = ApplicationService.CloseActiveApplication(InstallationConfig.ApplicationConfig.ApplicationPort,
-                InstallationConfig.ExecutableApplicationPath);
-            InstallationLogger.Log(InstallationMessage.Info(closed ?
-                InstallationResources.Application.Instance.Terminated:
-                InstallationResources.Application.Instance.ThereIsNoActiveInstance
-            ));
-
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Starting));
-            ApplicationService.RunApplication(InstallationConfig.ApplicationPath, () =>
+            var runningApplication = ApplicationRepository.GetInstance(InstallationConfig.ApplicationPath,
+                InstallationConfig.ApplicationConfig);
+
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Started));
+
+            if (InstallationConfig.Pipeline.InstallLicense)
             {
-                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Started));
+                InstallLicense(runningApplication);
+            }
 
-                if (InstallationConfig.Pipeline.InstallLicense)
-                {
-                    InstallLicense();
-                }
+            if (InstallationConfig.Pipeline.CompileApplication)
+            {
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Compiling));
+                //TODO: Handle compilation response
+                runningApplication.Compile();
+            }
 
-                if (InstallationConfig.Pipeline.CompileApplication)
-                {
-                    InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Compiling));
-                    ApplicationService.RebuildApplication(InstallationConfig.ApplicationConfig);
-                }
-              
-                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
-            });       
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
         }
 
-        public bool InstallLicense()
+        private bool InstallLicense(IRunningApplication runningApplication)
         {
             if (!InstallationConfig.Pipeline.InstallLicense || InstallationConfig.LicenseConfig == null)
             {
@@ -103,7 +101,7 @@ namespace BPMInstaller.Core.Services
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.CidActualized));
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Applying));
-            ApplicationService.UploadLicenses(InstallationConfig.ApplicationConfig, InstallationConfig.LicenseConfig);
+            runningApplication.AddLicenses(InstallationConfig.LicenseConfig);
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Applied));
 
             InstallationLogger.Log(InstallationMessage.Info(string.Format(InstallationResources.Licensing.AssingingTo,

@@ -98,6 +98,8 @@ namespace BPMInstaller.Core.Services.Database.Postgres
         /// Удаление назначенных лицензий и назначение всех на администратора
         /// </summary>
         /// <param name="userName">Пользователь администратора</param>
+
+        /// <inheritdoc cref="IDatabaseService.ApplyAdministratorLicenses(long)"/>
         public bool ApplyAdministratorLicenses(string userName)
         {
             var result = true;

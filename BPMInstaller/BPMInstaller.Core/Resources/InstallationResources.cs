@@ -102,7 +102,7 @@
             {
                 public const string Disconnecting = "Сброс активных подключений к БД";
 
-                public const string Disconnected = "Сброс активных подключений к БД";
+                public const string Disconnected = "Активные подключения к БД сброшены";
             }
 
             public static class Restoration

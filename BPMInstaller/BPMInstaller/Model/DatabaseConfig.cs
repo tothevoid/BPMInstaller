@@ -18,89 +18,43 @@ namespace BPMInstaller.UI.Desktop.Model
 
         private string? password;
 
-        private string? backupPath;
-
         private string? databaseName = "bpm";
 
-        private string? restorationCliLocation;
-
-        private string? selectedRestorationOption = RestorationMapping
-            .FirstOrDefault(mapping => mapping.Value == DatabaseDeploymentType.Docker).Key ?? string.Empty;
-
-        private string? selectedContainer;
-
-        //Rework with special converter
-        private bool isDocker = true;
-
-        private bool isCli;
-
-        private ObservableCollection<string> activeContainers = new ObservableCollection<string>();
-
         /// <inheritdoc cref="Core.Model.ApplicationConfig.Host"/>
-        public string? Host { get { return host; } set { Set(ref host, value); } }
+        public string? Host 
+        { 
+            get => host;
+            set => Set(ref host, value);
+        }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.Port"/>
-        public ushort Port { get { return port; } set { Set(ref port, value); } }
+        public ushort Port
+        {
+            get => port;
+            set => Set(ref port, value);
+        }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.UserName"/>
-        public string? UserName { get { return userName; } set { Set(ref userName, value); } }
+        public string? UserName 
+        { 
+            get => userName;
+            set => Set(ref userName, value);
+        }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.Password"/>
-        public string? Password { get { return password; } set { Set(ref password, value); } }
-
-        /// <inheritdoc cref="Core.Model.ApplicationConfig.BackupPath"/>
-        public string? BackupPath { get { return backupPath; } set { Set(ref backupPath, value); } }
+        public string? Password 
+        { 
+            get => password;
+            set => Set(ref password, value);
+        }
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.DatabaseName"/>
-        public string? DatabaseName { get { return databaseName; } set { Set(ref databaseName, value); } }
-
-        /// <inheritdoc cref="Core.Model.ApplicationConfig.RestorationCliLocation"/>
-        public string? RestorationCliLocation { get { return restorationCliLocation; } set { Set(ref restorationCliLocation, value); } }
-
-        public bool IsDocker { get { return isDocker; } set { Set(ref isDocker, value); } }
-
-        public bool IsCli { get { return isCli; } set { Set(ref isCli, value); } }
-
-        public string? SelectedContainer
-        {
-            get 
-            {
-                if (ActiveContainers == null || !ActiveContainers.Any())
-                {
-                    GetActiveContainers();
-                }
-
-                return selectedContainer;
-            } 
-            set { Set(ref selectedContainer, value); } 
-
-        }
-
-        public string SelectedRestorationOption 
+        public string? DatabaseName 
         { 
-            get { return selectedRestorationOption; }
-            set 
-            { 
-                Set(ref selectedRestorationOption, value);
-                ModifyVisibility();
-                if (RestorationKind == DatabaseDeploymentType.Docker)
-                {
-                    GetActiveContainers();
-                }
-            }
+            get => databaseName;
+            set => Set(ref databaseName, value);
         }
 
-        public ObservableCollection<string> ActiveContainers  { get { return activeContainers; } set { Set(ref activeContainers, value); } }
-
-        public DatabaseDeploymentType RestorationKind { get { return RestorationMapping[SelectedRestorationOption]; } } 
-
-        public IEnumerable<string> RestorationOptions { get; } = RestorationMapping.Keys;
-
-        private static Dictionary<string, DatabaseDeploymentType> RestorationMapping { get; } = new Dictionary<string, DatabaseDeploymentType>
-        {
-            { "Docker", DatabaseDeploymentType.Docker },
-            { "PG_restore", DatabaseDeploymentType.Cli },
-        };
 
         public void MergeConfig(Core.Model.DatabaseConfig databaseConfig)
         {
@@ -121,22 +75,6 @@ namespace BPMInstaller.UI.Desktop.Model
                 AdminPassword = this.Password,
                 DatabaseName = this.DatabaseName
             };      
-        }
-
-        public void GetActiveContainers()
-        {
-            var containers = new DockerService().GetActiveContainers().Select(x => x.Value).ToList();
-            ActiveContainers = new ObservableCollection<string>(containers);
-            if (ActiveContainers.Any())
-            {
-                SelectedContainer = ActiveContainers.First();
-            }
-        }
-
-        public void ModifyVisibility()
-        {
-            IsDocker = RestorationKind == DatabaseDeploymentType.Docker;
-            IsCli = RestorationKind == DatabaseDeploymentType.Cli;
         }
     }
 }

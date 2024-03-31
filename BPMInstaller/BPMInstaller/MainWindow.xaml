@@ -178,7 +178,7 @@
                                                         <ColumnDefinition Width="9*"/>
                                                         <ColumnDefinition Width="1*"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBox Style="{StaticResource BaseField}" Grid.Column="0" Text="{Binding Config.DatabaseConfig.BackupPath}"/>
+                                                    <TextBox Style="{StaticResource BaseField}" Grid.Column="0" Text="{Binding Config.BackupRestorationConfig.BackupPath}"/>
                                                     <Button Grid.Column="1" Content="Выбрать" Click="SelectBackupFile"/>
                                                 </Grid>
                                             </StackPanel>
@@ -190,7 +190,7 @@
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel>
                                                         <Label Height="25px">Способ</Label>
-                                                        <ComboBox Height="25px" SelectedItem="{Binding Config.DatabaseConfig.SelectedRestorationOption}" ItemsSource="{Binding Config.DatabaseConfig.RestorationOptions}">
+                                                        <ComboBox Height="25px" SelectedItem="{Binding Config.BackupRestorationConfig.SelectedRestorationOption}" ItemsSource="{Binding Config.BackupRestorationConfig.RestorationOptions}">
                                                             <ComboBox.ItemTemplate>
                                                                 <DataTemplate>
                                                                     <TextBlock Text="{Binding}"/>
@@ -198,20 +198,20 @@
                                                             </ComboBox.ItemTemplate>
                                                         </ComboBox>
                                                     </StackPanel>
-                                                    <StackPanel Grid.Column="1" Visibility="{Binding Path=Config.DatabaseConfig.IsCli, Converter={StaticResource VisibleIfTrueConverter}}">
+                                                    <StackPanel Grid.Column="1" Visibility="{Binding Path=Config.BackupRestorationConfig.IsCli, Converter={StaticResource VisibleIfTrueConverter}}">
                                                         <Label Height="25px">Путь к pg_restore</Label>
                                                         <Grid Height="25px">
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="75"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.RestorationCliLocation}"/>
+                                                            <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.BackupRestorationConfig.RestorationCliLocation}"/>
                                                             <Button Grid.Column="1" Content="Выбрать" Click="SelectCliPath"/>
                                                         </Grid>
                                                     </StackPanel>
-                                                    <StackPanel Grid.Column="1" Visibility="{Binding Path=Config.DatabaseConfig.IsDocker, Converter={StaticResource VisibleIfTrueConverter}}" Orientation="Vertical">
+                                                    <StackPanel Grid.Column="1" Visibility="{Binding Path=Config.BackupRestorationConfig.IsDocker, Converter={StaticResource VisibleIfTrueConverter}}" Orientation="Vertical">
                                                         <Label Height="25px">Образ</Label>
-                                                        <ComboBox Height="25px" SelectedItem="{Binding Config.DatabaseConfig.SelectedContainer}" ItemsSource="{Binding Config.DatabaseConfig.ActiveContainers}">
+                                                        <ComboBox Height="25px" SelectedItem="{Binding Config.BackupRestorationConfig.DockerImage}" ItemsSource="{Binding Config.BackupRestorationConfig.ActiveContainers}">
                                                             <ComboBox.ItemTemplate>
                                                                 <DataTemplate>
                                                                     <TextBlock Text="{Binding}"/>
@@ -263,7 +263,7 @@
                             </GroupBox>
                         </StackPanel>
                     </ScrollViewer>
-                    <Button Background="White" Grid.Row="1" Click="Install">Запустить установку</Button>
+                    <Button Background="White" Grid.Row="1" Click="Install">Выполнить</Button>
                 </Grid>
             </TabItem>
             <TabItem Header="Запуск">
@@ -271,8 +271,8 @@
                     <ListView ItemsSource="{Binding Output}" >
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=Date}">Дата</GridViewColumn>
-                                <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=Text}">Сообщение</GridViewColumn>
+                                <GridViewColumn Width="385px" DisplayMemberBinding="{Binding Path=Date}">Дата</GridViewColumn>
+                                <GridViewColumn Width="385px" DisplayMemberBinding="{Binding Path=Text}">Сообщение</GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>

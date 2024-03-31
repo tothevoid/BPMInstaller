@@ -67,7 +67,6 @@ namespace BPMInstaller.UI.Desktop.Model
         /// <inheritdoc cref="Core.BackupRestorationConfig"/>
         public BackupRestorationConfig BackupRestorationConfig { get; set; }
 
-
         public string? ValidateApplicationPath()
         {
             if (string.IsNullOrEmpty(applicationPath?.Trim()))

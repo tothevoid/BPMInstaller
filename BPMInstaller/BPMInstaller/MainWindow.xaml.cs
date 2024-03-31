@@ -111,14 +111,14 @@ namespace BPMInstaller.UI.Desktop
         #region File system selection handlers
         private void SelectBackupFile(object sender, RoutedEventArgs e)
         {
-            Config.DatabaseConfig.BackupPath = InteractionUtilities
-                .ShowFileSystemDialog(false, Config.DatabaseConfig.BackupPath).Path;
+            Config.BackupRestorationConfig.BackupPath = InteractionUtilities
+                .ShowFileSystemDialog(false, Config.BackupRestorationConfig.BackupPath).Path;
         }
 
         private void SelectCliPath(object sender, RoutedEventArgs e)
         {
-            Config.DatabaseConfig.RestorationCliLocation = InteractionUtilities
-                .ShowFileSystemDialog(true, Config.DatabaseConfig.RestorationCliLocation).Path;
+            Config.BackupRestorationConfig.RestorationCliLocation = InteractionUtilities
+                .ShowFileSystemDialog(true, Config.BackupRestorationConfig.RestorationCliLocation).Path;
         }
 
         private void SelectLicenseFile(object sender, RoutedEventArgs e)

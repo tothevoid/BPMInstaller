@@ -8,7 +8,8 @@ namespace BPMInstaller.Core.Services
     {
         public Dictionary<string, string> GetActiveContainers()
         {
-            var output = CallDockerCommand("ps --format \"{{.ID}}\t{{.Image}}\"");
+            var command = "ps --format \"{{.ID}}\t{{.Names}}\"";
+            var output = CallDockerCommand(command);
 
             return output.StandardOutput.Split("\n").Where(command => !string.IsNullOrEmpty(command))
                 .Select(part =>

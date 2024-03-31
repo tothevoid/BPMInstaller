@@ -42,7 +42,10 @@ namespace BPMInstaller.Core.Services
 
         private void StartBasicInstallation()
         {
-            ExecuteBeforeApplicationStarted();
+            if (!ExecuteBeforeApplicationStarted())
+            {
+                return;
+            }
 
             if (!InstallationConfig.Pipeline.StartApplication)
             {
@@ -57,18 +60,18 @@ namespace BPMInstaller.Core.Services
             ExecuteAfterApplicationStarted(runningApplication);
         }
 
-        private void ExecuteBeforeApplicationStarted()
+        private bool ExecuteBeforeApplicationStarted()
         {
             ExecuteFileSystemOperations();
 
             if (!InitializeDatabase())
             {
-                return;
+                return false;
             }
 
             if (!RestoreDatabase())
             {
-                return;
+                return false;
             }
 
             if (InstallationConfig.Pipeline.DisableForcePasswordChange)
@@ -77,6 +80,8 @@ namespace BPMInstaller.Core.Services
                 DatabaseService.DisableForcePasswordChange(ApplicationAdministrator.UserName);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixed));
             }
+
+            return true;
         }
 
         private void ExecuteAfterApplicationStarted(IRunningApplication runningApplication)

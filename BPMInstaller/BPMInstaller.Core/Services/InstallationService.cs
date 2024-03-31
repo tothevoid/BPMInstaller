@@ -42,7 +42,24 @@ namespace BPMInstaller.Core.Services
 
         private void StartBasicInstallation()
         {
-            ActualizeConfigs();
+            ExecuteBeforeApplicationStarted();
+
+            if (!InstallationConfig.Pipeline.StartApplication)
+            {
+                return;
+            }
+
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Starting));
+            var runningApplication = ApplicationRepository.GetInstance(InstallationConfig.ApplicationPath,
+                InstallationConfig.ApplicationConfig);
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Started));
+
+            ExecuteAfterApplicationStarted(runningApplication);
+        }
+
+        private void ExecuteBeforeApplicationStarted()
+        {
+            ExecuteFileSystemOperations();
 
             if (!InitializeDatabase())
             {
@@ -57,22 +74,13 @@ namespace BPMInstaller.Core.Services
             if (InstallationConfig.Pipeline.DisableForcePasswordChange)
             {
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixing));
-
                 DatabaseService.DisableForcePasswordChange(ApplicationAdministrator.UserName);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixed));
             }
-            
-            if (!InstallationConfig.Pipeline.StartApplication)
-            {
-                return;
-            }
+        }
 
-            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Starting));
-            var runningApplication = ApplicationRepository.GetInstance(InstallationConfig.ApplicationPath,
-                InstallationConfig.ApplicationConfig);
-
-            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Started));
-
+        private void ExecuteAfterApplicationStarted(IRunningApplication runningApplication)
+        {
             if (InstallationConfig.Pipeline.InstallLicense)
             {
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Started));
@@ -174,7 +182,7 @@ namespace BPMInstaller.Core.Services
             return true;
         }
 
-        public void ActualizeConfigs()
+        private void ExecuteFileSystemOperations()
         {
             var distributiveService = new DistributiveService();
 

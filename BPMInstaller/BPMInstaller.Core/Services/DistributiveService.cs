@@ -11,17 +11,19 @@ namespace BPMInstaller.Core.Services
         public void UpdateConnectionStrings(string applicationPath, DatabaseConfig databaseConfig = null, 
             RedisConfig redisConfig = null)
         {
-            var rootNode = GetConnectionString(applicationPath);
+            var connectionStringsPath = GetConnectionStringsPath(applicationPath);
+            var rootNode = GetConnectionString(connectionStringsPath);
 
             UpdateDatabaseConfig(databaseConfig, GetDatabaseString(rootNode.Configs));
             UpdateRedisConfig(redisConfig, GetRedisString(rootNode.Configs));
 
-            rootNode.Document.Save(applicationPath);
+            rootNode.Document.Save(connectionStringsPath);
         }
 
         public (DatabaseConfig DatabaseConfig, RedisConfig RedisConfig) GetConnectionStrings(string applicationPath)
         {
-            var rootNode = GetConnectionString(applicationPath);
+            var connectionStringsPath = GetConnectionStringsPath(applicationPath);
+            var rootNode = GetConnectionString(connectionStringsPath);
 
             return (
                 //TODO: Handle case-insensetive namings
@@ -81,11 +83,13 @@ namespace BPMInstaller.Core.Services
                .ToDictionary(keyValue => keyValue[0].Trim(), keyValue => keyValue[1].Trim());
         }
 
-        private (XmlDocument Document, XmlNode Configs) GetConnectionString(string applicationPath)
+        private string GetConnectionStringsPath(string applicationPath) =>
+            Path.Combine(applicationPath, "ConnectionStrings.config");
+
+        private (XmlDocument Document, XmlNode Configs) GetConnectionString(string connectionStringsPath)
         {
             XmlDocument doc = new XmlDocument();
-            var elementPath = Path.Combine(applicationPath, "ConnectionStrings.config");
-            doc.Load(elementPath);
+            doc.Load(connectionStringsPath);
             return (doc, doc.GetElementsByTagName("connectionStrings")[0]);
         }
 

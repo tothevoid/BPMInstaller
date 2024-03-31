@@ -9,7 +9,7 @@
         {
             public const string Started = "Запущена установка приложения";
 
-            public const string Ended = "Запущена установка приложения";
+            public const string Ended = "Установка приложения завершена";
         }
 
         public static class ConnectionStrings
@@ -27,7 +27,7 @@
 
             public const string FixingCookies = "Исправление авторизации";
 
-            public const string CookiedFixed = "Авторизация исправлена";
+            public const string CookiesFixed = "Авторизация исправлена";
         }
 
         public static class Application
@@ -70,6 +70,8 @@
 
         public static class Licensing
         {
+            public const string Started = "Процедура добавления лицензий начата";
+
             public const string CidActualization = "Обновление CId";
 
             public const string CidActualized = "CId обновлён";
@@ -78,9 +80,11 @@
 
             public const string Applied = "Лицензии установлены";
 
-            public const string AssingingTo = "Назначение лицензий на {0}";
+            public const string AssigningTo = "Назначение лицензий на {0}";
 
             public const string Assigned = "Лицензии назначены";
+
+            public const string Ended = "Процедура добавления лицензий завершена";
         }
 
         public static class Database

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BPMInstaller"
         mc:Ignorable="d"
-        Title="Установщик BPM" MinHeight="750" Height="975" Width="800">
+        Title="Установщик BPM" MinHeight="750" Height="1000" Width="800">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
         <Style x:Key="ControlGroup">

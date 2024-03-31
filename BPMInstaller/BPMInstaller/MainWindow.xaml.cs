@@ -132,28 +132,19 @@ namespace BPMInstaller.UI.Desktop
         //TODO: Remove duplication
         private void ValidateRedis(object sender, RoutedEventArgs e)
         {
-            if (ValidateRedisState.Fill == null || Config?.RedisConfig?.IsChanged == true)
-            {
-                ValidateConfig(() => Validator.ValidateRedisConnection(Config.RedisConfig.ToCoreModel()),
-                   ValidateRedisState, Config.RedisConfig);
-            }
+            ValidateConfig(() => Validator.ValidateRedisConnection(Config.RedisConfig.ToCoreModel()),
+                ValidateRedisState, Config.RedisConfig);
         }
 
         private void ValidateDatabase(object sender, RoutedEventArgs e)
         {
-            if (ValidateDatabaseState.Fill == null || Config?.DatabaseConfig?.IsChanged == true)
-            {
-                ValidateConfig(() => Validator.ValidateDatabaseConnection(Config.DatabaseConfig.ToCoreModel()),
-                   ValidateDatabaseState, Config.DatabaseConfig);
-            }
+            ValidateConfig(() => Validator.ValidateDatabaseConnection(Config.DatabaseConfig.ToCoreModel()),
+                ValidateDatabaseState, Config.DatabaseConfig);
         }
         private void ValidateApplication(object sender, RoutedEventArgs e)
         {
-            if (ValidateApplicationState.Fill == null || Config?.ApplicationConfig?.IsChanged == true)
-            {
-                ValidateConfig(() => Validator.ValidateAppConfig(Config.ApplicationConfig.ToCoreModel()), 
-                    ValidateApplicationState, Config.ApplicationConfig);
-            }
+            ValidateConfig(() => Validator.ValidateAppConfig(Config.ApplicationConfig.ToCoreModel()),
+                ValidateApplicationState, Config.ApplicationConfig);
         }
 
         private void ValidateConfig(Func<string> validationHandler, System.Windows.Shapes.Rectangle stateElement, BaseUIModel model)
@@ -171,16 +162,5 @@ namespace BPMInstaller.UI.Desktop
             });
         }
         #endregion
-
-        private void OpenConfig(object sender, RoutedEventArgs e)
-        {
-            var pressedButton = sender as Button;
-            if (pressedButton?.Tag is string processedButtonTag)
-            {
-                Config = new InstallationConfig { ApplicationPath = processedButtonTag };
-                Config.ActualizeTriggers();
-                LoadCurrentConfig();
-            }
-        }
     }
 }

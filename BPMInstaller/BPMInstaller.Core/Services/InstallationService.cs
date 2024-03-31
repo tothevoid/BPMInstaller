@@ -64,7 +64,6 @@ namespace BPMInstaller.Core.Services
             
             if (!InstallationConfig.Pipeline.StartApplication)
             {
-                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
                 return;
             }
 
@@ -76,7 +75,9 @@ namespace BPMInstaller.Core.Services
 
             if (InstallationConfig.Pipeline.InstallLicense)
             {
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Started));
                 InstallLicense(runningApplication);
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Ended));
             }
 
             if (InstallationConfig.Pipeline.CompileApplication)
@@ -85,15 +86,13 @@ namespace BPMInstaller.Core.Services
                 //TODO: Handle compilation response
                 runningApplication.Compile();
             }
-
-            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
         }
 
         private bool InstallLicense(IRunningApplication runningApplication)
         {
             if (!InstallationConfig.Pipeline.InstallLicense || InstallationConfig.LicenseConfig == null)
             {
-                return false;
+                return true;
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.CidActualization));
@@ -104,10 +103,10 @@ namespace BPMInstaller.Core.Services
             runningApplication.AddLicenses(InstallationConfig.LicenseConfig);
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Applied));
 
-            InstallationLogger.Log(InstallationMessage.Info(string.Format(InstallationResources.Licensing.AssingingTo,
+            InstallationLogger.Log(InstallationMessage.Info(string.Format(InstallationResources.Licensing.AssigningTo,
                 ApplicationAdministrator.UserName)));
             DatabaseService.ApplyAdministratorLicenses(ApplicationAdministrator.UserName);
-            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Applied));
+            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Assigned));
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Redis.Flushing));
             RedisService.FlushData(InstallationConfig.RedisConfig);
@@ -118,6 +117,11 @@ namespace BPMInstaller.Core.Services
 
         public bool InitializeDatabase()
         {
+            if (!InstallationConfig.Pipeline.RestoreDatabaseBackup)
+            {
+                return true;
+            }
+
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Connection.Validating));
             var exceptionMessage = DatabaseService.ValidateConnection();
             if (!string.IsNullOrEmpty(exceptionMessage))
@@ -195,7 +199,7 @@ namespace BPMInstaller.Core.Services
             {
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.FixingCookies));
                 distributiveService.FixAuthorizationCookies(InstallationConfig.ApplicationPath);
-                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.CookiedFixed));
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.CookiesFixed));
             }
         }
     }

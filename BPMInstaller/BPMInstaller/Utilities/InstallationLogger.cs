@@ -10,12 +10,7 @@ namespace BPMInstaller.UI.Desktop.Utilities
 
         public InstallationLogger(Action<InstallationMessage> messageHandler)
         {
-            if (messageHandler == null)
-            {
-                throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            OnInstallationMessageReceived += messageHandler;
+            OnInstallationMessageReceived += messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
         }
 
         public void Log(InstallationMessage message)

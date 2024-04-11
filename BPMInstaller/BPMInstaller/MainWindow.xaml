@@ -33,7 +33,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" Text="{Binding Config.ApplicationPath}"/>
-                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectDistributivePath"/>
+                                    <Button Grid.Column="1" Content="Выбрать" Command="{Binding Actions.SelectDistributivePathCommand}"/>
                                 </Grid>
                             </StackPanel>
                             <StackPanel Style="{StaticResource ControlGroup}">
@@ -41,7 +41,7 @@
                                     <GroupBox.Header>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock VerticalAlignment="Center">Приложение</TextBlock>
-                                            <Button Style="{StaticResource ValidationButton}" Margin="5 0" Click="ValidateApplication"/>
+                                            <Button Style="{StaticResource ValidationButton}" Margin="5 0" Command="{Binding Actions.ValidateApplicationCommand}"/>
                                             <Rectangle x:Name="ValidateApplicationState" Height="15" Width="15" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GroupBox.Header>
@@ -67,7 +67,7 @@
                                         <GroupBox.Header>
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock VerticalAlignment="Center">Подключение к базе данных</TextBlock>
-                                                <Button x:Name="ValidateDatabaseButton" Style="{StaticResource ValidationButton}" Margin="5 0" Click="ValidateDatabase"/>
+                                                <Button x:Name="ValidateDatabaseButton" Style="{StaticResource ValidationButton}" Margin="5 0" Command="{Binding Actions.ValidateDatabaseCommand}"/>
                                                 <Rectangle x:Name="ValidateDatabaseState" Height="15" Width="15" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </GroupBox.Header>
@@ -118,7 +118,7 @@
                                     <GroupBox.Header>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock VerticalAlignment="Center">Подключение к Redis</TextBlock>
-                                            <Button x:Name="ValidateRedisButton" Style="{StaticResource ValidationButton}" Click="ValidateRedis" Margin="5 0"/>
+                                            <Button x:Name="ValidateRedisButton" Style="{StaticResource ValidationButton}" Command="{Binding Actions.ValidateRedisCommand}" Margin="5 0"/>
                                             <Rectangle x:Name="ValidateRedisState" Height="15" Width="15" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GroupBox.Header>
@@ -179,7 +179,7 @@
                                                         <ColumnDefinition Width="1*"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBox Style="{StaticResource BaseField}" Grid.Column="0" Text="{Binding Config.BackupRestorationConfig.BackupPath}"/>
-                                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectBackupFile"/>
+                                                    <Button Grid.Column="1" Content="Выбрать" Command="{Binding Actions.SelectBackupFileCommand}"/>
                                                 </Grid>
                                             </StackPanel>
                                             <StackPanel Style="{StaticResource ControlGroup}">
@@ -206,7 +206,7 @@
                                                                 <ColumnDefinition Width="75"/>
                                                             </Grid.ColumnDefinitions>
                                                             <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.BackupRestorationConfig.RestorationCliLocation}"/>
-                                                            <Button Grid.Column="1" Content="Выбрать" Click="SelectCliPath"/>
+                                                            <Button Grid.Column="1" Content="Выбрать" Command="{Binding Actions.SelectCliPathCommand}"/>
                                                         </Grid>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1" Visibility="{Binding Path=Config.BackupRestorationConfig.IsDocker, Converter={StaticResource VisibleIfTrueConverter}}" Orientation="Vertical">
@@ -248,7 +248,7 @@
                                                         <ColumnDefinition Width="2*"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBox Style="{StaticResource BaseField}" Grid.Column="0" Text="{Binding Config.LicenseConfig.Path}"/>
-                                                    <Button Grid.Column="1" Content="Выбрать" Click="SelectLicenseFile"/>
+                                                    <Button Grid.Column="1" Content="Выбрать" Command="{Binding Actions.SelectLicenseFileCommand}"/>
                                                 </Grid>
                                             </StackPanel>
                                         </Grid>
@@ -263,11 +263,15 @@
                             </GroupBox>
                         </StackPanel>
                     </ScrollViewer>
-                    <Button Background="White" Grid.Row="1" Click="Install">Выполнить</Button>
+                    <Button Background="White" Grid.Row="1" Command="{Binding Actions.StartInstallationCommand}" >Выполнить</Button>
                 </Grid>
             </TabItem>
             <TabItem Header="Запуск">
                 <StackPanel DataContext="{Binding ControlsSessionState}" Margin="0 20">
+                    <StackPanel Visibility="{Binding Path=IsInstallationRunning, Converter={StaticResource VisibleIfTrueConverter}}">
+                        <TextBlock Margin="10, 0" HorizontalAlignment="Center" FontSize="14">Запущена установка</TextBlock>
+                        <TextBlock FontSize="14" HorizontalAlignment="Center" FontWeight="Bold" Text="{Binding InstallationDuration}"></TextBlock>
+                    </StackPanel>
                     <ListView ItemsSource="{Binding Output}" >
                         <ListView.View>
                             <GridView>

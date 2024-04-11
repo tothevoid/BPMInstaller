@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace BPMInstaller.UI.Desktop.Model.UI
 {
     public class ValidationState: BaseUIModel
     {
-        private SolidColorBrush applicationValidationStateColor = new SolidColorBrush(Colors.White);
-        private SolidColorBrush databaseValidationStateColor = new SolidColorBrush(Colors.White);
-        private SolidColorBrush redisValidationStateColor = new SolidColorBrush(Colors.White);
+        private SolidColorBrush applicationValidationStateColor = new(Colors.White);
+        private SolidColorBrush databaseValidationStateColor = new(Colors.White);
+        private SolidColorBrush redisValidationStateColor = new(Colors.White);
 
-        private string? applicationValidationResult = null;
-        private string? databaseValidationResult = null;
-        private string? redisValidationResult = null;
+        private string? applicationValidationResult;
+        private string? databaseValidationResult;
+        private string? redisValidationResult;
 
         public SolidColorBrush ApplicationValidationStateColor 
         { 

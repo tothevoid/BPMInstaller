@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BPMInstaller"
+        xmlns:viewModels="clr-namespace:BPMInstaller.UI.Desktop.ViewModels"
+        xmlns:ui="clr-namespace:BPMInstaller.UI.Desktop.Model.UI"
         mc:Ignorable="d"
         Title="Установщик BPM" MinHeight="750" Height="1000" Width="800">
     <Window.Resources>
@@ -15,7 +17,7 @@
             <Setter Property="Control.BorderThickness" Value="0 0 0 1" />
         </Style>
     </Window.Resources>
-    <Grid>
+    <Grid d:DataContext="{d:DesignInstance ui:InstallationConfigurationModel}">
         <TabControl  Name="ApplicationTabs" Padding="0,20,0,0">
             <TabItem Header="Конфигурация">
                 <Grid>
@@ -42,7 +44,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock VerticalAlignment="Center">Приложение</TextBlock>
                                             <Button Style="{StaticResource ValidationButton}" Margin="5 0" Command="{Binding Actions.ValidateApplicationCommand}"/>
-                                            <Rectangle x:Name="ValidateApplicationState" Height="15" Width="15" VerticalAlignment="Center"/>
+                                            <Rectangle Fill="{Binding ValidationState.ApplicationValidationStateColor}" ToolTip="{Binding ValidationState.ApplicationValidationResult}" x:Name="ValidateApplicationState" Height="15" Width="15" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GroupBox.Header>
                                     <Grid>
@@ -67,8 +69,8 @@
                                         <GroupBox.Header>
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock VerticalAlignment="Center">Подключение к базе данных</TextBlock>
-                                                <Button x:Name="ValidateDatabaseButton" Style="{StaticResource ValidationButton}" Margin="5 0" Command="{Binding Actions.ValidateDatabaseCommand}"/>
-                                                <Rectangle x:Name="ValidateDatabaseState" Height="15" Width="15" VerticalAlignment="Center"/>
+                                                <Button Style="{StaticResource ValidationButton}" Margin="5 0" Command="{Binding Actions.ValidateDatabaseCommand}"/>
+                                                <Rectangle Fill="{Binding  ValidationState.DatabaseValidationStateColor}" ToolTip="{Binding ValidationState.DatabaseValidationResult}" x:Name="ValidateDatabaseState" Height="15" Width="15" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </GroupBox.Header>
                                         <Grid>
@@ -119,7 +121,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock VerticalAlignment="Center">Подключение к Redis</TextBlock>
                                             <Button x:Name="ValidateRedisButton" Style="{StaticResource ValidationButton}" Command="{Binding Actions.ValidateRedisCommand}" Margin="5 0"/>
-                                            <Rectangle x:Name="ValidateRedisState" Height="15" Width="15" VerticalAlignment="Center"/>
+                                            <Rectangle Fill="{Binding  ValidationState.RedisValidationStateColor}" ToolTip="{Binding ValidationState.RedisValidationResult}" x:Name="ValidateRedisState" Height="15" Width="15" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GroupBox.Header>
                                     <Grid>

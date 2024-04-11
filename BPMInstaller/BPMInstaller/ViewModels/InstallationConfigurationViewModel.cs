@@ -40,13 +40,13 @@ namespace BPMInstaller.UI.Desktop.ViewModels
             return new ActionHandlersConfiguration()
             {
                 SelectBackupFileCommand = new RelayCommand((_) => SelectBackupFile()),
-                SelectDistributivePathCommand = new RelayCommand((_) => SelectBackupFile()),
-                SelectCliPathCommand = new RelayCommand((_) => SelectBackupFile()),
-                SelectLicenseFileCommand = new RelayCommand((_) => SelectBackupFile()),
-                StartInstallationCommand = new RelayCommand((_) => SelectBackupFile()),
-                ValidateApplicationCommand = new RelayCommand((_) => SelectBackupFile()),
-                ValidateDatabaseCommand = new RelayCommand((_) => SelectBackupFile()),
-                ValidateRedisCommand = new RelayCommand((_) => SelectBackupFile())
+                SelectDistributivePathCommand = new RelayCommand((_) => SelectDistributivePath()),
+                SelectCliPathCommand = new RelayCommand((_) => SelectCliPath()),
+                SelectLicenseFileCommand = new RelayCommand((_) => SelectLicenseFile()),
+                StartInstallationCommand = new RelayCommand((_) => StartInstallation()),
+                ValidateApplicationCommand = new RelayCommand((_) => ValidateApplication()),
+                ValidateDatabaseCommand = new RelayCommand((_) => ValidateDatabase()),
+                ValidateRedisCommand = new RelayCommand((_) => ValidateRedis())
             };
         }
 

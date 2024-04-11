@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Models
+namespace BPMInstaller.UI.Desktop.Models.Configs
 {
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
-    public class InstallationConfig: ResponsiveModel
+    public class InstallationConfig : ResponsiveModel
     {
         public event Action? OnModelChanged;
 
@@ -28,7 +28,7 @@ namespace BPMInstaller.UI.Desktop.Models
 
             configs.ForEach(config =>
             {
-                config.PropertyChanged += (_,_) =>
+                config.PropertyChanged += (_, _) =>
                 {
                     OnModelChanged?.Invoke();
                 };
@@ -38,8 +38,8 @@ namespace BPMInstaller.UI.Desktop.Models
         private string? applicationPath;
 
         /// <inheritdoc cref="Core.Model.InstallationConfig.ApplicationPath"/>
-        public string? ApplicationPath 
-        { 
+        public string? ApplicationPath
+        {
             get => applicationPath;
             set => Set(ref applicationPath, value);
         }

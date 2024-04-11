@@ -1,6 +1,6 @@
 ﻿using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Models
+namespace BPMInstaller.UI.Desktop.Models.Configs
 {
     /// <inheritdoc cref="Core.Model.DatabaseConfig"/>
     public class DatabaseConfig : ResponsiveModel
@@ -16,8 +16,8 @@ namespace BPMInstaller.UI.Desktop.Models
         private string databaseName = "bpm";
 
         /// <inheritdoc cref="Core.Model.DatabaseConfig.Host"/>
-        public string Host 
-        { 
+        public string Host
+        {
             get => host;
             set => Set(ref host, value);
         }
@@ -30,22 +30,22 @@ namespace BPMInstaller.UI.Desktop.Models
         }
 
         /// <inheritdoc cref="Core.Model.DatabaseConfig.AdminUserName"/>
-        public string AdminUserName 
-        { 
+        public string AdminUserName
+        {
             get => adminUserName;
             set => Set(ref adminUserName, value);
         }
 
         /// <inheritdoc cref="Core.Model.DatabaseConfig.AdminPassword"/>
-        public string AdminPassword 
-        { 
+        public string AdminPassword
+        {
             get => adminPassword;
             set => Set(ref adminPassword, value);
         }
 
         /// <inheritdoc cref="Core.Model.DatabaseConfig.DatabaseName"/>
-        public string DatabaseName 
-        { 
+        public string DatabaseName
+        {
             get => databaseName;
             set => Set(ref databaseName, value);
         }
@@ -70,7 +70,7 @@ namespace BPMInstaller.UI.Desktop.Models
                 AdminUserName = AdminUserName,
                 AdminPassword = AdminPassword,
                 DatabaseName = DatabaseName
-            };      
+            };
         }
     }
 }

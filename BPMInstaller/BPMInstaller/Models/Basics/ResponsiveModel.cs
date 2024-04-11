@@ -11,12 +11,12 @@ namespace BPMInstaller.UI.Desktop.Models.Basics
 
         protected void Set<T>(ref T field, T value, [CallerMemberName] string? propName = null)
         {
-            if (field != null && !field.Equals(value) || value != null && !value.Equals(field))
+            if (field != null && !field.Equals(value) || 
+                value != null && !value.Equals(field))
             {
                 field = value;
                 IsChanged = true;
-                if (PropertyChanged != null)
-                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propName));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
             }
         }
 

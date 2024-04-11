@@ -1,17 +1,17 @@
 ﻿using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Models
+namespace BPMInstaller.UI.Desktop.Models.Configs
 {
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
-    public class ApplicationConfig: ResponsiveModel
+    public class ApplicationConfig : ResponsiveModel
     {
         private ushort port = 5001;
 
         private string host = "localhost";
 
         /// <inheritdoc cref="Core.Model.ApplicationConfig.ApplicationPort"/>
-        public ushort Port 
-        { 
+        public ushort Port
+        {
             get => port;
             set => Set(ref port, value);
         }
@@ -31,7 +31,7 @@ namespace BPMInstaller.UI.Desktop.Models
         {
             return new Core.Model.ApplicationConfig
             {
-                ApplicationPort = this.Port
+                ApplicationPort = Port
             };
         }
     }

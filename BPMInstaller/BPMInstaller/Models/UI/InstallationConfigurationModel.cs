@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using BPMInstaller.Core.Services;
+using BPMInstaller.UI.Desktop.Models.Configs;
 
 namespace BPMInstaller.UI.Desktop.Models.UI
 {

@@ -1,9 +1,9 @@
 ﻿using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Models
+namespace BPMInstaller.UI.Desktop.Models.Configs
 {
     /// <inheritdoc cref="Core.Model.InstallationPipeline"/>
-    public class InstallationPipeline: ResponsiveModel
+    public class InstallationPipeline : ResponsiveModel
     {
         private bool updateApplicationPort = true;
 
@@ -28,8 +28,8 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.UpdateApplicationPort"/>
         /// </summary>
-        public bool UpdateApplicationPort 
-        { 
+        public bool UpdateApplicationPort
+        {
             get => updateApplicationPort;
             set => Set(ref updateApplicationPort, value);
         }
@@ -37,8 +37,8 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.UpdateDatabaseConnectionString"/>
         /// </summary>
-        public bool UpdateDatabaseConnectionString 
-        { 
+        public bool UpdateDatabaseConnectionString
+        {
             get => updateDatabaseConnectionString;
             set => Set(ref updateDatabaseConnectionString, value);
         }
@@ -46,8 +46,8 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.RestoreDatabaseBackup"/>
         /// </summary>
-        public bool RestoreDatabaseBackup 
-        { 
+        public bool RestoreDatabaseBackup
+        {
             get => restoreDatabaseBackup;
             set => Set(ref restoreDatabaseBackup, value);
         }
@@ -55,8 +55,8 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.UpdateRedisConnectionString"/>
         /// </summary>
-        public bool UpdateRedisConnectionString 
-        { 
+        public bool UpdateRedisConnectionString
+        {
             get => updateRedisConnectionString;
             set => Set(ref updateRedisConnectionString, value);
         }
@@ -64,16 +64,17 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.InstallLicense"/>
         /// </summary>
-        public bool InstallLicense 
-        { 
+        public bool InstallLicense
+        {
             get => installLicense;
-            set { Set(ref installLicense, value); if (!StartApplication) StartApplication = true; } }
+            set { Set(ref installLicense, value); if (!StartApplication) StartApplication = true; }
+        }
 
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.RemoveCertificate"/>
         /// </summary>
-        public bool RemoveCertificate 
-        { 
+        public bool RemoveCertificate
+        {
             get => removeCertificate;
             set => Set(ref removeCertificate, value);
         }
@@ -81,7 +82,7 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.DisableForcePasswordChange"/>
         /// </summary>
-        public bool DisableForcePasswordChange 
+        public bool DisableForcePasswordChange
         {
             get => disableForcePasswordChange;
             set => Set(ref disableForcePasswordChange, value);
@@ -90,17 +91,17 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.CompileApplication"/>
         /// </summary>
-        public bool CompileApplication 
-        { 
+        public bool CompileApplication
+        {
             get => compileApplication;
-            set { Set(ref compileApplication, value); if (!StartApplication) StartApplication = true;  }
+            set { Set(ref compileApplication, value); if (!StartApplication) StartApplication = true; }
         }
 
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.StartApplication"/>
         /// </summary>
-        public bool StartApplication 
-        { 
+        public bool StartApplication
+        {
             get => startApplication;
             set => Set(ref startApplication, value);
         }
@@ -108,8 +109,8 @@ namespace BPMInstaller.UI.Desktop.Models
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.FixCookies"/>
         /// </summary>
-        public bool FixCookies 
-        { 
+        public bool FixCookies
+        {
             get => fixCookies;
             set => Set(ref fixCookies, value);
         }

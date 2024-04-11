@@ -13,21 +13,21 @@ namespace BPMInstaller.UI.Desktop.ViewModels
     public class InstallationConfigurationViewModel
     {
         #region Tools
-        private IContextSynchronizer UiSynchronizer { get; }
+        private IContextSynchronizer MainThreadSync { get; }
 
-        private ConfigValidator Validator { get; } = new();
+        private ConfigValidator ConfigurationValidator { get; } = new();
 
-        private ConfigurationSerializer ConfigSerializer { get; set; } = new();
+        private ConfigurationSerializer ConfigurationSerializer { get; } = new();
         #endregion
 
         private InstallationConfigurationModel InstallationConfiguration { get; }
 
-        public InstallationConfigurationViewModel(IContextSynchronizer contextSynchronizer)
+        public InstallationConfigurationViewModel(IContextSynchronizer uiThreadSynchronizer)
         {
-            UiSynchronizer = contextSynchronizer;
+            MainThreadSync = uiThreadSynchronizer;
 
             InstallationConfiguration = new InstallationConfigurationModel(GetActionHandlers(), 
-                ConfigSerializer.LoadLocations().ToList());
+                ConfigurationSerializer.LoadLocations().ToList());
         }
 
         public InstallationConfigurationModel GetModel() => InstallationConfiguration;
@@ -56,7 +56,7 @@ namespace BPMInstaller.UI.Desktop.ViewModels
                 var logger = new InstallationLogger(AddLoggerMessage);
                 new InstallationService(logger, InstallationConfiguration.Config.ConvertToCoreModel()).Install();
 
-                UiSynchronizer.InvokeSynced(() =>
+                MainThreadSync.InvokeSynced(() =>
                 {
                     InstallationConfiguration.ControlsSessionState.InstallationEnded();
                 });
@@ -66,7 +66,7 @@ namespace BPMInstaller.UI.Desktop.ViewModels
 
         private void AddLoggerMessage(InstallationMessage message)
         {
-            UiSynchronizer.InvokeSynced(() => {
+            MainThreadSync.InvokeSynced(() => {
                 InstallationConfiguration.ControlsSessionState.Output.Add(message);
             });
         }
@@ -86,7 +86,7 @@ namespace BPMInstaller.UI.Desktop.ViewModels
                 !InstallationConfiguration.Configurations.Contains(InstallationConfiguration.Config.ApplicationPath))
             {
                 InstallationConfiguration.Configurations.Add(InstallationConfiguration.Config.ApplicationPath);
-                ConfigSerializer.SaveLocations(InstallationConfiguration.Configurations);
+                ConfigurationSerializer.SaveLocations(InstallationConfiguration.Configurations);
             }
 
             var initConnectionStrings = pathChanged ||
@@ -124,18 +124,18 @@ namespace BPMInstaller.UI.Desktop.ViewModels
         //TODO: Remove duplication
         private void ValidateRedis()
         {
-            ValidateConfig(() => Validator.ValidateRedisConnection(InstallationConfiguration.Config.RedisConfig.ToCoreModel()),
+            ValidateConfig(() => ConfigurationValidator.ValidateRedisConnection(InstallationConfiguration.Config.RedisConfig.ToCoreModel()),
                 ValidationState.ValidationOperation.Redis, InstallationConfiguration.Config.RedisConfig);
         }
 
         private void ValidateDatabase()
         {
-            ValidateConfig(() => Validator.ValidateDatabaseConnection(InstallationConfiguration.Config.DatabaseConfig.ToCoreModel()),
+            ValidateConfig(() => ConfigurationValidator.ValidateDatabaseConnection(InstallationConfiguration.Config.DatabaseConfig.ToCoreModel()),
                 ValidationState.ValidationOperation.Database, InstallationConfiguration.Config.DatabaseConfig);
         }
         private void ValidateApplication()
         {
-            ValidateConfig(() => Validator.ValidateAppConfig(InstallationConfiguration.Config.ApplicationConfig.ToCoreModel()),
+            ValidateConfig(() => ConfigurationValidator.ValidateAppConfig(InstallationConfiguration.Config.ApplicationConfig.ToCoreModel()),
                 ValidationState.ValidationOperation.Application, InstallationConfiguration.Config.ApplicationConfig);
         }
 
@@ -146,7 +146,7 @@ namespace BPMInstaller.UI.Desktop.ViewModels
             {
                 var validationResult = validationHandler();
                 
-                UiSynchronizer.InvokeSynced(() =>
+                MainThreadSync.InvokeSynced(() =>
                 {
                     InstallationConfiguration.ValidationState.HandleValidationResult(validationOperation, validationResult);
                 });

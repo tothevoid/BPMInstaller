@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BPMInstaller.UI.Desktop.Interfaces
 {
+    /// <summary>
+    /// Синхронизатор контекста выполнения логики
+    /// </summary>
     public interface IContextSynchronizer
     {
+        /// <summary>
+        /// Выполнение конкретного действия в основном потоке
+        /// </summary>
+        /// <param name="action">Выполняемое действие</param>
         void InvokeSynced(Action action);
     }
 }

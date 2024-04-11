@@ -1,17 +1,17 @@
 ﻿using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Models
+namespace BPMInstaller.UI.Desktop.Models.Configs
 {
     /// <inheritdoc cref="Core.Model.LicenseConfig"/>
-    public class LicenseConfig: ResponsiveModel
+    public class LicenseConfig : ResponsiveModel
     {
         private string path = string.Empty;
 
         private long cId;
 
         /// <inheritdoc cref="Core.Model.LicenseConfig.Path"/>
-        public string Path 
-        { 
+        public string Path
+        {
             get => path;
             set => Set(ref path, value);
         }

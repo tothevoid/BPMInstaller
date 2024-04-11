@@ -5,10 +5,10 @@ using BPMInstaller.Core.Enums;
 using BPMInstaller.Core.Services;
 using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Models
+namespace BPMInstaller.UI.Desktop.Models.Configs
 {
     /// <inheritdoc cref="Core.Model.BackupRestorationConfig"/>
-    public class BackupRestorationConfig: ResponsiveModel
+    public class BackupRestorationConfig : ResponsiveModel
     {
         private string? backupPath;
         private string? restorationCliLocation;
@@ -17,22 +17,22 @@ namespace BPMInstaller.UI.Desktop.Models
         private string selectedRestorationOption = RestorationMapping
             .FirstOrDefault(mapping => mapping.Value == DatabaseDeploymentType.Docker).Key ?? string.Empty;
 
-        private ObservableCollection<string> activeContainers = new ();
+        private ObservableCollection<string> activeContainers = new();
 
         /// TODO: Rework with specific converter
         private bool isDocker = true;
         private bool isCli = false;
 
         /// <inheritdoc cref="Core.Model.BackupRestorationConfig.BackupPath"/>
-        public string? BackupPath 
-        { 
+        public string? BackupPath
+        {
             get => backupPath;
             set => Set(ref backupPath, value);
         }
 
         /// <inheritdoc cref="Core.Model.BackupRestorationConfig.RestorationCliLocation"/>
-        public string? RestorationCliLocation 
-        { 
+        public string? RestorationCliLocation
+        {
             get => restorationCliLocation;
             set => Set(ref restorationCliLocation, value);
         }

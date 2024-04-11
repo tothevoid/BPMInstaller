@@ -7,7 +7,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary x:Name="Icons"
-                Source="pack://application:,,,/BPMInstaller.UI.Desktop;component/Icons.xaml" />
+                Source="pack://application:,,,/BPMInstaller;component/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

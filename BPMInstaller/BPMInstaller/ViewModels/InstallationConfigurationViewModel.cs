@@ -1,15 +1,12 @@
 ﻿using BPMInstaller.Core.Model.Runtime;
 using BPMInstaller.Core.Services;
-using BPMInstaller.UI.Desktop.Model;
 using BPMInstaller.UI.Desktop.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 using BPMInstaller.UI.Desktop.Interfaces;
-using BPMInstaller.UI.Desktop.Model.UI;
+using BPMInstaller.UI.Desktop.Models.Basics;
+using BPMInstaller.UI.Desktop.Models.UI;
 
 namespace BPMInstaller.UI.Desktop.ViewModels
 {
@@ -142,7 +139,7 @@ namespace BPMInstaller.UI.Desktop.ViewModels
                 ValidationState.ValidationOperation.Application, InstallationConfiguration.Config.ApplicationConfig);
         }
 
-        private void ValidateConfig(Func<string> validationHandler, ValidationState.ValidationOperation validationOperation, BaseUIModel model)
+        private void ValidateConfig(Func<string> validationHandler, ValidationState.ValidationOperation validationOperation, ResponsiveModel model)
         {
             InstallationConfiguration.ValidationState.StartValidation(validationOperation);
             Task.Run(() =>

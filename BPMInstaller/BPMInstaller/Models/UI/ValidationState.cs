@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Windows.Media;
+using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Model.UI
+namespace BPMInstaller.UI.Desktop.Models.UI
 {
-    public class ValidationState: BaseUIModel
+    public class ValidationState: ResponsiveModel
     {
         private SolidColorBrush applicationValidationStateColor = new(Colors.White);
         private SolidColorBrush databaseValidationStateColor = new(Colors.White);

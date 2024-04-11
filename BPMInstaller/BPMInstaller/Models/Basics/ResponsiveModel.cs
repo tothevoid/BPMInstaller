@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace BPMInstaller.UI.Desktop.Model
+namespace BPMInstaller.UI.Desktop.Models.Basics
 {
-    public class BaseUIModel: INotifyPropertyChanged
+    public class ResponsiveModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool IsChanged { get; private set; }
 
-        protected void Set<T>(ref T field, T value, [CallerMemberName] string propName = null)
+        protected void Set<T>(ref T field, T value, [CallerMemberName] string? propName = null)
         {
             if (field != null && !field.Equals(value) || value != null && !value.Equals(field))
             {

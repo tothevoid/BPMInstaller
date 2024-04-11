@@ -1,15 +1,12 @@
-﻿using System;
-using BPMInstaller.Core.Model;
-using BPMInstaller.Core.Model.Runtime;
-using System.Collections.ObjectModel;
-using System.Diagnostics.Metrics;
-using System.Threading;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
+using BPMInstaller.Core.Model.Runtime;
+using BPMInstaller.UI.Desktop.Models.Basics;
 using BPMInstaller.UI.Desktop.Utilities;
 
-namespace BPMInstaller.UI.Desktop.Model
+namespace BPMInstaller.UI.Desktop.Models.UI
 {
-    public class ControlsSessionState: BaseUIModel
+    public class ControlsSessionState : ResponsiveModel
     {
         private bool isInstallationRunning = false;
 
@@ -17,11 +14,23 @@ namespace BPMInstaller.UI.Desktop.Model
 
         private Visibility startButtonVisibility = Visibility.Visible;
 
-        public Visibility StartButtonVisibility { get { return startButtonVisibility; } private set { Set(ref startButtonVisibility, value); } }
+        public Visibility StartButtonVisibility
+        {
+            get => startButtonVisibility;
+            private set => Set(ref startButtonVisibility, value);
+        }
 
-        public bool IsInstallationRunning { get { return isInstallationRunning; } private set { Set(ref isInstallationRunning, value); } }
+        public bool IsInstallationRunning
+        {
+            get => isInstallationRunning;
+            private set => Set(ref isInstallationRunning, value);
+        }
 
-        public string InstallationDuration { get { return installationDuration; } private set { Set(ref installationDuration, value); } }
+        public string InstallationDuration
+        {
+            get => installationDuration;
+            private set => Set(ref installationDuration, value);
+        }
 
         public ObservableCollection<InstallationMessage> Output { get; set; } = new ObservableCollection<InstallationMessage>();
 
@@ -33,7 +42,6 @@ namespace BPMInstaller.UI.Desktop.Model
             counter = 0;
             StartButtonVisibility = Visibility.Collapsed;
             IsInstallationRunning = true;
-            var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
             InstallationDuration = DateTimeUtilities.SecondsToString(++counter);
         }
 
@@ -42,8 +50,5 @@ namespace BPMInstaller.UI.Desktop.Model
             IsInstallationRunning = false;
             StartButtonVisibility = Visibility.Visible;
         }
-
-
-       
     }
 }

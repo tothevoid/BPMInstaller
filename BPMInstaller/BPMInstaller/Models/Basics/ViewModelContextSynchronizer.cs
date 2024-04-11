@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Threading;
 using System.Windows.Threading;
 using BPMInstaller.UI.Desktop.Interfaces;
 
-namespace BPMInstaller.UI.Desktop
+namespace BPMInstaller.UI.Desktop.Models.Basics
 {
-    public class UiContextSynchronizer: IContextSynchronizer
+    public class ViewModelContextSynchronizer : IContextSynchronizer
     {
         private Dispatcher UiDispatcher { get; }
 
-        public UiContextSynchronizer(Dispatcher dispatcher)
+        public ViewModelContextSynchronizer(Dispatcher dispatcher)
         {
             UiDispatcher = dispatcher;
         }

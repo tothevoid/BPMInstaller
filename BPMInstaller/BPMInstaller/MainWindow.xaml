@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BPMInstaller"
         xmlns:viewModels="clr-namespace:BPMInstaller.UI.Desktop.ViewModels"
-        xmlns:ui="clr-namespace:BPMInstaller.UI.Desktop.Model.UI"
+        xmlns:ui1="clr-namespace:BPMInstaller.UI.Desktop.ViewModels"
+        xmlns:ui="clr-namespace:BPMInstaller.UI.Desktop.Models.UI"
         mc:Ignorable="d"
         Title="Установщик BPM" MinHeight="750" Height="1000" Width="800">
     <Window.Resources>
@@ -14,7 +15,7 @@
             <Setter Property="Control.Margin" Value="10" />
         </Style>
         <Style x:Key="BaseField" TargetType="TextBox">
-            <Setter Property="Control.BorderThickness" Value="0 0 0 1" />
+            <Setter Property="BorderThickness" Value="0 0 0 1" />
         </Style>
     </Window.Resources>
     <Grid d:DataContext="{d:DesignInstance ui:InstallationConfigurationModel}">
@@ -103,11 +104,11 @@
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="0">
                                                         <Label>Имя пользователя</Label>
-                                                        <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.UserName}"/>
+                                                        <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.AdminUserName}"/>
                                                     </StackPanel>
                                                     <StackPanel Style="{StaticResource ControlGroup}" Grid.Column="1">
                                                         <Label>Пароль</Label>
-                                                        <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.Password}"/>
+                                                        <TextBox Style="{StaticResource BaseField}" Text="{Binding Config.DatabaseConfig.AdminPassword}"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </GroupBox>
@@ -148,30 +149,30 @@
                             <GroupBox Header="Элементы установки" Style="{StaticResource ControlGroup}">
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                                        <CheckBox  IsChecked="{Binding Config.InstallationWorkflow.UpdateDatabaseConnectionString}">
+                                        <CheckBox  IsChecked="{Binding Config.InstallationPipeline.UpdateDatabaseConnectionString}">
                                             <TextBlock>Обновить строку подключения к БД</TextBlock>
                                         </CheckBox>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                                        <CheckBox IsChecked="{Binding Config.InstallationWorkflow.UpdateRedisConnectionString}">
+                                        <CheckBox IsChecked="{Binding Config.InstallationPipeline.UpdateRedisConnectionString}">
                                             <TextBlock>Обновить строку подключения к Redis</TextBlock>
                                         </CheckBox>
                                     </StackPanel>
-                                    <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.UpdateApplicationPort}">
+                                    <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.UpdateApplicationPort}">
                                         <TextBlock>Обновить порт приложения</TextBlock>
                                     </CheckBox>
-                                    <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.DisableForcePasswordChange}">
+                                    <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.DisableForcePasswordChange}">
                                         <TextBlock>Отключить принудительную смену пароля (для версии 1.3 и выше)</TextBlock>
                                     </CheckBox>
-                                    <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.FixCookies}">
+                                    <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.FixCookies}">
                                         <TextBlock>Исправить авторизацию (CookiesSameSiteMode=Lax)</TextBlock>
                                     </CheckBox>
                                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                                        <CheckBox IsChecked="{Binding Config.InstallationWorkflow.RestoreDatabaseBackup}">
+                                        <CheckBox IsChecked="{Binding Config.InstallationPipeline.RestoreDatabaseBackup}">
                                             <TextBlock>Восстановить бекап</TextBlock>
                                         </CheckBox>
                                     </StackPanel>
-                                    <StackPanel Visibility="{Binding Path=Config.InstallationWorkflow.RestoreDatabaseBackup, Converter={StaticResource VisibleIfTrueConverter}}">
+                                    <StackPanel Visibility="{Binding Path=Config.InstallationPipeline.RestoreDatabaseBackup, Converter={StaticResource VisibleIfTrueConverter}}">
                                         <StackPanel>
                                             <StackPanel Style="{StaticResource ControlGroup}">
                                                 <Label>Путь к бекапу</Label>
@@ -229,11 +230,11 @@
                                     </StackPanel>
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
-                                            <CheckBox IsChecked="{Binding Config.InstallationWorkflow.InstallLicense}">
+                                            <CheckBox IsChecked="{Binding Config.InstallationPipeline.InstallLicense}">
                                                 <TextBlock>Установить лицензии</TextBlock>
                                             </CheckBox>
                                         </StackPanel>
-                                        <Grid Visibility="{Binding Path=Config.InstallationWorkflow.InstallLicense, Converter={StaticResource VisibleIfTrueConverter}}">
+                                        <Grid Visibility="{Binding Path=Config.InstallationPipeline.InstallLicense, Converter={StaticResource VisibleIfTrueConverter}}">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="1*"/>
                                                 <ColumnDefinition Width="2*"/>
@@ -254,10 +255,10 @@
                                                 </Grid>
                                             </StackPanel>
                                         </Grid>
-                                        <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.CompileApplication}">
+                                        <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.CompileApplication}">
                                             <TextBlock>Полная компиляция</TextBlock>
                                         </CheckBox>
-                                        <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationWorkflow.StartApplication}">
+                                        <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.StartApplication}">
                                             <TextBlock>Запустить приложение</TextBlock>
                                         </CheckBox>
                                     </StackPanel>

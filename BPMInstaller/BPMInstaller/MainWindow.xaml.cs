@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using BPMInstaller.UI.Desktop.Models.Basics;
 using BPMInstaller.UI.Desktop.ViewModels;
 
 namespace BPMInstaller.UI.Desktop
@@ -9,7 +10,7 @@ namespace BPMInstaller.UI.Desktop
         public MainWindow()
         {
             InitializeComponent();
-            var vm = new InstallationConfigurationViewModel(new UiContextSynchronizer(Dispatcher));
+            var vm = new InstallationConfigurationViewModel(new ViewModelContextSynchronizer(Dispatcher));
             DataContext = vm.GetModel();
         }
     }

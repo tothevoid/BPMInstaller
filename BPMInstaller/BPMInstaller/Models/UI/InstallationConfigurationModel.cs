@@ -1,11 +1,9 @@
-﻿using System;
-using BPMInstaller.Core.Services;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Configuration;
+using BPMInstaller.Core.Services;
 
-namespace BPMInstaller.UI.Desktop.Model.UI
+namespace BPMInstaller.UI.Desktop.Models.UI
 {
     public class InstallationConfigurationModel
     {

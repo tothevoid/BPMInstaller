@@ -1,16 +1,14 @@
-﻿using BPMInstaller.Core.Enums;
-using BPMInstaller.Core.Services;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using BPMInstaller.Core.Enums;
+using BPMInstaller.Core.Services;
+using BPMInstaller.UI.Desktop.Models.Basics;
 
-namespace BPMInstaller.UI.Desktop.Model
+namespace BPMInstaller.UI.Desktop.Models
 {
-    /// <summary>
-    /// Данные для восстановления бекапа БД
-    /// </summary>
-    public class BackupRestorationConfig: BaseUIModel
+    /// <inheritdoc cref="Core.Model.BackupRestorationConfig"/>
+    public class BackupRestorationConfig: ResponsiveModel
     {
         private string? backupPath;
         private string? restorationCliLocation;
@@ -19,9 +17,9 @@ namespace BPMInstaller.UI.Desktop.Model
         private string selectedRestorationOption = RestorationMapping
             .FirstOrDefault(mapping => mapping.Value == DatabaseDeploymentType.Docker).Key ?? string.Empty;
 
-        private ObservableCollection<string> activeContainers = new ObservableCollection<string>();
+        private ObservableCollection<string> activeContainers = new ();
 
-        //Rework with specific converter
+        /// TODO: Rework with specific converter
         private bool isDocker = true;
         private bool isCli = false;
 
@@ -38,7 +36,6 @@ namespace BPMInstaller.UI.Desktop.Model
             get => restorationCliLocation;
             set => Set(ref restorationCliLocation, value);
         }
-
 
         public ObservableCollection<string> ActiveContainers
         {

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace BPMInstaller.UI.Desktop.Model.UI
+namespace BPMInstaller.UI.Desktop.Models.UI
 {
     public class ActionHandlersConfiguration
     {

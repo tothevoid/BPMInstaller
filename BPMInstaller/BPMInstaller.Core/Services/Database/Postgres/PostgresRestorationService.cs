@@ -16,22 +16,8 @@ namespace BPMInstaller.Core.Services.Database.Postgres
             DatabaseConfig = databaseConfig ?? throw new ArgumentNullException(nameof(databaseConfig)); ;
         }
 
-        /// <inheritdoc cref="IDatabaseRestorationService.Restore"/>
-        public bool Restore()
-        {
-            return BackupRestorationConfig.RestorationKind switch
-            {
-                DatabaseDeploymentType.Cli => RestoreByCli(),
-                DatabaseDeploymentType.Docker => RestoreByDocker(),
-                _ => throw new NotImplementedException()
-            };
-        }
-
-        /// <summary>
-        /// Восстановление с помощью pg_restore
-        /// </summary>
-        /// <returns>Бекап восстановлен</returns>
-        private bool RestoreByCli()
+        /// <inheritdoc cref="IDatabaseRestorationService.RestoreByCli"/>
+        public bool RestoreByCli()
         {
             if (string.IsNullOrEmpty(BackupRestorationConfig.RestorationCliLocation))
             {
@@ -63,7 +49,7 @@ namespace BPMInstaller.Core.Services.Database.Postgres
         /// Восстановление с помощью Docker
         /// </summary>
         /// <returns>Бекап восстановлен</returns>
-        private bool RestoreByDocker()
+        public bool RestoreByDocker()
         {
             if (string.IsNullOrEmpty(BackupRestorationConfig.DockerImage))
             {

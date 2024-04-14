@@ -6,9 +6,15 @@
     internal interface IDatabaseRestorationService
     {
         /// <summary>
-        /// Восстановление БД с помощью бекапа
+        /// Восстановление через Docker
         /// </summary>
         /// <returns>Восстановление успешно</returns>
-        public bool Restore();
+        public bool RestoreByDocker();
+
+        /// <summary>
+        /// Восстановление через CLI
+        /// </summary>
+        /// <returns>Восстановление успешно</returns>
+        public bool RestoreByCli();
     }
 }

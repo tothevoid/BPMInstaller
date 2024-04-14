@@ -5,7 +5,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.Json;
 using BPMInstaller.Core.Interfaces;
-using static BPMInstaller.Core.Services.Application.ApplicationInstance;
+using System.Text.Json.Serialization;
 
 namespace BPMInstaller.Core.Services.Application
 {
@@ -200,6 +200,21 @@ namespace BPMInstaller.Core.Services.Application
             {
                 ApplicationProcess.CloseMainWindow();
             }
+        }
+
+        public class LicenseResponse
+        {
+            [JsonPropertyName("success")]
+            public bool Success { get; set; }
+
+            [JsonPropertyName("errorInfo")]
+            public ErrorInfo ErrorInfo { get; set; }
+        }
+
+        public class ErrorInfo
+        {
+            [JsonPropertyName("message")]
+            public string Message { get; set; }
         }
     }
 }

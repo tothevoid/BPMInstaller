@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using BPMInstaller.Core.Model;
 using BPMInstaller.UI.Desktop.Models.Basics;
 
 namespace BPMInstaller.UI.Desktop.Models.Configs
@@ -8,7 +9,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
     /// <inheritdoc cref="Core.Model.ApplicationConfig"/>
     public class InstallationConfig : ResponsiveModel
     {
-        public event Action? OnModelChanged;
+        public event Action<string>? OnModelChanged;
 
         public InstallationConfig()
         {
@@ -28,9 +29,9 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
 
             configs.ForEach(config =>
             {
-                config.PropertyChanged += (_, _) =>
+                config.PropertyChanged += (_, propertyArgs) =>
                 {
-                    OnModelChanged?.Invoke();
+                    OnModelChanged?.Invoke(propertyArgs?.PropertyName ?? string.Empty);
                 };
             });
         }
@@ -43,6 +44,8 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
             get => applicationPath;
             set => Set(ref applicationPath, value);
         }
+
+        public DatabaseType DatabaseType { get; set; }
 
         /// <inheritdoc cref="Core.Model.InstallationConfig.ApplicationConfig"/>
         public ApplicationConfig ApplicationConfig { get; set; } = new();
@@ -86,7 +89,8 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
                 ApplicationConfig.ToCoreModel(),
                 DatabaseConfig.ToCoreModel(),
                 RedisConfig.ToCoreModel(),
-                InstallationPipeline.ToCoreModel())
+                InstallationPipeline.ToCoreModel(),
+                DatabaseType)
             {
                 LicenseConfig = LicenseConfig.ToCoreModel(),
                 BackupRestorationConfig = BackupRestorationConfig.ToCoreModel()

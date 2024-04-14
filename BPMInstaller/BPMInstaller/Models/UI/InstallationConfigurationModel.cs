@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using BPMInstaller.Core.Services;
 using BPMInstaller.UI.Desktop.Models.Configs;
@@ -27,14 +28,16 @@ namespace BPMInstaller.UI.Desktop.Models.UI
 
         public void UpdateConfiguration(string? applicationPath)
         {
-            if (string.IsNullOrEmpty(applicationPath))
+            if (string.IsNullOrEmpty(applicationPath) || !Directory.Exists(applicationPath))
             {
                 Config = new InstallationConfig();
                 return;
             }
 
-            var stateLoader = new AppConfigurationStateLoaded();
+            var stateLoader = new AppConfigurationStateLoader();
             var state = stateLoader.GetConfig(applicationPath);
+            Config.ApplicationPath = applicationPath;
+            Config.DatabaseType = new DistributiveService().GetDatabaseType(applicationPath);
             Config.ApplicationConfig.MergeConfig(state.ApplicationConfig);
             Config.DatabaseConfig.MergeConfig(state.DatabaseConfig);
             Config.RedisConfig.MergeConfig(state.RedisConfig);

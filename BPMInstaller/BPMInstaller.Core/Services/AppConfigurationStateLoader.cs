@@ -2,7 +2,7 @@
 
 namespace BPMInstaller.Core.Services
 {
-    public class AppConfigurationStateLoaded
+    public class AppConfigurationStateLoader
     {
         public (DatabaseConfig DatabaseConfig, RedisConfig RedisConfig, ApplicationConfig ApplicationConfig) GetConfig(string applicationPath)
         {

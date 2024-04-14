@@ -13,7 +13,7 @@ namespace BPMInstaller.Core.Services.Database.Postgres
         public PostgresRestorationService(BackupRestorationConfig backupRestorationConfig, DatabaseConfig databaseConfig)
         {
             BackupRestorationConfig = backupRestorationConfig ?? throw new ArgumentNullException(nameof(backupRestorationConfig));
-            DatabaseConfig = databaseConfig ?? throw new ArgumentNullException(nameof(databaseConfig)); ;
+            DatabaseConfig = databaseConfig ?? throw new ArgumentNullException(nameof(databaseConfig));
         }
 
         /// <inheritdoc cref="IDatabaseRestorationService.RestoreByCli"/>
@@ -49,7 +49,7 @@ namespace BPMInstaller.Core.Services.Database.Postgres
         /// Восстановление с помощью Docker
         /// </summary>
         /// <returns>Бекап восстановлен</returns>
-        public bool RestoreByDocker()
+        public bool RestoreByDocker(IInstallationLogger logger)
         {
             if (string.IsNullOrEmpty(BackupRestorationConfig.DockerImage))
             {
@@ -59,7 +59,7 @@ namespace BPMInstaller.Core.Services.Database.Postgres
             var docker = new DockerService();
             var backupName = DateTime.Now.ToString("dd-MM-HH:mm.backup");
             docker.CopyBackup(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, backupName);
-            docker.RestoreBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName,
+            docker.RestorePostgresBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName,
                 DatabaseConfig.DatabaseName, backupName);
             return true;
         }

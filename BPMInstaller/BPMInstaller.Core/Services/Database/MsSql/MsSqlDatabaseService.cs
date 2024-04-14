@@ -16,7 +16,7 @@ namespace BPMInstaller.Core.Services.Database.MsSql
 
         public string CreateDatabase()
         {
-            using var con = new SqlConnection(GetConnectionString(DatabaseConfig.DatabaseName));
+            using var con = new SqlConnection(GetConnectionString("master"));
 
             try
             {

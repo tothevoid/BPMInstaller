@@ -275,7 +275,12 @@
                         <TextBlock Margin="10, 0" HorizontalAlignment="Center" FontSize="14">Запущена установка</TextBlock>
                         <TextBlock FontSize="14" HorizontalAlignment="Center" FontWeight="Bold" Text="{Binding InstallationDuration}"></TextBlock>
                     </StackPanel>
-                    <ListView ItemsSource="{Binding Output}" >
+                    <ListView   
+                        MinHeight="600px"
+                        VerticalContentAlignment="Top"  
+                        ScrollViewer.VerticalScrollBarVisibility="Visible"
+                        ScrollViewer.CanContentScroll="False"
+                        ItemsSource="{Binding Output}" >
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Width="385px" DisplayMemberBinding="{Binding Path=Date}">Дата</GridViewColumn>

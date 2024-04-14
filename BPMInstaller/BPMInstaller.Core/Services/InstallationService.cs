@@ -217,7 +217,7 @@ namespace BPMInstaller.Core.Services
             return restorationKind switch
             {
                 DatabaseDeploymentType.Cli => DatabaseRestorationService.RestoreByCli(),
-                DatabaseDeploymentType.Docker => DatabaseRestorationService.RestoreByDocker(),
+                DatabaseDeploymentType.Docker => DatabaseRestorationService.RestoreByDocker(InstallationLogger),
                 _ => throw new NotImplementedException()
             };
         }

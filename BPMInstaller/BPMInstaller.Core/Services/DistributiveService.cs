@@ -1,6 +1,4 @@
 ﻿using BPMInstaller.Core.Model;
-using System;
-using System.Data;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -222,7 +220,7 @@ namespace BPMInstaller.Core.Services
                    $"Password={dbConfig.AdminPassword};" +
                    "Pooling = true;" +
                    "Max Pool Size = 1000;" +
-                   "Connection Timeout=600" +
+                   "Connection Timeout=600;" +
                    "Persist Security Info=True;" +
                    "MultipleActiveResultSets=True;";
         }
@@ -235,7 +233,7 @@ namespace BPMInstaller.Core.Services
                    $"Username={dbConfig.AdminUserName};" +
                    $"Password={dbConfig.AdminPassword};" +
                    "Timeout=500;" +
-                   "Command Timeout=400" +
+                   "Command Timeout=400;" +
                    "Pooling=True;";
         }
 

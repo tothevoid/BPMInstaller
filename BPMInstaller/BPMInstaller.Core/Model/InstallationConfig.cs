@@ -32,6 +32,10 @@ namespace BPMInstaller.Core.Model
                 var distributiveService = new DistributiveService();
                 DatabaseType = distributiveService.GetDatabaseType(ApplicationPath);
             }
+            else
+            {
+                DatabaseType = dbType;
+            }
 
             ApplicationConfig = applicationConfig ?? throw new ArgumentNullException(nameof(applicationConfig));
             DatabaseConfig = databaseConfig ?? throw new ArgumentNullException(nameof(databaseConfig));

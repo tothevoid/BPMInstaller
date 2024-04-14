@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BPMInstaller.UI.Desktop.Interfaces;
 using BPMInstaller.UI.Desktop.Models.Basics;
 using BPMInstaller.UI.Desktop.Models.UI;
+using BPMInstaller.Core.Model;
 
 namespace BPMInstaller.UI.Desktop.ViewModels
 {
@@ -86,13 +87,17 @@ namespace BPMInstaller.UI.Desktop.ViewModels
                 !InstallationConfiguration.Configurations.Contains(InstallationConfiguration.Config.ApplicationPath))
             {
                 InstallationConfiguration.Configurations.Add(InstallationConfiguration.Config.ApplicationPath);
+
+                var newDbType = new DistributiveService()
+                    .GetDatabaseType(InstallationConfiguration.Config.ApplicationPath);
+                InstallationConfiguration.Config.DatabaseType = newDbType;
+
                 ConfigurationSerializer.SaveLocations(InstallationConfiguration.Configurations);
             }
 
             var initConnectionStrings = pathChanged ||
                 InteractionUtilities.ShowConfirmationButton("Выбран идентичный дистрибутив",
                    "Проставить значения строк подключения из конфигурационных файлов?");
-
 
             if (initConnectionStrings)
             {
@@ -130,7 +135,9 @@ namespace BPMInstaller.UI.Desktop.ViewModels
 
         private void ValidateDatabase()
         {
-            ValidateConfig(() => ConfigurationValidator.ValidateDatabaseConnection(InstallationConfiguration.Config.DatabaseConfig.ToCoreModel()),
+            ValidateConfig(() => ConfigurationValidator.ValidateDatabaseConnection(
+                    InstallationConfiguration.Config.DatabaseType,
+                    InstallationConfiguration.Config.DatabaseConfig.ToCoreModel()),
                 ValidationState.ValidationOperation.Database, InstallationConfiguration.Config.DatabaseConfig);
         }
         private void ValidateApplication()

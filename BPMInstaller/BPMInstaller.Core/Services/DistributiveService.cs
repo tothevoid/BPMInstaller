@@ -1,4 +1,6 @@
 ﻿using BPMInstaller.Core.Model;
+using System;
+using System.Data;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -29,26 +31,26 @@ namespace BPMInstaller.Core.Services
             }
         }
 
-        public void UpdateConnectionStrings(string applicationPath, DatabaseConfig databaseConfig = null, 
+        public void UpdateConnectionStrings(string applicationPath, DatabaseType dbType, DatabaseConfig databaseConfig = null, 
             RedisConfig redisConfig = null)
         {
             var connectionStringsPath = GetConnectionStringsPath(applicationPath);
             var rootNode = GetConnectionString(connectionStringsPath);
 
-            UpdateDatabaseConfig(databaseConfig, GetDatabaseString(rootNode.Configs));
+            UpdateDatabaseConfig(databaseConfig, GetDatabaseString(rootNode.Configs), dbType);
             UpdateRedisConfig(redisConfig, GetRedisString(rootNode.Configs));
 
             rootNode.Document.Save(connectionStringsPath);
         }
 
-        public (DatabaseConfig DatabaseConfig, RedisConfig RedisConfig) GetConnectionStrings(string applicationPath)
+        public (DatabaseConfig DatabaseConfig, RedisConfig RedisConfig) GetConnectionStrings(string applicationPath, DatabaseType dbType)
         {
             var connectionStringsPath = GetConnectionStringsPath(applicationPath);
             var rootNode = GetConnectionString(connectionStringsPath);
 
             return (
                 //TODO: Handle case-insensetive namings
-                ParseDatabaseConnectionString(GetDatabaseString(rootNode.Configs)?.Value ?? string.Empty),
+                ParseDatabaseConnectionString(GetDatabaseString(rootNode.Configs)?.Value ?? string.Empty, dbType),
                 ParseRedisConnectionString(GetRedisString(rootNode.Configs)?.Value ?? string.Empty)
             );
         }
@@ -60,22 +62,60 @@ namespace BPMInstaller.Core.Services
             return (appSettingsPath, JsonSerializer.Deserialize<AppSettings>(appSettingsJson) ?? new AppSettings());
         }
 
-        private DatabaseConfig ParseDatabaseConnectionString(string connectionString)
+        private DatabaseConfig ParseDatabaseConnectionString(string connectionString, DatabaseType dbType)
         {
             if (string.IsNullOrEmpty(connectionString))
             {
                 return new DatabaseConfig();
             }
 
-            var keyValues = ParseKeyValuesString(connectionString);
+            var config = ParseKeyValuesString(connectionString);
+
+            switch (dbType)
+            {
+                case DatabaseType.MsSql:
+                    return ParseMsConfig(config);
+                case DatabaseType.PostgreSql:
+                    return ParsePostgresConfig(config);
+                default:
+                    throw new NotImplementedException(dbType.ToString());
+            }
+            
+        }
+
+        private DatabaseConfig ParsePostgresConfig(Dictionary<string, string> config)
+        {
+            return new DatabaseConfig
+            {
+                Host = config.ContainsKey(nameof(DatabaseConfig.Host)) ? config[nameof(DatabaseConfig.Host)] : string.Empty,
+                Port = config.ContainsKey(nameof(DatabaseConfig.Port)) ? ushort.Parse(config[nameof(DatabaseConfig.Port)]) : default,
+                AdminUserName = config.ContainsKey("Username") ? config["Username"] : string.Empty,
+                AdminPassword = config.ContainsKey("Password") ? config["Password"] : string.Empty,
+                DatabaseName = config.ContainsKey("Database") ? config["Database"] : string.Empty
+            };
+        }
+
+        private DatabaseConfig ParseMsConfig(Dictionary<string, string> config)
+        {
+            var host = config.ContainsKey("Data Source") ? config["Data Source"] : string.Empty;
+            ushort port = 1433; //default ms port
+            if (!string.IsNullOrEmpty(host))
+            {
+                var hostParts = host.Split(",");
+                if (hostParts.Length == 2)
+                {
+                    host = hostParts[0].Trim();
+                    port = Convert.ToUInt16(hostParts[1].Trim());
+                }
+            }
 
             return new DatabaseConfig
             {
-                Host = keyValues.ContainsKey(nameof(DatabaseConfig.Host)) ? keyValues[nameof(DatabaseConfig.Host)] : string.Empty,
-                Port = keyValues.ContainsKey(nameof(DatabaseConfig.Port)) ? ushort.Parse(keyValues[nameof(DatabaseConfig.Port)]): default,
-                AdminUserName = keyValues.ContainsKey("Username") ? keyValues["Username"] : string.Empty,
-                AdminPassword = keyValues.ContainsKey("Password") ? keyValues["Password"] : string.Empty,
-                DatabaseName = keyValues.ContainsKey("Database") ? keyValues["Database"] : string.Empty
+                Host = host,
+                Port = port,
+                AdminUserName = config.ContainsKey("User ID") ? config["User ID"] : string.Empty,
+                AdminPassword = config.ContainsKey("Password") ? config["Password"] : string.Empty,
+                DatabaseName = config.ContainsKey("Initial Catalog") ? config["Initial Catalog"] : string.Empty
             };
         }
 
@@ -154,10 +194,49 @@ namespace BPMInstaller.Core.Services
             return dbSetting.Attributes[1];
         }
 
-        private void UpdateDatabaseConfig(DatabaseConfig databaseConfig, XmlAttribute attribute)
+        private void UpdateDatabaseConfig(DatabaseConfig databaseConfig, XmlAttribute attribute, DatabaseType dbType)
         {
-            attribute.Value = $"Pooling=True;Database={databaseConfig.DatabaseName};Host={databaseConfig.Host};" +
-                $"Port={databaseConfig.Port};Username={databaseConfig.AdminUserName};Password={databaseConfig.AdminPassword};Timeout=500;Command Timeout=400";
+            attribute.Value = GetConnectionStringByDbType(databaseConfig, dbType);
+        }
+
+        private string GetConnectionStringByDbType(DatabaseConfig dbConfig, DatabaseType dbType)
+        {
+            switch (dbType)
+            {
+                case DatabaseType.MsSql:
+                    return FormatMsConnectionString(dbConfig);
+                case DatabaseType.PostgreSql:
+                    return FormatPostgresConnectionString(dbConfig);
+                default:
+                    throw new NotImplementedException(dbType.ToString());
+            }
+
+        }
+
+        // TODO: Migrate logic to specific db classes
+        private string FormatMsConnectionString(DatabaseConfig dbConfig)
+        {
+            return $"Data Source={dbConfig.Host},{dbConfig.Port};" +
+                   $"Initial Catalog={dbConfig.DatabaseName};" +
+                   $"User ID={dbConfig.AdminUserName};" +
+                   $"Password={dbConfig.AdminPassword};" +
+                   "Pooling = true;" +
+                   "Max Pool Size = 1000;" +
+                   "Connection Timeout=600" +
+                   "Persist Security Info=True;" +
+                   "MultipleActiveResultSets=True;";
+        }
+
+        private string FormatPostgresConnectionString(DatabaseConfig dbConfig)
+        {
+            return $"Database={dbConfig.DatabaseName};" +
+                   $"Host={dbConfig.Host};" +
+                   $"Port={dbConfig.Port};" +
+                   $"Username={dbConfig.AdminUserName};" +
+                   $"Password={dbConfig.AdminPassword};" +
+                   "Timeout=500;" +
+                   "Command Timeout=400" +
+                   "Pooling=True;";
         }
 
         private void UpdateRedisConfig(RedisConfig redisConfig, XmlNode attribute)

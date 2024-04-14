@@ -7,7 +7,8 @@ namespace BPMInstaller.Core.Services
         public (DatabaseConfig DatabaseConfig, RedisConfig RedisConfig, ApplicationConfig ApplicationConfig) GetConfig(string applicationPath)
         {
             var distributiveService = new DistributiveService();
-            var connectionString = distributiveService.GetConnectionStrings(applicationPath);
+            var dbType = distributiveService.GetDatabaseType(applicationPath);
+            var connectionString = distributiveService.GetConnectionStrings(applicationPath, dbType);
             var url = distributiveService.GetAppSettings(applicationPath).Settings?.Kestrel?.Endpoints?.Http?.Url ?? string.Empty;
             var portParts = url.Reverse().TakeWhile(symbol => char.IsDigit(symbol)).Reverse();
             var port = ushort.Parse(string.Join("", portParts));

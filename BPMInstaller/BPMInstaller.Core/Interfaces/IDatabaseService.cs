@@ -31,7 +31,7 @@
         /// <param name="userName">Пользователь администратора</param>
         public bool ApplyAdministratorLicenses(string userName);
 
-        public string? ValidateConnection();
+        public string ValidateConnection();
 
         void TerminateAllActiveSessions(string databaseConfigDatabaseName);
     }

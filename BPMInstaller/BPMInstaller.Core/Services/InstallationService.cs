@@ -1,9 +1,11 @@
 ﻿using BPMInstaller.Core.Constants;
+using BPMInstaller.Core.Enums;
 using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
 using BPMInstaller.Core.Model.Runtime;
 using BPMInstaller.Core.Resources;
 using BPMInstaller.Core.Services.Application;
+using BPMInstaller.Core.Services.Database.MsSql;
 using BPMInstaller.Core.Services.Database.Postgres;
 
 namespace BPMInstaller.Core.Services
@@ -14,16 +16,39 @@ namespace BPMInstaller.Core.Services
 
         private IDatabaseService DatabaseService { get; }
 
+        private IDatabaseRestorationService DatabaseRestorationService { get; }
+
         private RedisService RedisService { get; }
 
         private InstallationConfig InstallationConfig { get; }
+
+        private DistributiveService DistributiveService { get; }
 
         public InstallationService(IInstallationLogger logger, InstallationConfig installationConfig)
         {
             InstallationLogger = logger;
             InstallationConfig = installationConfig ?? throw new ArgumentException(nameof(installationConfig));
-            DatabaseService = new PostgresDatabaseService(installationConfig.DatabaseConfig);
+            DistributiveService = new DistributiveService();
+
+            var dbServices = GetDatabaseServices();
+            DatabaseService = dbServices.DbService;
+            DatabaseRestorationService = dbServices.BackupService;
             RedisService = new RedisService();
+        }
+
+        private (IDatabaseService DbService, IDatabaseRestorationService BackupService) GetDatabaseServices()
+        {
+            switch (InstallationConfig.DatabaseType)
+            {
+                case DatabaseType.MsSql:
+                    return (new MsSqlDatabaseService(InstallationConfig.DatabaseConfig), 
+                        new MsSqlRestorationService(InstallationConfig.BackupRestorationConfig, InstallationConfig.DatabaseConfig));
+                case DatabaseType.PostgreSql:
+                    return (new PostgresDatabaseService(InstallationConfig.DatabaseConfig), 
+                        new PostgresRestorationService(InstallationConfig.BackupRestorationConfig, InstallationConfig.DatabaseConfig));
+                default:
+                    throw new NotImplementedException(InstallationConfig.DatabaseType.ToString());
+            }
         }
 
         public void Install()
@@ -62,6 +87,7 @@ namespace BPMInstaller.Core.Services
 
         private bool ExecuteBeforeApplicationStarted()
         {
+
             ExecuteFileSystemOperations();
 
             if (!InitializeDatabase())
@@ -176,8 +202,7 @@ namespace BPMInstaller.Core.Services
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Restoration.Started));
 
-            IDatabaseRestorationService databaseRestorationService = new PostgresRestorationService(InstallationConfig.BackupRestorationConfig, InstallationConfig.DatabaseConfig);
-            if (!databaseRestorationService.Restore())
+            if (!Restore(InstallationConfig.BackupRestorationConfig.RestorationKind))
             {
                 InstallationLogger.Log(InstallationMessage.Error(InstallationResources.Database.Restoration.Failed));
                 return false;
@@ -187,15 +212,24 @@ namespace BPMInstaller.Core.Services
             return true;
         }
 
+        private bool Restore(DatabaseDeploymentType restorationKind)
+        {
+            return restorationKind switch
+            {
+                DatabaseDeploymentType.Cli => DatabaseRestorationService.RestoreByCli(),
+                DatabaseDeploymentType.Docker => DatabaseRestorationService.RestoreByDocker(),
+                _ => throw new NotImplementedException()
+            };
+        }
+
         private void ExecuteFileSystemOperations()
         {
-            var distributiveService = new DistributiveService();
-
             if (InstallationConfig.Pipeline.UpdateDatabaseConnectionString || 
                 InstallationConfig.Pipeline.UpdateRedisConnectionString)
             {
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ConnectionStrings.Actualization));
-                distributiveService.UpdateConnectionStrings(InstallationConfig.ApplicationPath,
+                DistributiveService.UpdateConnectionStrings(InstallationConfig.ApplicationPath,
+                    InstallationConfig.DatabaseType,
                     InstallationConfig.DatabaseConfig,
                     InstallationConfig.RedisConfig);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ConnectionStrings.Actualized));
@@ -204,14 +238,14 @@ namespace BPMInstaller.Core.Services
             if (InstallationConfig.Pipeline.UpdateApplicationPort)
             {
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.PortActualization));
-                distributiveService.UpdateApplicationPort(InstallationConfig.ApplicationConfig, InstallationConfig.ApplicationPath);
+                DistributiveService.UpdateApplicationPort(InstallationConfig.ApplicationConfig, InstallationConfig.ApplicationPath);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.PortActualized));
             }
 
             if (InstallationConfig.Pipeline.FixCookies)
             {
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.FixingCookies));
-                distributiveService.FixAuthorizationCookies(InstallationConfig.ApplicationPath);
+                DistributiveService.FixAuthorizationCookies(InstallationConfig.ApplicationPath);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.CookiesFixed));
             }
         }

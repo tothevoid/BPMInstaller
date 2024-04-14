@@ -1,4 +1,6 @@
-﻿namespace BPMInstaller.Core.Model
+﻿using BPMInstaller.Core.Services;
+
+namespace BPMInstaller.Core.Model
 {
     /// <summary>
     /// Конфигурация установки
@@ -10,8 +12,13 @@
         /// </summary>
         public string ApplicationPath { get; init; }
 
+        /// <summary>
+        /// <inheritdoc cref="DatabaseType"/>
+        /// </summary>
+        public DatabaseType DatabaseType { get; set; }
+
         public InstallationConfig(string applicationPath, ApplicationConfig applicationConfig,
-            DatabaseConfig databaseConfig, RedisConfig redisConfig, InstallationPipeline pipeline)
+            DatabaseConfig databaseConfig, RedisConfig redisConfig, InstallationPipeline pipeline, DatabaseType dbType = DatabaseType.NotSpecified)
         {
             if (string.IsNullOrEmpty(applicationPath))
             {
@@ -19,6 +26,13 @@
             }
 
             ApplicationPath = applicationPath;
+
+            if (dbType == DatabaseType.NotSpecified)
+            {
+                var distributiveService = new DistributiveService();
+                DatabaseType = distributiveService.GetDatabaseType(ApplicationPath);
+            }
+
             ApplicationConfig = applicationConfig ?? throw new ArgumentNullException(nameof(applicationConfig));
             DatabaseConfig = databaseConfig ?? throw new ArgumentNullException(nameof(databaseConfig));
             RedisConfig = redisConfig ?? throw new ArgumentNullException(nameof(redisConfig));

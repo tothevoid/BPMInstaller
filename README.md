@@ -20,14 +20,14 @@
 1. Redis
 
     Варианты:
-    * установить [портированную версии](https://github.com/microsoftarchive/redis/releases);
-    * использовать развёрнутый на доступном удалённом хосте;
-    * развернуть с помощью docker. Например c помощью: `docker run --name bpm-redis -d redis`.
+    * установить [портированную версию](https://github.com/microsoftarchive/redis/releases);
+    * использовать развёрнутый на удалённом хосте;
+    * развернуть с помощью docker. Например: `docker run --name bpm-redis -d redis`.
 2.  Необходимая СУБД
     
     Варианты:
-    * установка [Sql server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) или [Postgres](https://www.postgresql.org/download/)
-    * развёрнутая на доступном удалённом хосте (в данном случае восстановление бекапа не будет работать);
+    * установить [Sql server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) или [Postgres](https://www.postgresql.org/download/)
+    * использовать развёрнутую на доступном удалённом хосте (в данном случае восстановление бекапа не будет работать);
     * развернуть с помощью docker
 
 3.  Распакованный дистрибутив

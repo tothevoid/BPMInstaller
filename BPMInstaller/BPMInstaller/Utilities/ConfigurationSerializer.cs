@@ -17,13 +17,13 @@ namespace BPMInstaller.UI.Desktop.Utilities
 
         public IEnumerable<string> LoadLocations()
         {
-            if (File.Exists(ConfigPath))
+            if (!File.Exists(ConfigPath))
             {
-                var json = File.ReadAllText(ConfigPath);
-                return JsonSerializer.Deserialize<IEnumerable<string>>(json) ?? Enumerable.Empty<string>();
+                return Enumerable.Empty<string>();
             }
 
-            return Enumerable.Empty<string>();
+            var json = File.ReadAllText(ConfigPath);
+            return JsonSerializer.Deserialize<IEnumerable<string>>(json) ?? Enumerable.Empty<string>();
         }
     }
 }

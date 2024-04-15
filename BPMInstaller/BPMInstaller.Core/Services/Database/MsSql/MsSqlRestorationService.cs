@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BPMInstaller.Core.Interfaces;
+﻿using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
 
 namespace BPMInstaller.Core.Services.Database.MsSql
@@ -26,11 +21,9 @@ namespace BPMInstaller.Core.Services.Database.MsSql
                 return false;
             }
 
-            var docker = new DockerService();
-            var backupName = DateTime.Now.ToString("ddMMHHmm");
-            var backupFullName = backupName + ".bak";
-            docker.CopyBackup(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, backupFullName);
-            docker.RestoreMsBackup(BackupRestorationConfig.DockerImage, DatabaseConfig, backupName, backupFullName, logger);
+            var docker = new DockerService(logger);
+            docker.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, DatabaseType.MsSql);
+            docker.RestoreMsBackup(BackupRestorationConfig.DockerImage, DatabaseConfig, logger);
             return true;
         }
 

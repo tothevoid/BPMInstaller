@@ -20,6 +20,7 @@ namespace BPMInstaller.Core.Model
         /// <summary>
         /// Название создаваемой БД
         /// </summary>
+        /// TODO: Add FS names validation for backup cases
         public string DatabaseName { get; set; }
 
         /// <summary>

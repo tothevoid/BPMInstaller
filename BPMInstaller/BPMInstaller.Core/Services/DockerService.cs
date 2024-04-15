@@ -1,16 +1,27 @@
 ﻿using BPMInstaller.Core.Model.Docker;
 using System.Diagnostics;
-using System.Text.Json;
 using BPMInstaller.Core.Model;
-using System.Data.SqlTypes;
-using System.Net.Sockets;
 using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model.Runtime;
+using BPMInstaller.Core.Utilities;
 
 namespace BPMInstaller.Core.Services
 {
+    //TODO: separate into SqlServer and Postgres implementation + common logic service
     public class DockerService
     {
+        private IInstallationLogger? Logger { get; }
+
+        public DockerService(IInstallationLogger? logger = null)
+        {
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        //TODO: get rid of that workaround with logger injection implementation
+        private void LogMessage(string message) => Logger?.Log(InstallationMessage.Info(message));
+
+        private const string SqlServerDataLocation = "/var/opt/mssql/data";
+
         public Dictionary<string, string> GetActiveContainers()
         {
             var command = "ps --format \"{{.ID}}\t{{.Names}}\"";
@@ -25,86 +36,159 @@ namespace BPMInstaller.Core.Services
                 .ToDictionary(key => key.Id, value => value.ImageName);
         }
 
-        public bool CopyBackup(string backupPath, string containerId, string backupDockerName)
+        //TODO: get rid of DatabaseType dependency 
+        public bool CopyFileIntoContainer(string filePath, string containerId, string containerFileName, DatabaseType databaseType)
         {
-            if (!File.Exists(backupPath))
+            if (!File.Exists(filePath))
             {
                 return false;
             }
 
-            var output = CallDockerCommand($"cp {backupPath} {containerId}:/{backupDockerName}");
+            var backupName = GetBackupName(databaseType, containerFileName);
+            var output = CallDockerCommand($"cp {filePath} {containerId}:/{backupName}");
 
             return !string.IsNullOrEmpty(output.StandardOutput) && string.IsNullOrEmpty(output.ErrorOutput);
         }
 
-        public bool RestorePostgresBackup(string containerId, string userName, string dbName, string containerBackupFileName)
+        private string GetBackupName(DatabaseType dbType, string databaseName)
         {
-            var script = $"pg_restore --username={userName} --dbname={dbName} --no-owner --no-privileges ./{containerBackupFileName}";
-            var output = CallDockerCommand($"exec {containerId} bash -c \"{script}\"");
-
-            return string.IsNullOrEmpty(output.ErrorOutput);
-        }
-
-        public bool RestoreMsBackup(string containerId, DatabaseConfig dbConfig, string containerBackupFileName, string backupFullName, IInstallationLogger logger)
-        {
-            var dataParts = GetRestorationList(containerId, dbConfig, backupFullName);
-
-            var moveExpressions = dataParts.Select(pair =>
-                $"MOVE  \\\"{pair.Key}\\\" TO \\\"/var/opt/mssql/data/{containerBackupFileName}.{pair.Value}\\\"");
-
-            var query =
-                $"/opt/mssql-tools/bin/sqlcmd -S {dbConfig.Host},{dbConfig.Port} -U {dbConfig.AdminUserName} -P '{dbConfig.AdminPassword}' " +
-                $"-Q 'RESTORE DATABASE {dbConfig.DatabaseName} " +
-                $"FROM DISK = \\\"/{backupFullName}\\\" WITH {string.Join(',', moveExpressions)}, REPLACE'";
-
-            var output = CallDockerCommand($"exec -it {containerId} bash -c \"{query}\"", (string message) => logger.Log(InstallationMessage.Info(message)));
-
-            return true;
-        }
-        private Dictionary<string, string> GetRestorationList(string containerId, DatabaseConfig dbConfig, string containerBackupFileName)
-        {
-            var script = $"/opt/mssql-tools/bin/sqlcmd -S {dbConfig.Host},{dbConfig.Port} -U {dbConfig.AdminUserName} -P '{dbConfig.AdminPassword}' " +
-                         $"-Q 'RESTORE FILELISTONLY FROM DISK = \\\"/{containerBackupFileName}\\\"' | tr -s ' ' | cut -d ' ' -f 1-2";
-            var output = CallDockerCommand($"exec -it {containerId} bash -c \"{script}\"");
-            var parts = output.StandardOutput.Split(Environment.NewLine);
-            return parts.Where(part => part.Contains("MsSQL_DATA")).Select(dataPart => dataPart.Split(" "))
-                .ToDictionary(k => k[0], v => v[1].Split(".").Last());
-        }
-
-        private (string StandardOutput, string ErrorOutput) CallDockerCommand(string command,
-            Action<string>? handler = null)
-        {
-            Process process = new Process();
-            process.StartInfo.FileName = "docker";
-            process.StartInfo.Arguments = command;
-            process.StartInfo.UseShellExecute = false;
-
-            var waitForMessages = handler != null;
-
-            if (handler != null)
+            switch (dbType)
             {
-                process.OutputDataReceived += (sender, e) =>
-                {
-                    if (e.Data != null)
-                    {
-                        handler(e.Data);
-                        if (e.Data.Contains("RESTORE DATABASE successfully"))
-                        {
-                            waitForMessages = false;
-                        }
-                    }
-                };
+                case DatabaseType.PostgreSql:
+                    return $"{databaseName}.backup";
+                case DatabaseType.MsSql:
+                    return $"{databaseName}.bak";
+                default:
+                    throw new NotImplementedException(dbType.ToString());
             }
+        }
 
+        public bool RestorePostgresBackup(string containerId, string userName, string databaseName)
+        {
+            var restorationDockerCommand = GetPostgresRestorationCommand(containerId, userName, databaseName);
+            var restorationOutput = CallDockerCommand(restorationDockerCommand);
+            return string.IsNullOrEmpty(restorationOutput.ErrorOutput);
+        }
 
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
+        private string GetPostgresRestorationCommand(string containerId, string userName, string databaseName)
+        {
+            var backupName = GetBackupName(DatabaseType.PostgreSql, databaseName);
+
+            var restorationParameters = new[]
+            {
+                $"--username={userName}",
+                $"--dbname={databaseName}",
+                "--no-owner",
+                "--no-privileges",
+                $"./{backupName}"
+            };
+
+            var restorationScript = $"pg_restore {string.Join(" ", restorationParameters)}";
+            return FormatDockerExecutableCommand(containerId, restorationScript);
+        }
+
+        public bool RestoreMsBackup(string containerId, DatabaseConfig dbConfig)
+        {
+            var dockerCommand = GetBackupRestorationDockerCommand(containerId, dbConfig);
+
+            return CallDynamicDockerCommand(dockerCommand, message =>
+            {
+                LogMessage(message);
+                return message.Contains("RESTORE DATABASE successfully");
+            });
+        }
+
+        private string GetBackupRestorationDockerCommand(string containerId, DatabaseConfig dbConfig)
+        {
+            var backupName = GetBackupName(DatabaseType.MsSql, dbConfig.DatabaseName);
+            var backupFiles = GetRestorationList(containerId, dbConfig, dbConfig.DatabaseName).ToList();
+
+            var filesMoveExpressions = backupFiles.Select(file =>
+            {
+                var newFilePath = $"{SqlServerDataLocation}/{backupName}.{file.Extension}";
+                return $"MOVE {TextUtilities.EscapeExpression(file.Name)} TO {TextUtilities.EscapeExpression(newFilePath)}";
+            });
+
+            var restorationQuery = $"RESTORE DATABASE {dbConfig.DatabaseName} " +
+                        $"FROM DISK = {TextUtilities.EscapeExpression(backupName)} " +
+                        $"WITH {string.Join(',', filesMoveExpressions)}, REPLACE";
+
+            var restorationCommand = FormatSqlServerCommand(dbConfig, restorationQuery);
+            return FormatDockerExecutableCommand(containerId, restorationCommand, true);
+        }
+
+        private IEnumerable<BackupPartFile> GetRestorationList(string containerId, DatabaseConfig dbConfig, string containerBackupFileName)
+        {
+            var fileListCommand = GetSqlServerFileListDockerCommand(containerId, dbConfig, containerBackupFileName);
+            var rawBackupPartsInfo = CallDockerCommand(fileListCommand);
+
+            return ParseRawBackupFileList(rawBackupPartsInfo.StandardOutput);
+        }
+
+        private string GetSqlServerFileListDockerCommand(string containerId, DatabaseConfig dbConfig, string containerBackupFileName)
+        {
+            var query = $"RESTORE FILELISTONLY FROM DISK = {TextUtilities.EscapeExpression(containerBackupFileName)}";
+            var command = FormatSqlServerCommand(dbConfig, query);
+            var commandOutputOperations = "-Q  | tr -s ' ' | cut -d ' ' -f 1-2";
+
+            return FormatDockerExecutableCommand(containerId, $"{command} {commandOutputOperations}", true);
+        }
+
+        private IEnumerable<BackupPartFile> ParseRawBackupFileList(string rawFileList)
+        {
+            var dataParts = rawFileList
+                .Split(Environment.NewLine)
+                .Where(part => part.Contains("MsSQL_DATA"));
+
+            return dataParts
+                .Select(dataPart => dataPart.Split(" "))
+                .Select(dataPart => new BackupPartFile(dataPart[0], dataPart[1].Split(".").Last()));
+        }
+
+        private string FormatDockerExecutableCommand(string containerId, string command, bool interactiveMode = false)
+        {
+            var interactiveFlag = interactiveMode ? "-it" : string.Empty;
+            return $"exec {interactiveFlag} {containerId} bash -c \"{command}\"";
+        }
+
+        private string FormatSqlServerCommand(DatabaseConfig dbConfig, string query)
+        {
+            const string sqlServerCliLocation = "/opt/mssql-tools/bin/sqlcmd";
+            var args = new[]
+            {
+                $"-S {dbConfig.Host},{dbConfig.Port}",
+                $"-U {dbConfig.AdminUserName}",
+                $"-P '{dbConfig.AdminPassword}'",
+                $"-Q '{query}'"
+            };
+
+            return $"{sqlServerCliLocation} {string.Join(' ', args)}";
+        }
+
+        private (string StandardOutput, string ErrorOutput) CallDockerCommand(string command)
+        {
+            var process = GetBasicProcessConfiguration(command);
             process.Start();
-            if (handler != null)
-            {
-                process.BeginOutputReadLine();
-            }
+            process.WaitForExit();
 
+            return (process.StandardOutput.ReadToEnd(), process.StandardError.ReadToEnd());
+        }
+
+        private bool CallDynamicDockerCommand(string command, Func<string, bool> outputHandler)
+        {
+            var process = GetBasicProcessConfiguration(command);
+            bool waitForMessages = true; 
+
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (e.Data != null && waitForMessages)
+                {
+                    waitForMessages = outputHandler(e.Data);
+                }
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
             process.WaitForExit();
 
             while (waitForMessages)
@@ -112,9 +196,34 @@ namespace BPMInstaller.Core.Services
                 Thread.Sleep(150);
             }
 
-            return handler == null ? 
-                (process.StandardOutput.ReadToEnd(), process.StandardError.ReadToEnd()):
-                (string.Empty, string.Empty);
+            // TODO: Add timeout exception
+            return true;
+        }
+
+        private Process GetBasicProcessConfiguration(string command)
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = "docker";
+            process.StartInfo.Arguments = command;
+            process.StartInfo.UseShellExecute = false;
+
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+
+            return process;
+        }
+
+        private class BackupPartFile
+        {
+            public BackupPartFile(string name, string extension)
+            {
+                Name = name;
+                Extension = extension;
+            }
+
+            public string Name { get; init; }
+
+            public string Extension { get; init; }
         }
     }
 }

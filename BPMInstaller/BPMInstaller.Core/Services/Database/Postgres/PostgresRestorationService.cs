@@ -56,11 +56,9 @@ namespace BPMInstaller.Core.Services.Database.Postgres
                 return false;
             }
 
-            var docker = new DockerService();
-            var backupName = DateTime.Now.ToString("dd-MM-HH:mm.backup");
-            docker.CopyBackup(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, backupName);
-            docker.RestorePostgresBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName,
-                DatabaseConfig.DatabaseName, backupName);
+            var docker = new DockerService(logger);
+            docker.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, DatabaseType.PostgreSql);
+            docker.RestorePostgresBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName);
             return true;
         }
     }

@@ -9,7 +9,7 @@
         /// Восстановление через Docker
         /// </summary>
         /// <returns>Восстановление успешно</returns>
-        public bool RestoreByDocker(IInstallationLogger logger);
+        public bool RestoreByDocker();
 
         /// <summary>
         /// Восстановление через CLI

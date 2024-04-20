@@ -1,5 +1,4 @@
 ﻿using BPMInstaller.Core.Interfaces;
-using BPMInstaller.Core.Enums;
 using BPMInstaller.Core.Model;
 using System.Diagnostics;
 
@@ -9,11 +8,16 @@ namespace BPMInstaller.Core.Services.Database.Postgres
     {
         private DatabaseConfig DatabaseConfig { get; }
         private BackupRestorationConfig BackupRestorationConfig { get; }
+        private IInstallationLogger InstallationLogger { get; }
+        private DockerService DockerService{ get; }
 
-        public PostgresRestorationService(BackupRestorationConfig backupRestorationConfig, DatabaseConfig databaseConfig)
+        public PostgresRestorationService(BackupRestorationConfig backupRestorationConfig, DatabaseConfig databaseConfig, IInstallationLogger logger)
         {
             BackupRestorationConfig = backupRestorationConfig ?? throw new ArgumentNullException(nameof(backupRestorationConfig));
             DatabaseConfig = databaseConfig ?? throw new ArgumentNullException(nameof(databaseConfig));
+            InstallationLogger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            DockerService = new DockerService();
         }
 
         /// <inheritdoc cref="IDatabaseRestorationService.RestoreByCli"/>
@@ -49,17 +53,45 @@ namespace BPMInstaller.Core.Services.Database.Postgres
         /// Восстановление с помощью Docker
         /// </summary>
         /// <returns>Бекап восстановлен</returns>
-        public bool RestoreByDocker(IInstallationLogger logger)
+        public bool RestoreByDocker()
         {
             if (string.IsNullOrEmpty(BackupRestorationConfig.DockerImage))
             {
                 return false;
             }
 
-            var docker = new DockerService(logger);
-            docker.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, DatabaseType.PostgreSql);
-            docker.RestorePostgresBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName);
+            DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, GetBackupName());
+            RestorePostgresBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName);
             return true;
+        }
+
+        public bool RestorePostgresBackup(string containerId, string userName, string databaseName)
+        {
+            var restorationDockerCommand = GetPostgresRestorationCommand(containerId, userName);
+            var restorationOutput = DockerService.ExecuteCommandInContainer(containerId, restorationDockerCommand);
+            return string.IsNullOrEmpty(restorationOutput.ErrorOutput);
+        }
+
+        private string GetPostgresRestorationCommand(string containerId, string userName)
+        {
+            var backupName = GetBackupName();
+
+            var restorationParameters = new[]
+            {
+                $"--username={userName}",
+                $"--dbname={DatabaseConfig.DatabaseName}",
+                "--no-owner",
+                "--no-privileges",
+                $"./{backupName}"
+            };
+
+            var restorationScript = $"pg_restore {string.Join(" ", restorationParameters)}";
+            return DockerService.ExecuteCommandInContainer(containerId, restorationScript).StandardOutput;
+        }
+
+        private string GetBackupName()
+        {
+            return $"{DatabaseConfig.DatabaseName}.backup";
         }
     }
 }

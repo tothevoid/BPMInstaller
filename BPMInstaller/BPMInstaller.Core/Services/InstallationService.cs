@@ -42,10 +42,10 @@ namespace BPMInstaller.Core.Services
             {
                 case DatabaseType.MsSql:
                     return (new MsSqlDatabaseService(InstallationConfig.DatabaseConfig), 
-                        new MsSqlRestorationService(InstallationConfig.BackupRestorationConfig, InstallationConfig.DatabaseConfig));
+                        new MsSqlRestorationService(InstallationConfig.BackupRestorationConfig, InstallationConfig.DatabaseConfig, InstallationLogger));
                 case DatabaseType.PostgreSql:
                     return (new PostgresDatabaseService(InstallationConfig.DatabaseConfig), 
-                        new PostgresRestorationService(InstallationConfig.BackupRestorationConfig, InstallationConfig.DatabaseConfig));
+                        new PostgresRestorationService(InstallationConfig.BackupRestorationConfig, InstallationConfig.DatabaseConfig, InstallationLogger));
                 default:
                     throw new NotImplementedException(InstallationConfig.DatabaseType.ToString());
             }
@@ -217,7 +217,7 @@ namespace BPMInstaller.Core.Services
             return restorationKind switch
             {
                 DatabaseDeploymentType.Cli => DatabaseRestorationService.RestoreByCli(),
-                DatabaseDeploymentType.Docker => DatabaseRestorationService.RestoreByDocker(InstallationLogger),
+                DatabaseDeploymentType.Docker => DatabaseRestorationService.RestoreByDocker(),
                 _ => throw new NotImplementedException()
             };
         }

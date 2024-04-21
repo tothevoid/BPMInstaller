@@ -1,20 +1,63 @@
 ﻿using BPMInstaller.Core.Model.Docker;
-using System.Diagnostics;
-using BPMInstaller.Core.Model;
 using BPMInstaller.Core.Utilities;
-using System.ComponentModel;
 
 namespace BPMInstaller.Core.Services
 {
     //TODO: separate into SqlServer and Postgres implementation + common logic service
     public class DockerService
     {
+        private const string ProcessName = "docker";
+
+        // TODO: add results validation
         public Dictionary<string, string> GetActiveContainers()
         {
-            var command = "ps --format \"{{.ID}}\t{{.Names}}\"";
-            var output = CallDockerCommand(command);
+            const string outputFormat = "{{.ID}}\t{{.Names}}\"";
 
-            return output.StandardOutput.Split("\n").Where(command => !string.IsNullOrEmpty(command))
+            var commandResult = new CommandLineQueryExecutor(ProcessName)
+                .AddParameter("ps")
+                .AddParameter("--format", outputFormat)
+                .Execute();
+
+            return ProcessRawContainersList(commandResult.Output);
+        }
+
+        public bool CopyFileIntoContainer(string sourceFilePath, string containerId, string backupName)
+        {
+            if (!File.Exists(sourceFilePath))
+            {
+                return false;
+            }
+
+            string destinationPath = $"{containerId}:/{backupName}";
+
+            var commandResult = new CommandLineQueryExecutor(ProcessName)
+                .AddParameter("cp")
+                .AddParameter(sourceFilePath)
+                .AddParameter(destinationPath)
+                .Execute();
+
+            return string.IsNullOrEmpty(commandResult.Output) && 
+                   string.IsNullOrEmpty(commandResult.ErrorOutput);
+        }
+
+        public CommandLineExecutionResult ExecuteCommandInContainer(string containerId, string command, bool isInteractive = false) =>
+            GetDockerShellExecutor(containerId, command, isInteractive)
+                .Execute();
+        
+        public bool ExecuteCommandInContainerWhile(string containerId, string command, Func<string, bool> outputHandler) =>
+            GetDockerShellExecutor(containerId, command, true)
+                .ExecuteWhile(outputHandler);
+
+        private Dictionary<string, string> ProcessRawContainersList(string rawOutput)
+        {
+            if (string.IsNullOrEmpty(rawOutput))
+            {
+                return new Dictionary<string, string>();
+            }
+
+            return rawOutput
+                .Split(Environment.NewLine)
+                .Where(command => !string.IsNullOrEmpty(command))
                 .Select(part =>
                 {
                     var subPart = part.Split("\t");
@@ -23,83 +66,20 @@ namespace BPMInstaller.Core.Services
                 .ToDictionary(key => key.Id, value => value.ImageName);
         }
 
-        //TODO: get rid of DatabaseType dependency 
-        public bool CopyFileIntoContainer(string filePath, string containerId, string containerFileName, string backupName)
+        private CommandLineQueryExecutor GetDockerShellExecutor(string containerId, string command, bool interactiveMode = false)
         {
-            if (!File.Exists(filePath))
+            var builder = new CommandLineQueryExecutor(ProcessName)
+                .AddParameter("exec");
+
+            if (interactiveMode)
             {
-                return false;
+                builder.AddParameter("-it");
             }
 
-            var output = CallDockerCommand($"cp {filePath} {containerId}:/{backupName}");
-            return string.IsNullOrEmpty(output.StandardOutput) && string.IsNullOrEmpty(output.ErrorOutput);
-        }
-
-        public string FormatDockerExecutableCommand(string containerId, string command, bool interactiveMode = false)
-        {
-            var interactiveFlag = interactiveMode ? "-it " : string.Empty;
-
-            return $"exec {interactiveFlag}{containerId} bash -c \"{command}\"";
-        }
-
-        public (string StandardOutput, string ErrorOutput) CallDockerCommand(string command)
-        {
-            var process = GetBasicProcessConfiguration(command);
-            process.Start();
-            process.WaitForExit();
-
-            return (process.StandardOutput.ReadToEnd(), process.StandardError.ReadToEnd());
-        }
-
-        public (string StandardOutput, string ErrorOutput) ExecuteCommandInContainer(string containerId, string command, bool isInteractive = false)
-        {
-            var dockerCommand = FormatDockerExecutableCommand(containerId, command, isInteractive);
-            var process = GetBasicProcessConfiguration(dockerCommand);
-            process.Start();
-            process.WaitForExit();
-
-            return (process.StandardOutput.ReadToEnd(), process.StandardError.ReadToEnd());
-        }
-
-        public bool CallDynamicCommand(string containerId, string command, Func<string, bool> outputHandler)
-        {
-            var dockerCommand = FormatDockerExecutableCommand(containerId, command, true);
-            var process = GetBasicProcessConfiguration(dockerCommand);
-            bool waitForMessages = true;
-
-            process.OutputDataReceived += (_, e) =>
-            {
-                if (e.Data != null && waitForMessages)
-                {
-                    waitForMessages = outputHandler(e.Data);
-                }
-            };
-
-            process.Start();
-            process.BeginOutputReadLine();
-            process.WaitForExit();
-
-            while (waitForMessages)
-            {
-                Thread.Sleep(150);
-            }
-
-            // TODO: Add timeout exception
-            return true;
-        }
-
-
-        private Process GetBasicProcessConfiguration(string command)
-        {
-            Process process = new Process();
-            process.StartInfo.FileName = "docker";
-            process.StartInfo.Arguments = command;
-            process.StartInfo.UseShellExecute = false;
-
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-
-            return process;
+            return builder
+                .AddParameter(containerId)
+                .AddParameter("bash")
+                .AddParameter("-c", $"\"{command}\"");
         }
     }
 }

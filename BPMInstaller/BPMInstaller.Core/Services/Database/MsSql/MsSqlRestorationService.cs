@@ -8,6 +8,7 @@ using BPMInstaller.Core.Utilities;
 
 namespace BPMInstaller.Core.Services.Database.MsSql
 {
+    // TODO: refactor to generic CLI calls
     public class MsSqlRestorationService: IDatabaseRestorationService
     {
         private const string DockerDataLocation = "/var/opt/mssql/data";

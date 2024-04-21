@@ -1,5 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using BPMInstaller.Core.Model.Runtime;
 using BPMInstaller.UI.Desktop.Models.Basics;
 using BPMInstaller.UI.Desktop.Utilities;
@@ -8,6 +12,8 @@ namespace BPMInstaller.UI.Desktop.Models.UI
 {
     public class ControlsSessionState : ResponsiveModel
     {
+        private int counter = 0;
+
         private bool isInstallationRunning = false;
 
         private string installationDuration = string.Empty;
@@ -34,15 +40,40 @@ namespace BPMInstaller.UI.Desktop.Models.UI
 
         public ObservableCollection<InstallationMessage> Output { get; set; } = new ObservableCollection<InstallationMessage>();
 
-        private int counter = 0;
+        public int Counter
+        {
+            get => counter;
+            private set
+            {
+                counter = value;
+                UpdateInstallationDuration(value);
+            }
+        }
 
+        // TODO: fix dispatcher injection
         public void StartInstallation()
         {
             Output.Clear();
-            counter = 0;
+            Counter = 0;
             StartButtonVisibility = Visibility.Collapsed;
             IsInstallationRunning = true;
-            InstallationDuration = DateTimeUtilities.SecondsToString(++counter);
+        }
+
+        public async Task StartCounter(Action<Action> uiThreadAction)
+        {
+            while (isInstallationRunning)
+            {
+                await Task.Delay(1000);
+                uiThreadAction(() =>
+                {
+                    Counter++;
+                });
+            }
+        }
+
+        private void UpdateInstallationDuration(int currentCounterValue)
+        {
+            InstallationDuration = DateTimeUtilities.SecondsToString(currentCounterValue);
         }
 
         public void InstallationEnded()

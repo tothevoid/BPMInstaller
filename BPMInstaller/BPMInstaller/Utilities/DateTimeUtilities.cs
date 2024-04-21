@@ -5,7 +5,7 @@
         public static string SecondsToString(int seconds)
         {
             int minutes = seconds / 60;
-            int leftSeconds = minutes * 60 - seconds;
+            int leftSeconds = seconds - minutes * 60;
             return $"{minutes:D2}:{leftSeconds:D2}";
         }
     }

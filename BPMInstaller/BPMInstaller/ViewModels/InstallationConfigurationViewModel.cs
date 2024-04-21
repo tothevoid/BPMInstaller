@@ -50,7 +50,10 @@ namespace BPMInstaller.UI.Desktop.ViewModels
 
         private void StartInstallation()
         {
+
             InstallationConfiguration.ControlsSessionState.StartInstallation();
+
+            Task.Run(() => InstallationConfiguration.ControlsSessionState.StartCounter(MainThreadSync.InvokeSynced));
 
             Task.Run(() =>
             {

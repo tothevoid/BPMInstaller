@@ -19,7 +19,7 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             return outputParts
                 .Skip(2)
                 .Take(outputParts.Length - 5)
-                .Select(row => Regex.Replace(row, @"\s{2,}", "\t"));
+                .Select(row => Regex.Replace(row, @"\s{2,}", "\t").Replace("/", "\\"));
         }
     }
 }

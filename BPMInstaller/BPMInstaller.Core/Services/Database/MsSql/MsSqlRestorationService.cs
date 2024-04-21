@@ -4,6 +4,7 @@ using System.Diagnostics;
 using BPMInstaller.Core.Enums;
 using BPMInstaller.Core.Model.Runtime;
 using System.Text;
+using BPMInstaller.Core.Utilities;
 
 namespace BPMInstaller.Core.Services.Database.MsSql
 {
@@ -29,11 +30,33 @@ namespace BPMInstaller.Core.Services.Database.MsSql
         {
             var backupName = GetBackupName();
 
-            DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, backupName);
+            var isCopied = DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, backupName);
 
-            var rawFileListQuery = GetSqlServerFileListQuery(backupName);
-            var fileListOutput = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, rawFileListQuery, true).StandardOutput;
-            return CallRestorationCommand(fileListOutput, DockerDataLocation, backupName);
+            if (!isCopied)
+            {
+                return false;
+            }
+
+            var rawFileListQuery = GetSqlServerFileListQuery($"/{backupName}");
+            var outputParts = new StringBuilder();
+            DockerService.CallDynamicCommand(BackupRestorationConfig.DockerImage, rawFileListQuery, message =>
+            {
+                InstallationLogger.Log(InstallationMessage.Info(message));
+                outputParts.AppendLine(message);
+                return !message.Contains("rows affected");
+            });
+
+            var fileList = ParseRawBackupFileList(outputParts.ToString()).ToList();
+            var restorationQuery = CreateMoveQuery(fileList, DockerDataLocation, $"/{backupName}");
+            var restorationCommand = FormatSqlCmdCommand(restorationQuery);
+
+            var cliSource = "/opt/mssql-tools/bin/sqlcmd";
+
+            return DockerService.CallDynamicCommand(BackupRestorationConfig.DockerImage, $"{cliSource} {restorationCommand}", message =>
+            {
+                InstallationLogger.Log(InstallationMessage.Info(message));
+                return message.Contains("RESTORE DATABASE successfully");
+            });
         }
 
         public bool RestoreByCli()
@@ -55,14 +78,10 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             });
 
 
-            return CallRestorationCommand(outputParts.ToString(), localDataDirectory, newBackupPath);
-        }
-
-        private bool CallRestorationCommand(string fileListQueryOutput, string sqlServerDataPath, string backupFilePath)
-        {
-            var fileList = ParseRawBackupFileList(fileListQueryOutput).ToList();
-            var restorationQuery = CreateMoveQuery(fileList, sqlServerDataPath, backupFilePath);
+            var fileList = ParseRawBackupFileList(outputParts.ToString()).ToList();
+            var restorationQuery = CreateMoveQuery(fileList, localDataDirectory, newBackupPath);
             var restorationCommand = FormatSqlCmdCommand(restorationQuery);
+
             return CallDynamicCommand(restorationCommand, message =>
             {
                 InstallationLogger.Log(InstallationMessage.Info(message));
@@ -117,8 +136,8 @@ namespace BPMInstaller.Core.Services.Database.MsSql
                 "/opt/mssql-tools/bin/sqlcmd " :
                 "";
 
-            var query = $"{prefix}RESTORE FILELISTONLY FROM DISK = '{backupPath}'";
-            return FormatSqlCmdCommand(query);
+            var query = $"RESTORE FILELISTONLY FROM DISK = '{backupPath}'";
+            return $"{prefix}{FormatSqlCmdCommand(query)}";
         }
 
         // TODO: Move cli logic into separate class
@@ -180,13 +199,17 @@ namespace BPMInstaller.Core.Services.Database.MsSql
 
         private string FormatSqlCmdCommand(string query)
         {
+            var wrappedQuery = BackupRestorationConfig.RestorationKind == DatabaseDeploymentType.Docker ? 
+                TextUtilities.EscapeExpression(query) : 
+                $"\"{query}\"";
+
             var args = new[]
             {
                 $"-S {DatabaseConfig.Host},{DatabaseConfig.Port}",
                 $"-U {DatabaseConfig.AdminUserName}",
                 "-C",
                 $"-P {DatabaseConfig.AdminPassword}",
-                $"-Q \"{query}\"",
+                $"-Q {wrappedQuery}",
             };
 
             return $"{string.Join(' ', args)}";

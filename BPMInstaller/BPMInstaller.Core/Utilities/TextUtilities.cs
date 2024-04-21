@@ -8,6 +8,8 @@ namespace BPMInstaller.Core.Utilities
 {
     public static class TextUtilities
     {
-        public static string EscapeExpression(string expression) => $"\\\"{expression}\\\"";
+        public static string EscapeExpression(string expression) => $"{GetEscape()}{expression}{GetEscape()}";
+
+        public static string GetEscape() => "\\\"";
     }
 }

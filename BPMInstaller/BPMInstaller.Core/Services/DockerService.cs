@@ -1,6 +1,8 @@
 ﻿using BPMInstaller.Core.Model.Docker;
 using System.Diagnostics;
 using BPMInstaller.Core.Model;
+using BPMInstaller.Core.Utilities;
+using System.ComponentModel;
 
 namespace BPMInstaller.Core.Services
 {
@@ -29,14 +31,15 @@ namespace BPMInstaller.Core.Services
                 return false;
             }
 
-            var output = ExecuteCommandInContainer(containerId, $"cp {filePath} {containerId}:/{backupName}");
-            return !string.IsNullOrEmpty(output.StandardOutput) && string.IsNullOrEmpty(output.ErrorOutput);
+            var output = CallDockerCommand($"cp {filePath} {containerId}:/{backupName}");
+            return string.IsNullOrEmpty(output.StandardOutput) && string.IsNullOrEmpty(output.ErrorOutput);
         }
 
         public string FormatDockerExecutableCommand(string containerId, string command, bool interactiveMode = false)
         {
             var interactiveFlag = interactiveMode ? "-it " : string.Empty;
-            return $"exec {interactiveFlag}-d {containerId} bash -c \"{command}\"";
+
+            return $"exec {interactiveFlag}{containerId} bash -c \"{command}\"";
         }
 
         public (string StandardOutput, string ErrorOutput) CallDockerCommand(string command)
@@ -57,6 +60,34 @@ namespace BPMInstaller.Core.Services
 
             return (process.StandardOutput.ReadToEnd(), process.StandardError.ReadToEnd());
         }
+
+        public bool CallDynamicCommand(string containerId, string command, Func<string, bool> outputHandler)
+        {
+            var dockerCommand = FormatDockerExecutableCommand(containerId, command, true);
+            var process = GetBasicProcessConfiguration(dockerCommand);
+            bool waitForMessages = true;
+
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (e.Data != null && waitForMessages)
+                {
+                    waitForMessages = outputHandler(e.Data);
+                }
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.WaitForExit();
+
+            while (waitForMessages)
+            {
+                Thread.Sleep(150);
+            }
+
+            // TODO: Add timeout exception
+            return true;
+        }
+
 
         private Process GetBasicProcessConfiguration(string command)
         {

@@ -25,6 +25,7 @@ namespace BPMInstaller.Core.Model
         /// <summary>
         /// Образ в Docker-е, если БД развернута в контейнере
         /// </summary>
+        /// TODO: rename to ContainerId
         public string? DockerImage { get; set; }
     }
 }

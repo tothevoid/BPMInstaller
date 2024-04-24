@@ -29,18 +29,18 @@ namespace BPMInstaller.Core.Services.Database.MsSql
 
         public bool RestoreByDocker()
         {
-            var backupName = GetBackupName();
+            var backupPath = $"/{GetBackupName()}";
 
-            var isCopied = DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, backupName);
+            var isCopied = DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, backupPath);
 
             if (!isCopied)
             {
                 return false;
             }
 
-            var rawFileListQuery = GetSqlServerFileListQuery($"/{backupName}");
+            var rawFileListQuery = GetSqlServerFileListQuery(backupPath);
             var outputParts = new StringBuilder();
-            DockerService.CallDynamicCommand(BackupRestorationConfig.DockerImage, rawFileListQuery, message =>
+            DockerService.ExecuteCommandInContainerWhile(BackupRestorationConfig.DockerImage, rawFileListQuery, message =>
             {
                 InstallationLogger.Log(InstallationMessage.Info(message));
                 outputParts.AppendLine(message);
@@ -48,12 +48,12 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             });
 
             var fileList = ParseRawBackupFileList(outputParts.ToString()).ToList();
-            var restorationQuery = CreateMoveQuery(fileList, DockerDataLocation, $"/{backupName}");
+            var restorationQuery = CreateMoveQuery(fileList, DockerDataLocation, backupPath);
             var restorationCommand = FormatSqlCmdCommand(restorationQuery);
 
             var cliSource = "/opt/mssql-tools/bin/sqlcmd";
 
-            return DockerService.CallDynamicCommand(BackupRestorationConfig.DockerImage, $"{cliSource} {restorationCommand}", message =>
+            return DockerService.ExecuteCommandInContainerWhile(BackupRestorationConfig.DockerImage, $"{cliSource} {restorationCommand}", message =>
             {
                 InstallationLogger.Log(InstallationMessage.Info(message));
                 return message.Contains("RESTORE DATABASE successfully");
@@ -131,7 +131,7 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             return backupsDirectory;
         }
 
-        private string GetSqlServerFileListQuery(string backupPath)
+        private string ExecuteServerFileListQuery(string backupPath)
         {
             var prefix = BackupRestorationConfig.RestorationKind == DatabaseDeploymentType.Docker ?
                 "/opt/mssql-tools/bin/sqlcmd " :
@@ -140,6 +140,17 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             var query = $"RESTORE FILELISTONLY FROM DISK = '{backupPath}'";
             return $"{prefix}{FormatSqlCmdCommand(query)}";
         }
+
+        private string ExecuteFileListCommandInDocker()
+        {
+            DockerService.ExecuteCommandInContainerWhile();
+        }
+
+        private string ExecuteFileListCommandLocally()
+        {
+            new CommandLineQueryExecutor("sqlcmd");
+        }
+
 
         // TODO: Move cli logic into separate class
         private bool CallDynamicCommand(string command, Func<string, bool> outputHandler)

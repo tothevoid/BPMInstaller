@@ -21,14 +21,14 @@ namespace BPMInstaller.Core.Services
             return ProcessRawContainersList(commandResult.Output);
         }
 
-        public bool CopyFileIntoContainer(string sourceFilePath, string containerId, string backupName)
+        public bool CopyFileIntoContainer(string sourceFilePath, string containerId, string backupPath)
         {
             if (!File.Exists(sourceFilePath))
             {
                 return false;
             }
 
-            string destinationPath = $"{containerId}:/{backupName}";
+            string destinationPath = $"{containerId}:{backupPath}";
 
             var commandResult = new CommandLineQueryExecutor(ProcessName)
                 .AddParameter("cp")
@@ -36,7 +36,7 @@ namespace BPMInstaller.Core.Services
                 .AddParameter(destinationPath)
                 .Execute();
 
-            return string.IsNullOrEmpty(commandResult.Output) && 
+            return string.IsNullOrEmpty(commandResult.Output) &&
                    string.IsNullOrEmpty(commandResult.ErrorOutput);
         }
 

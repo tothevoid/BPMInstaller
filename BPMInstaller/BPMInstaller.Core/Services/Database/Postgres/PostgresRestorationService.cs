@@ -60,7 +60,7 @@ namespace BPMInstaller.Core.Services.Database.Postgres
                 return false;
             }
 
-            DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName, GetBackupName());
+            DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName);
             RestorePostgresBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName);
             return true;
         }
@@ -86,7 +86,7 @@ namespace BPMInstaller.Core.Services.Database.Postgres
             };
 
             var restorationScript = $"pg_restore {string.Join(" ", restorationParameters)}";
-            return DockerService.ExecuteCommandInContainer(containerId, restorationScript).StandardOutput;
+            return DockerService.ExecuteCommandInContainer(containerId, restorationScript).Output;
         }
 
         private string GetBackupName()

@@ -40,7 +40,7 @@ namespace BPMInstaller.Core.Utilities
             process.StartInfo.FileName = ExecutingFileName;
 
             process.StartInfo.Arguments = GetArguments();
-            process.StartInfo.UseShellExecute = UseShellExecute;
+            process.StartInfo.UseShellExecute = false;
 
             if (RunInForeground)
             {
@@ -81,30 +81,32 @@ namespace BPMInstaller.Core.Utilities
         public bool ExecuteWhile(Func<string, bool> outputHandler)
         {
             var process = Build();
-            bool waitForMessages = true;
+            bool shouldExit = false;
 
             process.OutputDataReceived += (_, e) =>
             {
-                if (e.Data != null && waitForMessages)
+                if (e.Data != null && !shouldExit)
                 {
-                    waitForMessages = outputHandler(e.Data);
+                    shouldExit = outputHandler(e.Data);
                 }
             };
 
             process.Start();
             process.BeginOutputReadLine();
-            process.WaitForExit();
+            //process.WaitForExit();
 
-            while (waitForMessages)
+            while (!shouldExit)
             {
                 Thread.Sleep(150);
             }
 
+            //TODO: maybe that call is not needed
+            //process.CancelOutputRead();
+            process.Close();
             // TODO: Add timeout exception
             return true;
         }
     }
-}
 
     public class CommandLineExecutionResult
     {

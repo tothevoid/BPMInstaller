@@ -38,16 +38,8 @@ namespace BPMInstaller.Core.Services.Database.MsSql
                 return false;
             }
 
-            var rawFileListQuery = GetSqlServerFileListQuery(backupPath);
-            var outputParts = new StringBuilder();
-            DockerService.ExecuteCommandInContainerWhile(BackupRestorationConfig.DockerImage, rawFileListQuery, message =>
-            {
-                InstallationLogger.Log(InstallationMessage.Info(message));
-                outputParts.AppendLine(message);
-                return !message.Contains("rows affected");
-            });
-
-            var fileList = ParseRawBackupFileList(outputParts.ToString()).ToList();
+            var rawFileListResult = ExecuteServerFileListQuery(backupPath);
+            var fileList = ParseRawBackupFileList(rawFileListResult).ToList();
             var restorationQuery = CreateMoveQuery(fileList, DockerDataLocation, backupPath);
             var restorationCommand = FormatSqlCmdCommand(restorationQuery);
 
@@ -67,19 +59,8 @@ namespace BPMInstaller.Core.Services.Database.MsSql
 
             File.Copy(BackupRestorationConfig.BackupPath, newBackupPath, true);
 
-            var fileListQuery = GetSqlServerFileListQuery(newBackupPath);
-            
-            //TODO: use synced version
-            var outputParts = new StringBuilder();
-            CallDynamicCommand(fileListQuery, message =>
-            {
-                InstallationLogger.Log(InstallationMessage.Info(message));
-                outputParts.AppendLine(message);
-                return !message.Contains("rows affected");
-            });
-
-
-            var fileList = ParseRawBackupFileList(outputParts.ToString()).ToList();
+            var rawFileListResult = ExecuteServerFileListQuery(newBackupPath);
+            var fileList = ParseRawBackupFileList(rawFileListResult).ToList();
             var restorationQuery = CreateMoveQuery(fileList, localDataDirectory, newBackupPath);
             var restorationCommand = FormatSqlCmdCommand(restorationQuery);
 
@@ -133,22 +114,41 @@ namespace BPMInstaller.Core.Services.Database.MsSql
 
         private string ExecuteServerFileListQuery(string backupPath)
         {
-            var prefix = BackupRestorationConfig.RestorationKind == DatabaseDeploymentType.Docker ?
-                "/opt/mssql-tools/bin/sqlcmd " :
-                "";
-
             var query = $"RESTORE FILELISTONLY FROM DISK = '{backupPath}'";
-            return $"{prefix}{FormatSqlCmdCommand(query)}";
+            var command = FormatSqlCmdCommand(query);
+
+            var outputParts = new StringBuilder();
+
+            bool HandleMessages(string message)
+            {
+                InstallationLogger.Log(InstallationMessage.Info(message));
+                outputParts.AppendLine(message);
+                return message.Contains("rows affected");
+            }
+
+            var executionResult = BackupRestorationConfig.RestorationKind == DatabaseDeploymentType.Docker
+                ? ExecuteFileListCommandInDocker(command, HandleMessages)
+                : ExecuteFileListCommandLocally(command, HandleMessages);
+
+            if (!executionResult)
+            {
+                throw new ArgumentException(backupPath);
+            }
+
+            return outputParts.ToString();
         }
 
-        private string ExecuteFileListCommandInDocker()
+        private bool ExecuteFileListCommandInDocker(string command, Func<string, bool> handler)
         {
-            DockerService.ExecuteCommandInContainerWhile();
+            return DockerService.ExecuteCommandInContainerWhile(BackupRestorationConfig.DockerImage, 
+                $"/opt/mssql-tools/bin/sqlcmd {command}", handler);
         }
 
-        private string ExecuteFileListCommandLocally()
+        private bool ExecuteFileListCommandLocally(string command, Func<string, bool> handler)
         {
-            new CommandLineQueryExecutor("sqlcmd");
+            return new CommandLineQueryExecutor("sqlcmd")
+                .AddParameter(command)
+                .ExecuteWhile(handler);
         }
 
 

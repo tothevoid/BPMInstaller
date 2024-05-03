@@ -51,7 +51,7 @@ namespace BPMInstaller.Core.Services
             }
         }
 
-        public void Install()
+        public string Install()
         {
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Started));
             try
@@ -61,8 +61,10 @@ namespace BPMInstaller.Core.Services
             catch (Exception ex)
             {
                 InstallationLogger.Log(InstallationMessage.Error(ex.Message));
+                return ex.Message;
             }
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
+            return string.Empty;
         }
 
         private void StartBasicInstallation()
@@ -154,7 +156,7 @@ namespace BPMInstaller.Core.Services
             return true;
         }
 
-        public bool InitializeDatabase()
+        private bool InitializeDatabase()
         {
             if (!InstallationConfig.Pipeline.RestoreDatabaseBackup)
             {
@@ -188,7 +190,7 @@ namespace BPMInstaller.Core.Services
             return true;
         }
 
-        public bool RestoreDatabase()
+        private bool RestoreDatabase()
         {
             if (!InstallationConfig.Pipeline.RestoreDatabaseBackup)
             {

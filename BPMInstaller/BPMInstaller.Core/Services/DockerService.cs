@@ -35,7 +35,7 @@ namespace BPMInstaller.Core.Services
                 .AddParameter(sourceFilePath)
                 .AddParameter(destinationPath)
                 .Execute();
-
+            
             return string.IsNullOrEmpty(commandResult.Output) &&
                    string.IsNullOrEmpty(commandResult.ErrorOutput);
         }

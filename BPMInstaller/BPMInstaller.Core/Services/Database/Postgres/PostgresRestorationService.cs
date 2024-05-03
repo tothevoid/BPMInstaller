@@ -1,6 +1,7 @@
 ﻿using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
 using System.Diagnostics;
+using BPMInstaller.Core.Utilities;
 
 namespace BPMInstaller.Core.Services.Database.Postgres
 {
@@ -23,30 +24,26 @@ namespace BPMInstaller.Core.Services.Database.Postgres
         /// <inheritdoc cref="IDatabaseRestorationService.RestoreByCli"/>
         public bool RestoreByCli()
         {
-            if (string.IsNullOrEmpty(BackupRestorationConfig.RestorationCliLocation))
+            if (!File.Exists(BackupRestorationConfig.BackupPath))
             {
                 return false;
             }
 
-            if (File.Exists(BackupRestorationConfig.RestorationCliLocation))
-            {
-                return false;
-            }
-
-            Process process = new Process();
             var backupFileName = Path.GetFileName(BackupRestorationConfig.BackupPath);
-            process.StartInfo.WorkingDirectory = BackupRestorationConfig.BackupPath.Substring(0, 
+            var directory = BackupRestorationConfig.BackupPath.Substring(0,
                 BackupRestorationConfig.BackupPath.Length - backupFileName.Length - 1);
-            process.StartInfo.FileName = $"{BackupRestorationConfig.RestorationCliLocation}/pg_restore.exe";
-            process.StartInfo.Arguments = $"--port={DatabaseConfig.Port} --username={DatabaseConfig.AdminUserName} --dbname={DatabaseConfig.DatabaseName} --no-owner --no-privileges ./{backupFileName}";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.EnvironmentVariables["PGPASSWORD"] = DatabaseConfig.AdminPassword;
 
-            process.Start();
-            process.WaitForExit();
-            var output = process.StandardError.ReadToEnd();
-            return string.IsNullOrEmpty(output);
+            var executionResult = new CommandLineQueryExecutor(BackupRestorationConfig.RestorationCliLocation, directory)
+                .AddParameter("--port", DatabaseConfig.Port.ToString(), "=")
+                .AddParameter("--username", DatabaseConfig.AdminUserName, "=")
+                .AddParameter("--dbname", DatabaseConfig.DatabaseName, "=")
+                .AddParameter("--no-owner")
+                .AddParameter("--no-privileges")
+                .AddParameter($"./{backupFileName}")
+                .AddEnvironmentVariable("PGPASSWORD", DatabaseConfig.AdminPassword)
+                .Execute();
+
+            return string.IsNullOrEmpty(executionResult.Output);
         }
 
         /// <summary>
@@ -60,33 +57,31 @@ namespace BPMInstaller.Core.Services.Database.Postgres
                 return false;
             }
 
-            DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, DatabaseConfig.DatabaseName);
-            RestorePostgresBackup(BackupRestorationConfig.DockerImage, DatabaseConfig.AdminUserName, DatabaseConfig.DatabaseName);
+            var backupPath = $"/{GetBackupName()}";
+            DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, 
+                BackupRestorationConfig.DockerImage, backupPath);
+            RestorePostgresBackup(backupPath);
             return true;
         }
 
-        public bool RestorePostgresBackup(string containerId, string userName, string databaseName)
+        public bool RestorePostgresBackup(string backupPath)
         {
-            var restorationDockerCommand = GetPostgresRestorationCommand(containerId, userName);
-            var restorationOutput = DockerService.ExecuteCommandInContainer(containerId, restorationDockerCommand);
-            return string.IsNullOrEmpty(restorationOutput.ErrorOutput);
-        }
-
-        private string GetPostgresRestorationCommand(string containerId, string userName)
-        {
-            var backupName = GetBackupName();
-
             var restorationParameters = new[]
             {
-                $"--username={userName}",
+                $"--username={DatabaseConfig.AdminUserName}",
                 $"--dbname={DatabaseConfig.DatabaseName}",
                 "--no-owner",
                 "--no-privileges",
-                $"./{backupName}"
+                $"./{backupPath}"
             };
 
             var restorationScript = $"pg_restore {string.Join(" ", restorationParameters)}";
-            return DockerService.ExecuteCommandInContainer(containerId, restorationScript).Output;
+            var restorationDockerCommand = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, 
+                restorationScript).Output;
+
+            var restorationOutput = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, 
+                restorationDockerCommand);
+            return string.IsNullOrEmpty(restorationOutput.ErrorOutput);
         }
 
         private string GetBackupName()

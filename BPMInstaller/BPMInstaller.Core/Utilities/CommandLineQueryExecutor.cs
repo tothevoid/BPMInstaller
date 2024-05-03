@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection.Metadata;
 
 namespace BPMInstaller.Core.Utilities
 {
@@ -8,29 +9,42 @@ namespace BPMInstaller.Core.Utilities
 
         private bool RunInForeground { get; }
 
+        //TODO: remove
         private bool UseShellExecute { get; }
 
         private bool CustomOutputHandler { get; }
 
-        private Dictionary<string, string> Parameters { get; } = new Dictionary<string, string>();
+        private List<QueryParameter> Parameters { get; } = new List<QueryParameter>();
 
-        public CommandLineQueryExecutor(string fileName, bool customOutputHandler = true, bool useShellExecute = true, bool runInForeground = true)
+        private Dictionary<string, string> EnvironmentVariables { get; } = new Dictionary<string, string>();
+
+        private string? InitialDirectory { get; }
+
+        public CommandLineQueryExecutor(string fileName, string? initialDirectory = null, bool customOutputHandler = true, bool useShellExecute = true, 
+            bool runInForeground = true)
         {
             ExecutingFileName = fileName ?? throw new ArgumentNullException(fileName);
             RunInForeground = runInForeground;
             UseShellExecute = useShellExecute;
             CustomOutputHandler = customOutputHandler;
+            InitialDirectory = initialDirectory;
         }
 
-        public CommandLineQueryExecutor AddParameter(string key, string value)
+        public CommandLineQueryExecutor AddParameter(string key, string value, string separator = " ")
         {
-            Parameters.Add(key, value);
+            Parameters.Add(new QueryParameter() {Key = key, Value = value, Separator = separator });
+            return this;
+        }
+
+        public CommandLineQueryExecutor AddEnvironmentVariable(string variable, string value)
+        {
+            EnvironmentVariables.Add(variable, value);
             return this;
         }
 
         public CommandLineQueryExecutor AddParameter(string key)
         {
-            Parameters.Add(key, string.Empty);
+            Parameters.Add(new QueryParameter() { Key = key });
             return this;
         }
 
@@ -41,6 +55,11 @@ namespace BPMInstaller.Core.Utilities
 
             process.StartInfo.Arguments = GetArguments();
             process.StartInfo.UseShellExecute = false;
+
+            if (!string.IsNullOrEmpty(InitialDirectory))
+            {
+                process.StartInfo.WorkingDirectory = InitialDirectory;
+            }
 
             if (RunInForeground)
             {
@@ -54,6 +73,11 @@ namespace BPMInstaller.Core.Utilities
                 process.StartInfo.RedirectStandardError = true;
             }
 
+            foreach (var environmentVariables in EnvironmentVariables)
+            {
+                process.StartInfo.EnvironmentVariables[environmentVariables.Key] = environmentVariables.Value;
+            }
+
             return process;
         }
 
@@ -61,8 +85,7 @@ namespace BPMInstaller.Core.Utilities
         {
             var parameters = Parameters.Select(parameter =>
             {
-                string separator = !string.IsNullOrEmpty(parameter.Value) ? " ": "";
-                return $"{parameter.Key}{separator}{parameter.Value}";
+                return $"{parameter.Key}{parameter.Separator ?? string.Empty}{parameter.Value ?? string.Empty}";
             });
 
             return string.Join(" ", parameters);
@@ -105,6 +128,15 @@ namespace BPMInstaller.Core.Utilities
             process.Close();
             // TODO: Add timeout exception
             return true;
+        }
+
+        private class QueryParameter
+        {
+            public string Key { get; set; }
+
+            public string? Value { get; set; }
+
+            public string? Separator { get; set; }
         }
     }
 

@@ -107,6 +107,8 @@
 
             public static class Restoration
             {
+                public const string EmptyConfig = "Отсутствует конфиг для восстановления БД";
+
                 public const string Started = "Запущено восстановление БД";
 
                 public const string Ended = "Завершено восстановление БД";

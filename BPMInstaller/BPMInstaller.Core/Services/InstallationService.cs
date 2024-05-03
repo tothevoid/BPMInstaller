@@ -56,27 +56,28 @@ namespace BPMInstaller.Core.Services
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Started));
             try
             {
-                StartBasicInstallation();
+                var installationResult = StartBasicInstallation();
+                InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
+                return installationResult;
             }
             catch (Exception ex)
             {
                 InstallationLogger.Log(InstallationMessage.Error(ex.Message));
                 return ex.Message;
             }
-            InstallationLogger.Log(InstallationMessage.Info(InstallationResources.MainWorkflow.Ended, true));
-            return string.Empty;
         }
 
-        private void StartBasicInstallation()
+        private string StartBasicInstallation()
         {
-            if (!ExecuteBeforeApplicationStarted())
+            var executionBeforeApplicationStartedResult = ExecuteBeforeApplicationStarted();
+            if (!string.IsNullOrEmpty(executionBeforeApplicationStartedResult))
             {
-                return;
+                return executionBeforeApplicationStartedResult;
             }
 
             if (!InstallationConfig.Pipeline.StartApplication)
             {
-                return;
+                return string.Empty;
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Starting));
@@ -85,21 +86,24 @@ namespace BPMInstaller.Core.Services
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Started));
 
             ExecuteAfterApplicationStarted(runningApplication);
+
+            return string.Empty;
         }
 
-        private bool ExecuteBeforeApplicationStarted()
+        private string ExecuteBeforeApplicationStarted()
         {
-
             ExecuteFileSystemOperations();
 
-            if (!InitializeDatabase())
+            var initializationResult = InitializeDatabase();
+            if (!string.IsNullOrEmpty(initializationResult))
             {
-                return false;
+                return initializationResult;
             }
 
-            if (!RestoreDatabase())
+            var restorationResult = RestoreDatabase();
+            if (!string.IsNullOrEmpty(restorationResult))
             {
-                return false;
+                return restorationResult;
             }
 
             if (InstallationConfig.Pipeline.DisableForcePasswordChange)
@@ -109,7 +113,7 @@ namespace BPMInstaller.Core.Services
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixed));
             }
 
-            return true;
+            return string.Empty;
         }
 
         private void ExecuteAfterApplicationStarted(IRunningApplication runningApplication)
@@ -156,19 +160,20 @@ namespace BPMInstaller.Core.Services
             return true;
         }
 
-        private bool InitializeDatabase()
+        private string InitializeDatabase()
         {
             if (!InstallationConfig.Pipeline.RestoreDatabaseBackup)
             {
-                return true;
+                return string.Empty;
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Connection.Validating));
             var exceptionMessage = DatabaseService.ValidateConnection();
             if (!string.IsNullOrEmpty(exceptionMessage))
             {
-                InstallationLogger.Log(InstallationMessage.Error(InstallationResources.Database.Connection.Failed));
-                return false;
+                var errorMessage = InstallationResources.Database.Connection.Failed;
+                InstallationLogger.Log(InstallationMessage.Error(errorMessage));
+                return errorMessage;
             }
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Connection.Success));
 
@@ -183,35 +188,36 @@ namespace BPMInstaller.Core.Services
             {
                 var errorMessage = string.Format(InstallationResources.Database.Creation.Failed, databaseCreationResult);
                 InstallationLogger.Log(InstallationMessage.Info(errorMessage, true));
-                return false;
+                return errorMessage;
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Creation.Done));
-            return true;
+            return string.Empty;
         }
 
-        private bool RestoreDatabase()
+        private string RestoreDatabase()
         {
             if (!InstallationConfig.Pipeline.RestoreDatabaseBackup)
             {
-                return true;
+                return string.Empty;
             }
 
             if (InstallationConfig.BackupRestorationConfig == null)
             {
-                return false;
+                return InstallationResources.Database.Restoration.EmptyConfig;
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Restoration.Started));
 
             if (!Restore(InstallationConfig.BackupRestorationConfig.RestorationKind))
             {
-                InstallationLogger.Log(InstallationMessage.Error(InstallationResources.Database.Restoration.Failed));
-                return false;
+                var errorMessage = InstallationResources.Database.Restoration.Failed;
+                InstallationLogger.Log(InstallationMessage.Error(errorMessage));
+                return errorMessage;
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Restoration.Ended));
-            return true;
+            return string.Empty;
         }
 
         private bool Restore(DatabaseDeploymentType restorationKind)

@@ -19,7 +19,7 @@
         </Style>
     </Window.Resources>
     <Grid d:DataContext="{d:DesignInstance ui:InstallationConfigurationModel}">
-        <TabControl  Name="ApplicationTabs" Padding="0,20,0,0">
+        <TabControl SelectedIndex="{Binding ControlsSessionState.ActiveTabIndex}"  Name="ApplicationTabs" Padding="0,20,0,0">
             <TabItem Header="Конфигурация">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -269,14 +269,18 @@
                     <Button Background="White" Grid.Row="1" Command="{Binding Actions.StartInstallationCommand}" >Выполнить</Button>
                 </Grid>
             </TabItem>
-            <TabItem Header="Запуск">
+            <TabItem Header="Установка">
                 <StackPanel DataContext="{Binding ControlsSessionState}" Margin="0 20">
                     <StackPanel Visibility="{Binding Path=IsInstallationRunning, Converter={StaticResource VisibleIfTrueConverter}}">
                         <TextBlock Margin="10, 0" HorizontalAlignment="Center" FontSize="14">Запущена установка</TextBlock>
-                        <TextBlock FontSize="14" HorizontalAlignment="Center" FontWeight="Bold" Text="{Binding InstallationDuration}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock FontSize="14" FontWeight="Bold" Text="Выполняется: "></TextBlock>
+                        <TextBlock FontSize="14" FontWeight="Bold" Text="{Binding InstallationDuration}"></TextBlock>
                     </StackPanel>
                     <ListView   
                         MinHeight="600px"
+                        Margin="10"
                         VerticalContentAlignment="Top"  
                         ScrollViewer.VerticalScrollBarVisibility="Visible"
                         ScrollViewer.CanContentScroll="False"

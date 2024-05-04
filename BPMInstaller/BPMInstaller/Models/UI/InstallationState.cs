@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Data.SqlTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +13,8 @@ namespace BPMInstaller.UI.Desktop.Models.UI
 {
     public class ControlsSessionState : ResponsiveModel
     {
+        private sbyte activeTabIndex = 0;
+
         private int counter = 0;
 
         private bool isInstallationRunning = false;
@@ -30,6 +33,12 @@ namespace BPMInstaller.UI.Desktop.Models.UI
         {
             get => isInstallationRunning;
             private set => Set(ref isInstallationRunning, value);
+        }
+
+        public sbyte ActiveTabIndex
+        {
+            get => activeTabIndex;
+            set => Set(ref activeTabIndex, value);
         }
 
         public string InstallationDuration
@@ -55,6 +64,7 @@ namespace BPMInstaller.UI.Desktop.Models.UI
         {
             Output.Clear();
             Counter = 0;
+            ActiveTabIndex = 1;
             StartButtonVisibility = Visibility.Collapsed;
             IsInstallationRunning = true;
         }

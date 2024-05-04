@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using BPMInstaller.Core.Enums;
+using BPMInstaller.Core.Model;
 using BPMInstaller.Core.Services;
 using BPMInstaller.UI.Desktop.Models.Basics;
 

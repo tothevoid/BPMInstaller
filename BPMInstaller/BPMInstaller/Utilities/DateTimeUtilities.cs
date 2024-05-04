@@ -6,7 +6,7 @@
         {
             int minutes = seconds / 60;
             int leftSeconds = seconds - minutes * 60;
-            return $"{minutes:D2}:{leftSeconds:D2}";
+            return $"{minutes:D2} мин. {leftSeconds:D2} сек.";
         }
     }
 }

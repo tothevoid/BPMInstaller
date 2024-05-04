@@ -62,7 +62,7 @@
         {
             public const string Fixing = "Исправление принудительной смены пароля";
 
-            public const string Fixed = "Исправление принудительной смены пароля";
+            public const string Fixed = "Принудительной смена пароля отлючена";
         }
 
         public static class Licensing

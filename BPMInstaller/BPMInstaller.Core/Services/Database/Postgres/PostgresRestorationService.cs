@@ -75,20 +75,19 @@ namespace BPMInstaller.Core.Services.Database.Postgres
                 $"--dbname={DatabaseConfig.DatabaseName}",
                 "--no-owner",
                 "--no-privileges",
-                $"./{backupPath}"
+                $".{backupPath}"
             };
 
             InstallationLogger.Log(InstallationMessage.Info(RestorationResources.GeneratingDataMigrationCommand));
             var restorationScript = $"pg_restore {string.Join(" ", restorationParameters)}";
-            var restorationDockerCommand = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, 
-                restorationScript).Output;
             InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationCommandGenerated));
 
             InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationStarted));
-            var restorationOutput = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, 
-                restorationDockerCommand);
+            var restorationDockerCommand = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, 
+                restorationScript);
             InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationEnded));
-            return string.IsNullOrEmpty(restorationOutput.ErrorOutput);
+
+            return string.IsNullOrEmpty(restorationDockerCommand.ErrorOutput);
         }
 
         private string GetBackupName()

@@ -9,12 +9,12 @@
         /// Восстановление через Docker
         /// </summary>
         /// <returns>Восстановление успешно</returns>
-        public bool RestoreByDocker();
+        public string RestoreByDocker();
 
         /// <summary>
         /// Восстановление через CLI
         /// </summary>
         /// <returns>Восстановление успешно</returns>
-        public bool RestoreByCli();
+        public string RestoreByCli();
     }
 }

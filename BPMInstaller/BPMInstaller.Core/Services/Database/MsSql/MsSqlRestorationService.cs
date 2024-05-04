@@ -1,10 +1,11 @@
-﻿using BPMInstaller.Core.Interfaces;
+﻿using BPMInstaller.Core.Enums;
+using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
-using System.Diagnostics;
-using BPMInstaller.Core.Enums;
 using BPMInstaller.Core.Model.Runtime;
-using System.Text;
 using BPMInstaller.Core.Utilities;
+using System.Diagnostics;
+using System.Text;
+using RestorationResources = BPMInstaller.Core.Resources.InstallationResources.Database.Restoration;
 
 namespace BPMInstaller.Core.Services.Database.MsSql
 {
@@ -27,48 +28,70 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             DockerService = new DockerService();
         }
 
-        public bool RestoreByDocker()
+        public string RestoreByDocker()
         {
-            var backupPath = $"/{GetBackupName()}";
+            var newBackupPath = $"/{GetBackupName()}";
 
-            var isCopied = DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, backupPath);
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.CopyingBackupFile));
+            var isCopied = DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, BackupRestorationConfig.DockerImage, newBackupPath);
 
             if (!isCopied)
             {
-                return false;
+                return RestorationResources.FileIsNotCopiedIntoContainer;
             }
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.BackupFileCopied));
 
-            var rawFileListResult = ExecuteServerFileListQuery(backupPath);
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.SqlServer.BackupPartsExtractionStarted));
+            var rawFileListResult = ExecuteServerFileListQuery(newBackupPath);
             var fileList = ParseRawBackupFileList(rawFileListResult).ToList();
-            var restorationQuery = CreateMoveQuery(fileList, DockerDataLocation, backupPath);
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.SqlServer.BackupPartsExtractionEnded));
+
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.GeneratingDataMigrationCommand));
+            var restorationQuery = CreateMoveQuery(fileList, DockerDataLocation, newBackupPath);
             var restorationCommand = FormatSqlCmdCommand(restorationQuery);
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationCommandGenerated));
 
-            var cliSource = "/opt/mssql-tools/bin/sqlcmd";
+            const string cliSource = "/opt/mssql-tools/bin/sqlcmd";
 
-            return DockerService.ExecuteCommandInContainerWhile(BackupRestorationConfig.DockerImage, $"{cliSource} {restorationCommand}", message =>
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationStarted));
+            DockerService.ExecuteCommandInContainerWhile(BackupRestorationConfig.DockerImage, $"{cliSource} {restorationCommand}", message =>
             {
                 InstallationLogger.Log(InstallationMessage.Info(message));
                 return message.Contains("RESTORE DATABASE successfully");
             });
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationEnded));
+
+            return string.Empty;
         }
 
-        public bool RestoreByCli()
+        //TODO: Remove duplication
+        public string RestoreByCli()
         {
             var localDataDirectory = GetLocalDataLocation();
             var newBackupPath = Path.Combine(localDataDirectory, GetBackupName());
 
             File.Copy(BackupRestorationConfig.BackupPath, newBackupPath, true);
 
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.SqlServer.BackupPartsExtractionStarted));
             var rawFileListResult = ExecuteServerFileListQuery(newBackupPath);
             var fileList = ParseRawBackupFileList(rawFileListResult).ToList();
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.SqlServer.BackupPartsExtractionEnded));
+
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.GeneratingDataMigrationCommand));
             var restorationQuery = CreateMoveQuery(fileList, localDataDirectory, newBackupPath);
             var restorationCommand = FormatSqlCmdCommand(restorationQuery);
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationCommandGenerated));
 
-            return CallDynamicCommand(restorationCommand, message =>
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationStarted));
+            CallDynamicCommand(restorationCommand, message =>
             {
                 InstallationLogger.Log(InstallationMessage.Info(message));
                 return message.Contains("RESTORE DATABASE successfully");
             });
+
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationEnded));
+
+            return string.Empty;
         }
 
         private string CreateMoveQuery(IEnumerable<BackupPartFile> fileList, string sqlServerDataPath, string backupFilePath)
@@ -152,7 +175,7 @@ namespace BPMInstaller.Core.Services.Database.MsSql
         }
 
 
-        // TODO: Move cli logic into separate class
+        // TODO: Remove
         private bool CallDynamicCommand(string command, Func<string, bool> outputHandler)
         {
             var process = GetBasicProcessConfiguration(command);
@@ -179,6 +202,7 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             return true;
         }
 
+        //TODO: Remove
         private Process GetBasicProcessConfiguration(string command)
         {
             Process process = new Process();
@@ -198,7 +222,7 @@ namespace BPMInstaller.Core.Services.Database.MsSql
             return process;
         }
 
-
+        //TODO: Remove
         public (string Output, string ErrorOutput) CallCmdCommand(string command)
         {
             var process = GetBasicProcessConfiguration(command);
@@ -217,7 +241,7 @@ namespace BPMInstaller.Core.Services.Database.MsSql
 
             var args = new[]
             {
-                $"-S {DatabaseConfig.Host},{DatabaseConfig.Port}",
+                $"-S {DatabaseConfig.Host}",
                 $"-U {DatabaseConfig.AdminUserName}",
                 "-C",
                 $"-P {DatabaseConfig.AdminPassword}",

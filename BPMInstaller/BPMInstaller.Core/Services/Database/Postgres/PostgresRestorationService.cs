@@ -1,7 +1,8 @@
 ﻿using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
-using System.Diagnostics;
+using BPMInstaller.Core.Model.Runtime;
 using BPMInstaller.Core.Utilities;
+using RestorationResources = BPMInstaller.Core.Resources.InstallationResources.Database.Restoration;
 
 namespace BPMInstaller.Core.Services.Database.Postgres
 {
@@ -22,13 +23,8 @@ namespace BPMInstaller.Core.Services.Database.Postgres
         }
 
         /// <inheritdoc cref="IDatabaseRestorationService.RestoreByCli"/>
-        public bool RestoreByCli()
+        public string RestoreByCli()
         {
-            if (!File.Exists(BackupRestorationConfig.BackupPath))
-            {
-                return false;
-            }
-
             var backupFileName = Path.GetFileName(BackupRestorationConfig.BackupPath);
             var directory = BackupRestorationConfig.BackupPath.Substring(0,
                 BackupRestorationConfig.BackupPath.Length - backupFileName.Length - 1);
@@ -43,27 +39,34 @@ namespace BPMInstaller.Core.Services.Database.Postgres
                 .AddEnvironmentVariable("PGPASSWORD", DatabaseConfig.AdminPassword)
                 .Execute();
 
-            return string.IsNullOrEmpty(executionResult.Output);
+            return executionResult.Output;
         }
 
         /// <summary>
         /// Восстановление с помощью Docker
         /// </summary>
         /// <returns>Бекап восстановлен</returns>
-        public bool RestoreByDocker()
+        public string RestoreByDocker()
         {
-            if (string.IsNullOrEmpty(BackupRestorationConfig.DockerImage))
+            var backupPath = $"/{GetBackupName()}";
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.CopyingBackupFile));
+            var isCopied = DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, 
+                BackupRestorationConfig.DockerImage, backupPath);
+
+            if (!isCopied)
             {
-                return false;
+                InstallationLogger.Log(InstallationMessage.Info(RestorationResources.FileIsNotCopiedIntoContainer));
             }
 
-            var backupPath = $"/{GetBackupName()}";
-            DockerService.CopyFileIntoContainer(BackupRestorationConfig.BackupPath, 
-                BackupRestorationConfig.DockerImage, backupPath);
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.BackupFileCopied));
+
+           
             RestorePostgresBackup(backupPath);
-            return true;
+            
+            return string.Empty;
         }
 
+        //TODO: Use CLI API
         public bool RestorePostgresBackup(string backupPath)
         {
             var restorationParameters = new[]
@@ -75,12 +78,16 @@ namespace BPMInstaller.Core.Services.Database.Postgres
                 $"./{backupPath}"
             };
 
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.GeneratingDataMigrationCommand));
             var restorationScript = $"pg_restore {string.Join(" ", restorationParameters)}";
             var restorationDockerCommand = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, 
                 restorationScript).Output;
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationCommandGenerated));
 
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationStarted));
             var restorationOutput = DockerService.ExecuteCommandInContainer(BackupRestorationConfig.DockerImage, 
                 restorationDockerCommand);
+            InstallationLogger.Log(InstallationMessage.Info(RestorationResources.DataMigrationEnded));
             return string.IsNullOrEmpty(restorationOutput.ErrorOutput);
         }
 

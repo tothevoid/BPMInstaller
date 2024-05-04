@@ -2,9 +2,6 @@
 {
     public static class InstallationResources
     {
-        /// <summary>
-        /// Основной поток выполнения установки
-        /// </summary>
         public static class MainWorkflow
         {
             public const string Started = "Запущена установка приложения";
@@ -113,7 +110,28 @@
 
                 public const string Ended = "Завершено восстановление БД";
 
-                public const string Failed = "Во время восстановления БД возникла ошибка";
+                public const string Failed = "Во время восстановления БД возникла ошибка: {0}";
+
+                public const string CopyingBackupFile = "Копирование файла с бекапом";
+
+                public const string BackupFileCopied = "Копирование файла с бекапом";
+
+                public const string FileIsNotCopiedIntoContainer = "Не получилось скопировать файл бекапа в контейнер";
+
+                public const string GeneratingDataMigrationCommand = "Формирование команды переноса данных";
+
+                public const string DataMigrationCommandGenerated = "Формирование команды переноса данных завершено";
+
+                public const string DataMigrationStarted = "Запущен перенос данных из бэкапа";
+
+                public const string DataMigrationEnded = "Перенос данных из бэкапа завершён";
+
+                public static class SqlServer
+                {
+                    public const string BackupPartsExtractionStarted = "Запущена загрузка сооставляющих частей бэкапа";
+
+                    public const string BackupPartsExtractionEnded = "Загрузка сооставляющих частей бэкапа завершена";
+                }
             }
 
             public static class Creation
@@ -125,6 +143,5 @@
                 public const string Failed = "Во время создания БД возникла ошибка: {0}";
             }
         }
-
     }
 }

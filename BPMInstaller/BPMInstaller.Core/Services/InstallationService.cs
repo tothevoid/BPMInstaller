@@ -209,9 +209,10 @@ namespace BPMInstaller.Core.Services
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Restoration.Started));
 
-            if (!Restore(InstallationConfig.BackupRestorationConfig.RestorationKind))
+            var restorationResult = Restore(InstallationConfig.BackupRestorationConfig.RestorationKind);
+            if (!string.IsNullOrEmpty(restorationResult))
             {
-                var errorMessage = InstallationResources.Database.Restoration.Failed;
+                var errorMessage = string.Format(InstallationResources.Database.Restoration.Failed, restorationResult);
                 InstallationLogger.Log(InstallationMessage.Error(errorMessage));
                 return errorMessage;
             }
@@ -220,7 +221,7 @@ namespace BPMInstaller.Core.Services
             return string.Empty;
         }
 
-        private bool Restore(DatabaseDeploymentType restorationKind)
+        private string Restore(DatabaseDeploymentType restorationKind)
         {
             return restorationKind switch
             {

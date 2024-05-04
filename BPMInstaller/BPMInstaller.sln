@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMInstaller.UI.Desktop", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMInstaller.Core", "BPMInstaller.Core\BPMInstaller.Core.csproj", "{C8740BC9-C7CA-4EFF-BBD9-ABF77DE53C56}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMInstaller.Core.Tests", "BPMInstaller.Core.Tests\BPMInstaller.Core.Tests.csproj", "{E260173C-4576-4028-B7A7-6AB07DDFAAFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C8740BC9-C7CA-4EFF-BBD9-ABF77DE53C56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8740BC9-C7CA-4EFF-BBD9-ABF77DE53C56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8740BC9-C7CA-4EFF-BBD9-ABF77DE53C56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E260173C-4576-4028-B7A7-6AB07DDFAAFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E260173C-4576-4028-B7A7-6AB07DDFAAFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E260173C-4576-4028-B7A7-6AB07DDFAAFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E260173C-4576-4028-B7A7-6AB07DDFAAFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

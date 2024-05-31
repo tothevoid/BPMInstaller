@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
 
 namespace BPMInstaller.Core.Utilities
 {
@@ -12,6 +13,8 @@ namespace BPMInstaller.Core.Utilities
         //TODO: remove
         private bool UseShellExecute { get; }
 
+        private bool UseArgumentsAsList { get; }
+
         private bool CustomOutputHandler { get; }
 
         private List<QueryParameter> Parameters { get; } = new List<QueryParameter>();
@@ -21,24 +24,19 @@ namespace BPMInstaller.Core.Utilities
         private string? InitialDirectory { get; }
 
         public CommandLineQueryExecutor(string fileName, string? initialDirectory = null, bool customOutputHandler = true, bool useShellExecute = true, 
-            bool runInForeground = true)
+            bool runInForeground = true, bool useArgumentAsList = false)
         {
             ExecutingFileName = fileName ?? throw new ArgumentNullException(fileName);
             RunInForeground = runInForeground;
             UseShellExecute = useShellExecute;
             CustomOutputHandler = customOutputHandler;
             InitialDirectory = initialDirectory;
+            UseArgumentsAsList = useArgumentAsList;
         }
 
         public CommandLineQueryExecutor AddParameter(string key, string value, string separator = " ")
         {
             Parameters.Add(new QueryParameter() {Key = key, Value = value, Separator = separator });
-            return this;
-        }
-
-        public CommandLineQueryExecutor AddEnvironmentVariable(string variable, string value)
-        {
-            EnvironmentVariables.Add(variable, value);
             return this;
         }
 
@@ -48,12 +46,27 @@ namespace BPMInstaller.Core.Utilities
             return this;
         }
 
+        public CommandLineQueryExecutor AddEnvironmentVariable(string variable, string value)
+        {
+            EnvironmentVariables.Add(variable, value);
+            return this;
+        }
+
         private Process Build()
         {
             Process process = new Process();
             process.StartInfo.FileName = ExecutingFileName;
 
-            process.StartInfo.Arguments = GetArguments();
+            var arguments = GetArguments().ToList();
+            if (UseArgumentsAsList)
+            {
+                arguments.ForEach(arg => process.StartInfo.ArgumentList.Add(arg));
+            }
+            else
+            {
+                process.StartInfo.Arguments = string.Join(" ", arguments);
+            }
+
             process.StartInfo.UseShellExecute = false;
 
             if (!string.IsNullOrEmpty(InitialDirectory))
@@ -81,14 +94,12 @@ namespace BPMInstaller.Core.Utilities
             return process;
         }
 
-        private string GetArguments()
+        private IEnumerable<string> GetArguments()
         {
-            var parameters = Parameters.Select(parameter =>
+            return Parameters.Select(parameter =>
             {
                 return $"{parameter.Key}{parameter.Separator ?? string.Empty}{parameter.Value ?? string.Empty}";
             });
-
-            return string.Join(" ", parameters);
         }
 
         public CommandLineExecutionResult Execute()

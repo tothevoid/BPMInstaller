@@ -11,11 +11,12 @@ namespace BPMInstaller.Core.Services
         // TODO: add results validation
         public Dictionary<string, string> GetActiveContainers()
         {
-            const string outputFormat = "{{.ID}}\t{{.Names}}\"";
+            const string outputFormat = "{{.ID}}\t{{.Names}}";
 
-            var commandResult = new CommandLineQueryExecutor(ProcessName)
+            var commandResult = new CommandLineQueryExecutor(ProcessName, useArgumentAsList: true)
                 .AddParameter("ps")
-                .AddParameter("--format", outputFormat)
+                .AddParameter("--format")
+                .AddParameter(outputFormat)
                 .Execute();
 
             return ProcessRawContainersList(commandResult.Output);
@@ -56,7 +57,7 @@ namespace BPMInstaller.Core.Services
             }
 
             return rawOutput
-                .Split(Environment.NewLine)
+                .Split("\n")
                 .Where(command => !string.IsNullOrEmpty(command))
                 .Select(part =>
                 {

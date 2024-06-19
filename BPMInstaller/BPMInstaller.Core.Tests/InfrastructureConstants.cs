@@ -4,15 +4,15 @@
     {
         public static class Postgres
         {
-            public static string DistributivePath = "";
+            public static string DistributivePath = "C:\\Users\\tothe\\Desktop\\all\\Distr13PG";
 
-            public static string RestoreCliPath = "";
+            public static string RestoreCliPath = "C:\\Program Files\\PostgreSQL\\16\\bin\\pg_restore.exe";
 
-            public static string DockerImage = "pgsql";
+            public static string DockerImage = "pgsql_db_v2";
 
-            public static ushort LocalDatabasePort = 5433;
+            public static ushort LocalDatabasePort = 5432;
 
-            public static ushort DockerDatabasePort = 5432;
+            public static ushort DockerDatabasePort = 5433;
 
             public static string AdminUserName = "postgres";
 
@@ -21,13 +21,13 @@
 
         public static class SqlServer
         {
-            public static string DistributivePath = "";
+            public static string DistributivePath = "C:\\Users\\tothe\\Desktop\\all\\Distr13MS";
 
             public static string DockerImage = "mssql";
 
-            public static ushort LocalDatabasePort = 1434;
+            public static ushort LocalDatabasePort = 1433;
 
-            public static ushort DockerDatabasePort = 1433;
+            public static ushort DockerDatabasePort = 1434;
 
             public static string AdminUserName = "SA";
 

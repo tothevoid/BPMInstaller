@@ -5,6 +5,8 @@
     /// </summary>
     public class InstallationPipeline
     {
+        public int TotalSteps { get; set; }
+
         #region Строки подключения к отдельным сервисам
         /// <summary>
         /// Обновление строки подключения к БД

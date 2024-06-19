@@ -4,7 +4,7 @@
     {
         public static class MainWorkflow
         {
-            public const string Started = "Запущена установка приложения";
+            public const string Started = "Выполняется установка приложения";
 
             public const string Ended = "Установка приложения завершена";
         }

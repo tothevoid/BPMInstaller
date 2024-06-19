@@ -1,4 +1,5 @@
-﻿using BPMInstaller.Core.Constants;
+﻿using System.Reflection;
+using BPMInstaller.Core.Constants;
 using BPMInstaller.Core.Enums;
 using BPMInstaller.Core.Interfaces;
 using BPMInstaller.Core.Model;
@@ -24,7 +25,9 @@ namespace BPMInstaller.Core.Services
 
         private DistributiveService DistributiveService { get; }
 
-        public InstallationService(IInstallationLogger logger, InstallationConfig installationConfig)
+        private Action<string>? OnStepCompleted { get; }
+
+        public InstallationService(IInstallationLogger logger, InstallationConfig installationConfig, Action<string>? onStepCompleted = null)
         {
             InstallationLogger = logger;
             InstallationConfig = installationConfig ?? throw new ArgumentException(nameof(installationConfig));
@@ -34,6 +37,11 @@ namespace BPMInstaller.Core.Services
             DatabaseService = dbServices.DbService;
             DatabaseRestorationService = dbServices.BackupService;
             RedisService = new RedisService();
+
+            if (onStepCompleted != null)
+            {
+                OnStepCompleted = onStepCompleted;
+            }
         }
 
         private (IDatabaseService DbService, IDatabaseRestorationService BackupService) GetDatabaseServices()
@@ -84,6 +92,7 @@ namespace BPMInstaller.Core.Services
             var runningApplication = ApplicationRepository.GetInstance(InstallationConfig.ApplicationPath,
                 InstallationConfig.ApplicationConfig);
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Started));
+            OnStepCompleted?.Invoke("");
 
             ExecuteAfterApplicationStarted(runningApplication);
 
@@ -111,6 +120,7 @@ namespace BPMInstaller.Core.Services
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixing));
                 DatabaseService.DisableForcePasswordChange(ApplicationAdministrator.UserName);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ForcePasswordChange.Fixed));
+                OnStepCompleted?.Invoke("");
             }
 
             return string.Empty;
@@ -123,6 +133,7 @@ namespace BPMInstaller.Core.Services
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Started));
                 InstallLicense(runningApplication);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Licensing.Ended));
+                OnStepCompleted?.Invoke("");
             }
 
             if (InstallationConfig.Pipeline.CompileApplication)
@@ -130,6 +141,7 @@ namespace BPMInstaller.Core.Services
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Application.Compiling));
                 //TODO: Handle compilation response
                 runningApplication.Compile();
+                OnStepCompleted?.Invoke("");
             }
         }
 
@@ -192,6 +204,7 @@ namespace BPMInstaller.Core.Services
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Creation.Done));
+            OnStepCompleted?.Invoke("");
             return string.Empty;
         }
 
@@ -218,6 +231,7 @@ namespace BPMInstaller.Core.Services
             }
 
             InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Database.Restoration.Ended));
+            OnStepCompleted?.Invoke("");
             return string.Empty;
         }
 
@@ -242,6 +256,8 @@ namespace BPMInstaller.Core.Services
                     InstallationConfig.DatabaseConfig,
                     InstallationConfig.RedisConfig);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.ConnectionStrings.Actualized));
+
+                OnStepCompleted?.Invoke("");
             }
 
             if (InstallationConfig.Pipeline.UpdateApplicationPort)
@@ -249,6 +265,8 @@ namespace BPMInstaller.Core.Services
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.PortActualization));
                 DistributiveService.UpdateApplicationPort(InstallationConfig.ApplicationConfig, InstallationConfig.ApplicationPath);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.PortActualized));
+
+                OnStepCompleted?.Invoke("");
             }
 
             if (InstallationConfig.Pipeline.FixCookies)
@@ -256,6 +274,8 @@ namespace BPMInstaller.Core.Services
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.FixingCookies));
                 DistributiveService.FixAuthorizationCookies(InstallationConfig.ApplicationPath);
                 InstallationLogger.Log(InstallationMessage.Info(InstallationResources.Distributive.CookiesFixed));
+
+                OnStepCompleted?.Invoke("");
             }
         }
     }

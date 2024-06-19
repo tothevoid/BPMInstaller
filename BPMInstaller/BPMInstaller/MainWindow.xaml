@@ -270,28 +270,33 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Установка">
-                <StackPanel DataContext="{Binding ControlsSessionState}" Margin="0 20">
-                    <StackPanel Visibility="{Binding Path=IsInstallationRunning, Converter={StaticResource VisibleIfTrueConverter}}">
-                        <TextBlock Margin="10, 0" HorizontalAlignment="Center" FontSize="14">Запущена установка</TextBlock>
+                <StackPanel Margin="0 20">
+                    <StackPanel DataContext="{Binding ControlsSessionState}" Visibility="{Binding Path=IsInstallationRunning, Converter={StaticResource VisibleIfTrueConverter}}">
+                        <TextBlock Margin="10, 0" HorizontalAlignment="Center" FontSize="14">Выполняется установка</TextBlock>
                     </StackPanel>
-                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                        <TextBlock FontSize="14" FontWeight="Bold" Text="Выполняется: "></TextBlock>
-                        <TextBlock FontSize="14" FontWeight="Bold" Text="{Binding InstallationDuration}"></TextBlock>
+                    <ProgressBar Minimum="1" Value="{Binding ControlsSessionState.StepsPassed}" Maximum="{Binding Config.InstallationPipeline.TotalSteps }"  Height="30px" Margin="20px, 20px">
+
+                    </ProgressBar>
+                    <StackPanel DataContext="{Binding ControlsSessionState}" Orientation="Vertical">
+                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                            <TextBlock FontSize="14" FontWeight="Bold" Text="Время выполнения: "></TextBlock>
+                            <TextBlock FontSize="14" FontWeight="Bold" Text="{Binding InstallationDuration}"></TextBlock>
+                        </StackPanel>
+                        <ListView   
+                            MinHeight="600px"
+                            Margin="10"
+                            VerticalContentAlignment="Top"  
+                            ScrollViewer.VerticalScrollBarVisibility="Visible"
+                            ScrollViewer.CanContentScroll="False"
+                            ItemsSource="{Binding Output}" >
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Width="385px" DisplayMemberBinding="{Binding Path=Date}">Дата</GridViewColumn>
+                                    <GridViewColumn Width="385px" DisplayMemberBinding="{Binding Path=Text}">Сообщение</GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
                     </StackPanel>
-                    <ListView   
-                        MinHeight="600px"
-                        Margin="10"
-                        VerticalContentAlignment="Top"  
-                        ScrollViewer.VerticalScrollBarVisibility="Visible"
-                        ScrollViewer.CanContentScroll="False"
-                        ItemsSource="{Binding Output}" >
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Width="385px" DisplayMemberBinding="{Binding Path=Date}">Дата</GridViewColumn>
-                                <GridViewColumn Width="385px" DisplayMemberBinding="{Binding Path=Text}">Сообщение</GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
                 </StackPanel>
             </TabItem>
         </TabControl>

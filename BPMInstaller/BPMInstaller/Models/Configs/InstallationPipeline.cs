@@ -1,10 +1,19 @@
-﻿using BPMInstaller.UI.Desktop.Models.Basics;
+﻿using System;
+using System.Linq;
+using BPMInstaller.UI.Desktop.Models.Basics;
 
 namespace BPMInstaller.UI.Desktop.Models.Configs
 {
     /// <inheritdoc cref="Core.Model.InstallationPipeline"/>
     public class InstallationPipeline : ResponsiveModel
     {
+        public InstallationPipeline()
+        {
+            var selectedSteps = GetType().GetProperties().Sum(prop =>
+                prop.PropertyType == typeof(bool) ? Convert.ToInt32((bool)prop.GetValue(this, null)) : 0);
+            TotalSteps = selectedSteps - 1;
+        }
+
         private bool updateApplicationPort = true;
 
         private bool updateDatabaseConnectionString = true;
@@ -25,13 +34,15 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
 
         private bool startApplication;
 
+        private int totalSteps = 0;
+
         /// <summary>
         /// <inheritdoc cref="Core.Model.InstallationPipeline.UpdateApplicationPort"/>
         /// </summary>
         public bool UpdateApplicationPort
         {
             get => updateApplicationPort;
-            set => Set(ref updateApplicationPort, value);
+            set => SetStep(ref updateApplicationPort, value);
         }
 
         /// <summary>
@@ -40,7 +51,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool UpdateDatabaseConnectionString
         {
             get => updateDatabaseConnectionString;
-            set => Set(ref updateDatabaseConnectionString, value);
+            set => SetStep(ref updateDatabaseConnectionString, value);
         }
 
         /// <summary>
@@ -49,7 +60,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool RestoreDatabaseBackup
         {
             get => restoreDatabaseBackup;
-            set => Set(ref restoreDatabaseBackup, value);
+            set => SetStep(ref restoreDatabaseBackup, value);
         }
 
         /// <summary>
@@ -58,7 +69,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool UpdateRedisConnectionString
         {
             get => updateRedisConnectionString;
-            set => Set(ref updateRedisConnectionString, value);
+            set => SetStep(ref updateRedisConnectionString, value);
         }
 
         /// <summary>
@@ -67,7 +78,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool InstallLicense
         {
             get => installLicense;
-            set { Set(ref installLicense, value); if (!StartApplication) StartApplication = true; }
+            set { SetStep(ref installLicense, value); if (!StartApplication) StartApplication = true; }
         }
 
         /// <summary>
@@ -76,7 +87,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool RemoveCertificate
         {
             get => removeCertificate;
-            set => Set(ref removeCertificate, value);
+            set => SetStep(ref removeCertificate, value);
         }
 
         /// <summary>
@@ -85,7 +96,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool DisableForcePasswordChange
         {
             get => disableForcePasswordChange;
-            set => Set(ref disableForcePasswordChange, value);
+            set => SetStep(ref disableForcePasswordChange, value);
         }
 
         /// <summary>
@@ -94,7 +105,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool CompileApplication
         {
             get => compileApplication;
-            set { Set(ref compileApplication, value); if (!StartApplication) StartApplication = true; }
+            set { SetStep(ref compileApplication, value); if (!StartApplication) StartApplication = true; }
         }
 
         /// <summary>
@@ -103,7 +114,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool StartApplication
         {
             get => startApplication;
-            set => Set(ref startApplication, value);
+            set => SetStep(ref startApplication, value);
         }
 
         /// <summary>
@@ -112,7 +123,19 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
         public bool FixCookies
         {
             get => fixCookies;
-            set => Set(ref fixCookies, value);
+            set => SetStep(ref fixCookies, value);
+        }
+
+        public int TotalSteps
+        {
+            get => totalSteps;
+            set => Set(ref totalSteps, value);
+        }
+
+        protected void SetStep(ref bool field, bool value, string? propName = null)
+        {
+            base.Set(ref field, value, propName);
+            TotalSteps += value ? 1 : -1;
         }
 
         public Core.Model.InstallationPipeline ToCoreModel()
@@ -128,7 +151,8 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
                 StartApplication = StartApplication,
                 UpdateApplicationPort = UpdateApplicationPort,
                 UpdateDatabaseConnectionString = UpdateDatabaseConnectionString,
-                UpdateRedisConnectionString = UpdateRedisConnectionString
+                UpdateRedisConnectionString = UpdateRedisConnectionString,
+                TotalSteps = TotalSteps
             };
         }
     }

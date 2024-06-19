@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Data.SqlTypes;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 using BPMInstaller.Core.Model.Runtime;
 using BPMInstaller.UI.Desktop.Models.Basics;
 using BPMInstaller.UI.Desktop.Utilities;
@@ -13,9 +10,11 @@ namespace BPMInstaller.UI.Desktop.Models.UI
 {
     public class ControlsSessionState : ResponsiveModel
     {
+        private int stepsPassed = 0;
+
         private sbyte activeTabIndex = 0;
 
-        private int counter = 0;
+        private int secondsFromStart = 0;
 
         private bool isInstallationRunning = false;
 
@@ -47,14 +46,20 @@ namespace BPMInstaller.UI.Desktop.Models.UI
             private set => Set(ref installationDuration, value);
         }
 
+        public int StepsPassed
+        {
+            get => stepsPassed;
+            set => Set(ref stepsPassed, value);
+        }
+
         public ObservableCollection<InstallationMessage> Output { get; set; } = new ObservableCollection<InstallationMessage>();
 
-        public int Counter
+        public int SecondsFromStart
         {
-            get => counter;
+            get => secondsFromStart;
             private set
             {
-                counter = value;
+                secondsFromStart = value;
                 UpdateInstallationDuration(value);
             }
         }
@@ -63,7 +68,8 @@ namespace BPMInstaller.UI.Desktop.Models.UI
         public void StartInstallation()
         {
             Output.Clear();
-            Counter = 0;
+            StepsPassed = 0;
+            SecondsFromStart = 0;
             ActiveTabIndex = 1;
             StartButtonVisibility = Visibility.Collapsed;
             IsInstallationRunning = true;
@@ -76,7 +82,7 @@ namespace BPMInstaller.UI.Desktop.Models.UI
                 await Task.Delay(1000);
                 uiThreadAction(() =>
                 {
-                    Counter++;
+                    SecondsFromStart++;
                 });
             }
         }

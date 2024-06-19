@@ -58,7 +58,7 @@ namespace BPMInstaller.UI.Desktop.ViewModels
             Task.Run(() =>
             {
                 var logger = new InstallationLogger(AddLoggerMessage);
-                new InstallationService(logger, InstallationConfiguration.Config.ConvertToCoreModel()).Install();
+                new InstallationService(logger, InstallationConfiguration.Config.ConvertToCoreModel(), HandlePassedStep).Install();
 
                 MainThreadSync.InvokeSynced(() =>
                 {
@@ -72,6 +72,14 @@ namespace BPMInstaller.UI.Desktop.ViewModels
         {
             MainThreadSync.InvokeSynced(() => {
                 InstallationConfiguration.ControlsSessionState.Output.Add(message);
+            });
+        }
+
+        private void HandlePassedStep(string message)
+        {
+            MainThreadSync.InvokeSynced(() =>
+            {
+                InstallationConfiguration.ControlsSessionState.StepsPassed++;
             });
         }
 

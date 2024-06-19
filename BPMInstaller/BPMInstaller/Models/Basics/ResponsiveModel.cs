@@ -9,7 +9,7 @@ namespace BPMInstaller.UI.Desktop.Models.Basics
 
         public bool IsChanged { get; private set; }
 
-        protected void Set<T>(ref T field, T value, [CallerMemberName] string? propName = null)
+        protected virtual void Set<T>(ref T field, T value, [CallerMemberName] string? propName = null)
         {
             if (field != null && !field.Equals(value) || 
                 value != null && !value.Equals(field))

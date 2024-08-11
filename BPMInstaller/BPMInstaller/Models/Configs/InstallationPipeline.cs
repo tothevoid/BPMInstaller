@@ -34,6 +34,8 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
 
         private bool startApplication;
 
+        private bool switchApplicationMode;
+
         private int totalSteps = 0;
 
         /// <summary>
@@ -126,6 +128,15 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
             set => SetStep(ref fixCookies, value);
         }
 
+        /// <summary>
+        /// <inheritdoc cref="Core.Model.InstallationPipeline.SwitchApplicationMode"/>
+        /// </summary>
+        public bool SwitchApplicationMode
+        {
+            get => switchApplicationMode;
+            set => SetStep(ref switchApplicationMode, value);
+        }
+
         public int TotalSteps
         {
             get => totalSteps;
@@ -152,6 +163,7 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
                 UpdateApplicationPort = UpdateApplicationPort,
                 UpdateDatabaseConnectionString = UpdateDatabaseConnectionString,
                 UpdateRedisConnectionString = UpdateRedisConnectionString,
+                SwitchApplicationMode = SwitchApplicationMode,
                 TotalSteps = TotalSteps
             };
         }

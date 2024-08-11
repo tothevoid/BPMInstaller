@@ -17,8 +17,15 @@ namespace BPMInstaller.Core.Model
         /// </summary>
         public DatabaseType DatabaseType { get; set; }
 
+        /// <summary>
+        /// <inheritdoc cref="ApplicationMode"/>
+        /// </summary>
+        public ApplicationMode ApplicationMode { get; set; }
+
         public InstallationConfig(string applicationPath, ApplicationConfig applicationConfig,
-            DatabaseConfig databaseConfig, RedisConfig redisConfig, InstallationPipeline pipeline, DatabaseType dbType = DatabaseType.NotSpecified)
+            DatabaseConfig databaseConfig, RedisConfig redisConfig, InstallationPipeline pipeline, 
+            DatabaseType dbType = DatabaseType.NotSpecified,
+            ApplicationMode applicationMode = ApplicationMode.Database)
         {
             if (string.IsNullOrEmpty(applicationPath))
             {
@@ -27,15 +34,13 @@ namespace BPMInstaller.Core.Model
 
             ApplicationPath = applicationPath;
 
-            if (dbType == DatabaseType.NotSpecified)
-            {
-                var distributiveService = new DistributiveService();
-                DatabaseType = distributiveService.GetDatabaseType(ApplicationPath);
-            }
-            else
-            {
-                DatabaseType = dbType;
-            }
+            DistributiveStateService? distributiveStateService =
+                dbType == DatabaseType.NotSpecified || applicationMode == ApplicationMode.NotSpecified ? 
+                    new DistributiveStateService(applicationPath): 
+                    null;
+
+            DatabaseType = dbType == DatabaseType.NotSpecified ? distributiveStateService.DatabaseType : dbType;
+            ApplicationMode = applicationMode == ApplicationMode.NotSpecified ? distributiveStateService.ApplicationMode : applicationMode;
 
             ApplicationConfig = applicationConfig ?? throw new ArgumentNullException(nameof(applicationConfig));
             DatabaseConfig = databaseConfig ?? throw new ArgumentNullException(nameof(databaseConfig));

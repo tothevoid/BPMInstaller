@@ -45,6 +45,17 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
             set => Set(ref applicationPath, value);
         }
 
+        private bool useFileSystemMode;
+
+        /// <summary>
+        /// Использовать режим разработки в файловой системе
+        /// </summary>
+        public bool UseFileSystemMode
+        {
+            get => useFileSystemMode;
+            set => Set(ref useFileSystemMode, value);
+        }
+
         public DatabaseType DatabaseType { get; set; }
 
         /// <inheritdoc cref="Core.Model.InstallationConfig.ApplicationConfig"/>
@@ -90,11 +101,22 @@ namespace BPMInstaller.UI.Desktop.Models.Configs
                 DatabaseConfig.ToCoreModel(),
                 RedisConfig.ToCoreModel(),
                 InstallationPipeline.ToCoreModel(),
-                DatabaseType)
+                DatabaseType,
+                GetApplicationMode())
+                {
+                    LicenseConfig = LicenseConfig.ToCoreModel(),
+                    BackupRestorationConfig = BackupRestorationConfig.ToCoreModel()
+                };
+        }
+
+        private ApplicationMode GetApplicationMode()
+        {
+            if (!InstallationPipeline.SwitchApplicationMode)
             {
-                LicenseConfig = LicenseConfig.ToCoreModel(),
-                BackupRestorationConfig = BackupRestorationConfig.ToCoreModel()
-            };
+                return ApplicationMode.NotSpecified;
+            }
+
+            return UseFileSystemMode ? ApplicationMode.FileSystem : ApplicationMode.Database;
         }
     }
 }

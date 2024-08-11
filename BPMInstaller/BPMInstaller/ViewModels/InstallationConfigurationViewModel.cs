@@ -99,8 +99,7 @@ namespace BPMInstaller.UI.Desktop.ViewModels
             {
                 InstallationConfiguration.Configurations.Add(InstallationConfiguration.Config.ApplicationPath);
 
-                var newDbType = new DistributiveService()
-                    .GetDatabaseType(InstallationConfiguration.Config.ApplicationPath);
+                var newDbType = new DistributiveStateService(InstallationConfiguration.Config.ApplicationPath).DatabaseType;
                 InstallationConfiguration.Config.DatabaseType = newDbType;
 
                 ConfigurationSerializer.SaveLocations(InstallationConfiguration.Configurations);

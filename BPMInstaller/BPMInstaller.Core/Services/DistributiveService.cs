@@ -1,4 +1,5 @@
-﻿using BPMInstaller.Core.Model;
+﻿using System.Collections;
+using BPMInstaller.Core.Model;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,27 +9,6 @@ namespace BPMInstaller.Core.Services
 {
     public class DistributiveService
     {
-        public DatabaseType GetDatabaseType(string applicationPath)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(Path.Combine(applicationPath, "BPMSoft.WebHost.dll.config"));
-            var dbConfig = doc.SelectSingleNode("configuration/bpmsoft/db/general");
-            string securityEngine = dbConfig?.Attributes?.GetNamedItem("securityEngineType")?.Value ?? string.Empty;
-
-            if (securityEngine.Contains("DB.PostgreSql"))
-            {
-                return DatabaseType.PostgreSql;
-            }
-            else if (securityEngine.Contains("DB.MSSql"))
-            {
-                return DatabaseType.MsSql;
-            }
-            else
-            {
-                throw new NotImplementedException(securityEngine);
-            }
-        }
-
         public void UpdateConnectionStrings(string applicationPath, DatabaseType dbType, DatabaseConfig databaseConfig = null, 
             RedisConfig redisConfig = null)
         {

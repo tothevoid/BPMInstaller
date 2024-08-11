@@ -167,6 +167,16 @@
                                     <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.FixCookies}">
                                         <TextBlock>Исправить авторизацию (CookiesSameSiteMode=Lax)</TextBlock>
                                     </CheckBox>
+                                    <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.SwitchApplicationMode}">
+                                        <TextBlock>Сменить режим разработки</TextBlock>
+                                    </CheckBox>
+                                    <StackPanel Visibility="{Binding Path=Config.InstallationPipeline.SwitchApplicationMode, Converter={StaticResource VisibleIfTrueConverter}}">
+                                        <StackPanel Style="{StaticResource ControlGroup}">
+                                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.UpdateApplicationPort}">
+                                                <TextBlock>Режим разработки в файловой системе</TextBlock>
+                                            </CheckBox>
+                                        </StackPanel>
+                                    </StackPanel>
                                     <StackPanel Orientation="Horizontal" Style="{StaticResource ControlGroup}">
                                         <CheckBox IsChecked="{Binding Config.InstallationPipeline.RestoreDatabaseBackup}">
                                             <TextBlock>Восстановить бекап</TextBlock>

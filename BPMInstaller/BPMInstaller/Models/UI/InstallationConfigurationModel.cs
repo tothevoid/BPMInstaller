@@ -37,7 +37,7 @@ namespace BPMInstaller.UI.Desktop.Models.UI
             var stateLoader = new AppConfigurationStateLoader();
             var state = stateLoader.GetConfig(applicationPath);
             Config.ApplicationPath = applicationPath;
-            Config.DatabaseType = new DistributiveService().GetDatabaseType(applicationPath);
+            Config.DatabaseType = new DistributiveStateService(applicationPath).DatabaseType;
             Config.ApplicationConfig.MergeConfig(state.ApplicationConfig);
             Config.DatabaseConfig.MergeConfig(state.DatabaseConfig);
             Config.RedisConfig.MergeConfig(state.RedisConfig);

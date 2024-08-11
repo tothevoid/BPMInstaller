@@ -21,6 +21,11 @@
 
         #region Подготовка приложения
         /// <summary>
+        /// Переключить режим разработки (ФС/БД)
+        /// </summary>
+        public bool SwitchApplicationMode { get; set; }
+
+        /// <summary>
         /// Обновление порта приложения (AppSettings.json)
         /// </summary>
         public bool UpdateApplicationPort { get; set; }

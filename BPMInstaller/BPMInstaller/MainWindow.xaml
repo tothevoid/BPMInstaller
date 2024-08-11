@@ -172,7 +172,7 @@
                                     </CheckBox>
                                     <StackPanel Visibility="{Binding Path=Config.InstallationPipeline.SwitchApplicationMode, Converter={StaticResource VisibleIfTrueConverter}}">
                                         <StackPanel Style="{StaticResource ControlGroup}">
-                                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.InstallationPipeline.UpdateApplicationPort}">
+                                            <CheckBox Style="{StaticResource ControlGroup}" IsChecked="{Binding Config.UseFileSystemMode}">
                                                 <TextBlock>Режим разработки в файловой системе</TextBlock>
                                             </CheckBox>
                                         </StackPanel>

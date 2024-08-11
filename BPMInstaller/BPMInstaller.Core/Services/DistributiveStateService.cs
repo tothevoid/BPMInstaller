@@ -48,8 +48,8 @@ namespace BPMInstaller.Core.Services
 
         public ApplicationMode GetApplicationMode()
         {
-            var useStaticFileContentSetting = XmlConfig.SelectSingleNode("configuration/appSettings[@name='UseStaticFileContent']");
-            string staticContentStatus = useStaticFileContentSetting?.Attributes?.GetNamedItem("securityEngineType")?.Value ?? string.Empty;
+            var useStaticFileContentSetting = XmlConfig.SelectSingleNode("configuration/bpmsoft/fileDesignMode");
+            string staticContentStatus = useStaticFileContentSetting?.Attributes?.GetNamedItem("enabled")?.Value ?? string.Empty;
 
             return staticContentStatus.Contains("true") ? ApplicationMode.FileSystem : ApplicationMode.Database;
         }

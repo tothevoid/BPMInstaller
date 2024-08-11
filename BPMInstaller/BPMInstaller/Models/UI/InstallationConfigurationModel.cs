@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using BPMInstaller.Core.Model;
 using BPMInstaller.Core.Services;
-using BPMInstaller.UI.Desktop.Models.Configs;
+using InstallationConfig = BPMInstaller.UI.Desktop.Models.Configs.InstallationConfig;
 
 namespace BPMInstaller.UI.Desktop.Models.UI
 {
@@ -37,10 +39,25 @@ namespace BPMInstaller.UI.Desktop.Models.UI
             var stateLoader = new AppConfigurationStateLoader();
             var state = stateLoader.GetConfig(applicationPath);
             Config.ApplicationPath = applicationPath;
-            Config.DatabaseType = new DistributiveStateService(applicationPath).DatabaseType;
+            var stateService = new DistributiveStateService(applicationPath);
+            Config.DatabaseType = stateService.DatabaseType;
+            Config.UseFileSystemMode = ConvertApplicationMode(stateService.ApplicationMode);
             Config.ApplicationConfig.MergeConfig(state.ApplicationConfig);
             Config.DatabaseConfig.MergeConfig(state.DatabaseConfig);
             Config.RedisConfig.MergeConfig(state.RedisConfig);
+        }
+
+        private bool ConvertApplicationMode(ApplicationMode applicationMode)
+        {
+            switch (applicationMode)
+            {
+                case ApplicationMode.Database:
+                    return false;
+                case ApplicationMode.FileSystem:
+                    return true;
+                default:
+                    throw new NotImplementedException(applicationMode.ToString());
+            }
         }
     }
 }

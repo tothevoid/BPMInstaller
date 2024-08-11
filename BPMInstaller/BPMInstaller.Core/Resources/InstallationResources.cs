@@ -2,6 +2,13 @@
 {
     public static class InstallationResources
     {
+        public static class ApplicationMode
+        {
+            public const string Db = "в БД";
+
+            public const string FileSystem = "в файловой системе";
+        }
+
         public static class MainWorkflow
         {
             public const string Started = "Выполняется установка приложения";
@@ -25,6 +32,10 @@
             public const string FixingCookies = "Исправление авторизации";
 
             public const string CookiesFixed = "Авторизация исправлена";
+
+            public const string SwitchingApplicationMode = "Смена режима разработки стенда на {0}";
+
+            public const string ApplicationModeSwitched = "Режим разработки {0} успешно установлен";
         }
 
         public static class Application

@@ -277,6 +277,22 @@ namespace BPMInstaller.Core.Services
 
                 OnStepCompleted?.Invoke("");
             }
+
+            if (InstallationConfig.Pipeline.SwitchApplicationMode && 
+                InstallationConfig.ApplicationMode != ApplicationMode.NotSpecified)
+            {
+                var modeCaption = InstallationConfig.ApplicationMode == ApplicationMode.Database? 
+                    InstallationResources.ApplicationMode.Db:
+                    InstallationResources.ApplicationMode.FileSystem;
+
+                InstallationLogger.Log(InstallationMessage
+                    .Info(string.Format(InstallationResources.Distributive.SwitchingApplicationMode, modeCaption)));
+                DistributiveService.SwitchApplicationMode(InstallationConfig.ApplicationPath, InstallationConfig.ApplicationMode);
+                InstallationLogger.Log(InstallationMessage
+                    .Info(string.Format(InstallationResources.Distributive.ApplicationModeSwitched, modeCaption)));
+
+                OnStepCompleted?.Invoke("");
+            }
         }
     }
 }

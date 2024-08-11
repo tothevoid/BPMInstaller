@@ -160,6 +160,29 @@ namespace BPMInstaller.Core.Services
             doc.Save(elementPath);
         }
 
+        public bool SwitchApplicationMode(string applicationPath, ApplicationMode applicationMode)
+        {
+            if (applicationMode == ApplicationMode.NotSpecified)
+            {
+                return false;
+            }
+
+            XmlDocument doc = new XmlDocument();
+            var elementPath = Path.Combine(applicationPath, "BPMSoft.WebHost.dll.config");
+            doc.Load(elementPath);
+
+            var isFileDesignMode = applicationMode == ApplicationMode.FileSystem;
+
+            var staticFileContent = doc.SelectSingleNode("configuration/bpmsoft/fileDesignMode");
+            staticFileContent.Attributes[0].Value = isFileDesignMode.ToString().ToLower();
+
+            var fileDesignMode = doc.SelectSingleNode("configuration/appSettings/add[@key='UseStaticFileContent']");
+            fileDesignMode.Attributes[1].Value = (!isFileDesignMode).ToString().ToLower();
+
+            doc.Save(elementPath);
+            return true;
+        }
+
         private XmlAttribute GetDatabaseString(XmlNode rootNode)
         {
             var dbSetting = rootNode.SelectSingleNode("add[@name='db']");

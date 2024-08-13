@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Media;
 using BPMInstaller.UI.Desktop.Models.Basics;
 
@@ -79,6 +80,16 @@ namespace BPMInstaller.UI.Desktop.Models.UI
                     break;
                 default:
                     throw new NotImplementedException(operation.ToString());
+            }
+        }
+
+        public void Reset()
+        {
+            var defaultColor = new SolidColorBrush(Colors.White);
+            var operations = Enum.GetValues(typeof(ValidationOperation)).Cast<ValidationOperation>();
+            foreach (var operation in operations)
+            {
+                UpdateValidationState(operation, defaultColor, string.Empty);
             }
         }
 
